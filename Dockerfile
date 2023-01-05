@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Install dependencies
 # Doing this separately by copying only the requirements file enables better use of the build cache
-COPY ./requirements.txt /azimuth-caas-operator
+COPY ./requirements.txt /azimuth-caas-operator/requirements.txt
 RUN pip install --no-deps --requirement /azimuth-caas-operator/requirements.txt
 
 # Install the perftest package

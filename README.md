@@ -6,7 +6,7 @@ This is still very much work in progress!!
 
 ## Run unit tests
 
-We tox, and uses python3.9::
+We tox, and uses python3.9:
 
     pip install tox
     tox

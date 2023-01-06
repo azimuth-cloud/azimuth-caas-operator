@@ -21,6 +21,11 @@ spec:
       containers:
       - name: run
         image: quay.io/ansible/ansible-runner:latest
+        command:
+        - ansible-runner
+        - run
+        - /runner
+        - -j
         env:
         - name: RUNNER_PLAYBOOK
           value: "test.yml"

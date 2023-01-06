@@ -28,7 +28,9 @@ class TestClusterType(base.TestCase):
       "singular": "clustertype",
       "plural": "clustertypes",
       "shortNames": [],
-      "categories": "azimuth"
+      "categories": [
+        "azimuth"
+      ]
     },
     "versions": [
       {

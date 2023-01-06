@@ -25,14 +25,28 @@ async def register_crds(client):
     LOG.info("CRDs imported")
 
 
-@kopf.on.event("azimuth.stackhpc.com", "clustertypes")
-async def clustertype_event(type, body, name, namespace, labels, **kwargs):
-    LOG.info(f"cluster type event for {name} in {namespace}")
+@kopf.on.create("azimuth.stackhpc.com", "clustertypes")
+async def cluster_type_event(body, name, namespace, labels, **kwargs):
+    if type == "DELETED":
+        LOG.info(f"cluster_type {name} in {namespace} is deleted")
+        return
+
+    LOG.debug(f"cluster_type event for {name} in {namespace}")
+    reg = registry.get_registry()
+    cluster_event = reg.get_model_instance(body)
+    LOG.info(f"seen cluster_type event {cluster_event.spec.gitUrl}")
+    # TODO(johngarbutt): fetch ui meta from git repo and update crd
 
 
-@kopf.on.event("azimuth.stackhpc.com", "cluster")
-async def cluster_event(type, body, name, namespace, labels, **kwargs):
+@kopf.on.create("azimuth.stackhpc.com", "cluster")
+async def cluster_event(body, name, namespace, labels, **kwargs):
     LOG.info(f"cluster event for {name} in {namespace}")
+    reg = registry.get_registry()
+    cluster = reg.get_model_instance(body)
+    cluster_type_name = cluster.spec.clusterTypeName
+    LOG.info(f"seen cluster of type {cluster_type_name} with status {cluster.status}")
+    # TODO(johngarbutt): fetch the cluster type, if available, get the git ref
+    # TODO(johngarbutt): create a job to create the cluster!
 
 
 @kopf.on.event("job", labels={"azimuth-caas-cluster": kopf.PRESENT})

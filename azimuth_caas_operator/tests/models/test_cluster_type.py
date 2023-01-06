@@ -139,12 +139,12 @@ class TestClusterType(base.TestCase):
                 "description": "Base model for use within CRD definitions.",
                 "type": "object",
                 "properties": {
-                  "gitUrl": {
+                  "clusterTypeName": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "gitUrl"
+                  "clusterTypeName"
                 ]
               },
               "status": {
@@ -155,8 +155,10 @@ class TestClusterType(base.TestCase):
                     "description": "An enumeration.",
                     "enum": [
                       "Pending",
-                      "Available",
-                      "Failed"
+                      "Configuring",
+                      "Ready",
+                      "Failed",
+                      "Deleting"
                     ],
                     "type": "string"
                   }

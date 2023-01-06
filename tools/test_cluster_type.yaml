@@ -1,0 +1,7 @@
+---
+apiVersion: azimuth.stackhpc.com/v1alpha1
+kind: ClusterType
+metadata:
+  name: testtype1
+spec:
+  gitUrl: main

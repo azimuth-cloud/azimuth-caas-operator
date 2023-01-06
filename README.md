@@ -18,3 +18,5 @@ You can test it with tox too:
    minkube start
    tox -e kopf &
    kubctl apply -f tools/test_job.yaml
+   kubctl apply -f tools/test_cluster_type.yaml
+   kubctl apply -f tools/test_cluster.yaml

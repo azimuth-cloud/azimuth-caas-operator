@@ -5,9 +5,12 @@ from kube_custom_resource import schema
 
 
 class ClusterPhase(str, schema.Enum):
+
     PENDING = "Pending"
-    AVAILABLE = "Available"
+    CONFIG = "Configuring"
+    READY = "Ready"
     FAILED = "Failed"
+    DELETING = "Deleting"
 
 
 class ClusterStatus(schema.BaseModel):
@@ -15,7 +18,7 @@ class ClusterStatus(schema.BaseModel):
 
 
 class ClusterSpec(schema.BaseModel):
-    gitUrl: str
+    clusterTypeName: str
 
 
 class Cluster(crd.CustomResource, scope=crd.Scope.CLUSTER):

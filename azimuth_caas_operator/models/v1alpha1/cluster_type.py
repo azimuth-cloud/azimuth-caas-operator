@@ -1,5 +1,3 @@
-import typing as t
-
 from pydantic import Field
 
 import kube_custom_resource as crd
@@ -20,6 +18,6 @@ class ClusterTypeSpec(schema.BaseModel):
     gitUrl: str
 
 
-class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER, abstract=True):
+class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
     spec: ClusterTypeSpec
     status: ClusterTypeStatus = Field(default_factory=ClusterTypeStatus)

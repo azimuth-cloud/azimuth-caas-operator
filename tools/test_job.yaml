@@ -1,0 +1,34 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ansible-runner-test-1
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - image: alpine/git
+        name: git
+        command:
+        - git
+        - clone
+        - https://github.com/ansible/ansible-runner.git
+        - /repo
+        volumeMounts:
+        - name: playbooks
+          mountPath: /repo
+      containers:
+      - name: run
+        image: quay.io/ansible/ansible-runner:latest
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: "test.yml"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /runner
+          subPath: demo
+      volumes:
+      - name: playbooks
+        emptyDir: {}
+  backoffLimit: 0

@@ -1,4 +1,5 @@
 # azimuth-caas-operator
+![tox](https://github.com/stackhpc/azimuth-caas-operator/actions/workflows/tox.yaml/badge.svg?branch=main)
 
 K8s operator to create clusters using K8s CRDs
 
@@ -15,5 +16,8 @@ We tox, and uses python3.9:
 
 You can test it with tox too:
 
-     minkube start
-     tox -e kopf
+    minkube start
+    tox -e kopf &
+    kubctl apply -f tools/test_job.yaml
+    kubctl apply -f tools/test_cluster_type.yaml
+    kubctl apply -f tools/test_cluster.yaml

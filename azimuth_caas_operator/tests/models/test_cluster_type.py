@@ -10,6 +10,7 @@ CATEGORIES = "azimuth"
 REGISTRY = crd.CustomResourceRegistry(API_GROUP, CATEGORIES)
 REGISTRY.discover_models(cluster_type)
 
+
 class TestClusterType(base.TestCase):
     def test_cluster_type_crd(self):
         crds = list(REGISTRY)

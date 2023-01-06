@@ -6,14 +6,14 @@ This is still very much work in progress!!
 
 ## Run unit tests
 
-We tox, and uses python3.9:
+We tox, and uses python3.9::
 
-  pip install tox
-  tox
+    pip install tox
+    tox
 
 ## Test opertor locally
 
 You can test it with tox too:
 
-   minkube start
-   tox -e kopf
+     minkube start
+     tox -e kopf

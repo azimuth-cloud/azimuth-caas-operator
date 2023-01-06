@@ -1,24 +1,20 @@
 import json
 
-import kube_custom_resource as crd
-
-from azimuth_caas_operator.models.v1alpha1 import cluster_type
+from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.tests import base
 
 
-API_GROUP = "azimuth.stackhpc.com"
-CATEGORIES = "azimuth"
-
-REGISTRY = crd.CustomResourceRegistry(API_GROUP, CATEGORIES)
-REGISTRY.discover_models(cluster_type)
-
-
 class TestClusterType(base.TestCase):
-    def test_cluster_type_crd(self):
-        crds = list(REGISTRY)
-        self.assertEqual(1, len(crds))
-        expected = """\
-{
+    def test_registry_size(self):
+        reg = registry.get_registry()
+        self.assertEqual(1, len(list(reg)))
+
+    def test_cluster_type_crd_json(self):
+        crds = list(registry.get_registry())
+        cluster_type_crd = crds[0].kubernetes_resource()
+
+        actual = json.dumps(cluster_type_crd, indent=2)
+        expected = """{
   "apiVersion": "apiextensions.k8s.io/v1",
   "kind": "CustomResourceDefinition",
   "metadata": {
@@ -90,5 +86,4 @@ class TestClusterType(base.TestCase):
     ]
   }
 }"""
-        actual = json.dumps(crds[0].kubernetes_resource(), indent=2)
         self.assertEqual(expected, actual)

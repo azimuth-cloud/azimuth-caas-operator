@@ -16,4 +16,5 @@ We tox, and uses python3.9:
 You can test it with tox too:
 
    minkube start
-   tox -e kopf
+   tox -e kopf &
+   kubctl apply -f tools/test_job.yaml

@@ -3,6 +3,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ansible-runner-test-1
+  labels:
+      azimuth-caas-cluster: test1
 spec:
   template:
     spec:

@@ -4,19 +4,13 @@ from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.tests import base
 
 
-class TestClusterType(base.TestCase):
-    def test_registry_size(self):
-        reg = registry.get_registry()
-        self.assertEqual(2, len(list(reg)))
-
+class TestModels(base.TestCase):
     def test_cluster_type_crd_json(self):
-        crds = list(registry.get_registry())
         cluster_type_crd = None
-        for crd in crds:
-            resource = crd.kubernetes_resource()
+        for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
-            if name == "clustertypes.azimuth.stackhpc.com":
+            if name == "clustertypes.caas.azimuth.stackhpc.com":
                 cluster_type_crd = resource
 
         actual = json.dumps(cluster_type_crd, indent=2)
@@ -24,10 +18,10 @@ class TestClusterType(base.TestCase):
   "apiVersion": "apiextensions.k8s.io/v1",
   "kind": "CustomResourceDefinition",
   "metadata": {
-    "name": "clustertypes.azimuth.stackhpc.com"
+    "name": "clustertypes.caas.azimuth.stackhpc.com"
   },
   "spec": {
-    "group": "azimuth.stackhpc.com",
+    "group": "caas.azimuth.stackhpc.com",
     "scope": "Cluster",
     "names": {
       "kind": "ClusterType",
@@ -97,13 +91,11 @@ class TestClusterType(base.TestCase):
         self.assertEqual(expected, actual)
 
     def test_cluster_crd_json(self):
-        crds = list(registry.get_registry())
         cluster_crd = None
-        for crd in crds:
-            resource = crd.kubernetes_resource()
+        for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
-            if name == "clusters.azimuth.stackhpc.com":
+            if name == "clusters.caas.azimuth.stackhpc.com":
                 cluster_crd = resource
 
         actual = json.dumps(cluster_crd, indent=2)
@@ -111,10 +103,10 @@ class TestClusterType(base.TestCase):
   "apiVersion": "apiextensions.k8s.io/v1",
   "kind": "CustomResourceDefinition",
   "metadata": {
-    "name": "clusters.azimuth.stackhpc.com"
+    "name": "clusters.caas.azimuth.stackhpc.com"
   },
   "spec": {
-    "group": "azimuth.stackhpc.com",
+    "group": "caas.azimuth.stackhpc.com",
     "scope": "Cluster",
     "names": {
       "kind": "Cluster",

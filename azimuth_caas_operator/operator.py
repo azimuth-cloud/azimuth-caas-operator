@@ -4,6 +4,7 @@ import logging
 import easykube
 import kopf
 from pydantic.json import pydantic_encoder
+import yaml
 
 from azimuth_caas_operator.models import registry
 
@@ -41,6 +42,9 @@ async def get_job_log(client, job_name, namespace):
     log_resource = await client.api("v1").resource("pods/log")
     # TODO(johngarbutt): we should pass tail here
     logs = await log_resource.fetch(pod_name, namespace=namespace)
+    # TODO(johngarbutt): easykube.kubernetes.client.errors.ApiError:
+    # container "run" in pod "test2rfc6z-5zw84" is waiting to start:
+    # PodInitializing
 
     # split into lines
     logs = logs.strip()
@@ -87,9 +91,62 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     cluster = registry.parse_model(body)
     cluster_type_name = cluster.spec.clusterTypeName
     LOG.info(f"seen cluster of type {cluster_type_name} with status {cluster.status}")
-    # TODO(johngarbutt): fetch the cluster type, if available, get the git ref
 
-    # TODO(johngarbutt): create a job to create the cluster!
+    # Fetch the cluster type, if available, get the git ref
+    client = get_k8s_client()
+    cluster_type = await client.api("azimuth.stackhpc.com/v1alpha1").resource(
+        "clustertype"
+    )
+    # TODO(johngarbutt) how to catch not found errors?
+    cluster_type_raw = await cluster_type.fetch(cluster_type_name)
+    LOG.info(f"Git URL: {cluster_type_raw.spec.gitUrl}")
+
+    # job_resource =
+    job_resource = await client.api("batch/v1").resource("jobs")
+    # TOOD(johngarbutt): template out and include ownership, etc.
+    job_yaml = """apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: test2
+  labels:
+      azimuth-caas-cluster: test1
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - image: alpine/git
+        name: git
+        command:
+        - git
+        - clone
+        - https://github.com/ansible/ansible-runner.git
+        - /repo
+        volumeMounts:
+        - name: playbooks
+          mountPath: /repo
+      containers:
+      - name: run
+        image: quay.io/ansible/ansible-runner:latest
+        command:
+        - ansible-runner
+        - run
+        - /runner
+        - -j
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: "test.yml"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /runner
+          subPath: demo
+      volumes:
+      - name: playbooks
+        emptyDir: {}
+  backoffLimit: 0"""
+    job_data = yaml.safe_load(job_yaml)
+    job = await job_resource.create(job_data)
+    LOG.info(f"{job}")
 
 
 @kopf.on.event("job", labels={"azimuth-caas-cluster": kopf.PRESENT})
@@ -118,6 +175,11 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
         LOG.info(f"{body}")
         return
 
+    if active and not ready:
+        LOG.info(f"job is running, pod not ready.")
+        # skip checking logs until pod init container finished
+        return
+
     if active:
         LOG.info(f"job is running, pod ready:{ready}")
     if failed:
@@ -129,3 +191,20 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
     client = get_k8s_client()
     job_log = await get_job_log(client, name, namespace)
     LOG.info(f"{job_log}")
+
+    if success:
+        job_resource = await client.api("batch/v1").resource("jobs")
+        # TODO(johngarbutt): send propagationPolicy="Background" like kubectl
+        await job_resource.delete(name, namespace=namespace)
+        LOG.info(f"deleted job {name} in {namespace}")
+
+        # delete pods so they are not orphaned
+        pod_resource = await client.api("v1").resource("pods")
+        pods = [
+            pod
+            async for pod in pod_resource.list(
+                labels={"job-name": name}, namespace=namespace
+            )
+        ]
+        for pod in pods:
+            await pod_resource.delete(pod["metadata"]["name"], namespace=namespace)

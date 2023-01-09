@@ -46,12 +46,36 @@ class TestModels(base.TestCase):
                 "description": "Base model for use within CRD definitions.",
                 "type": "object",
                 "properties": {
-                  "gitUrl": {
+                  "uiMetaUrl": {
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri",
                     "type": "string"
+                  },
+                  "gitUrl": {
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "gitVersion": {
+                    "type": "string"
+                  },
+                  "playbook": {
+                    "type": "string"
+                  },
+                  "extraVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 },
                 "required": [
-                  "gitUrl"
+                  "uiMetaUrl",
+                  "gitUrl",
+                  "gitVersion",
+                  "playbook"
                 ]
               },
               "status": {

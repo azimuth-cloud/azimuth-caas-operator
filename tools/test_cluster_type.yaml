@@ -2,6 +2,11 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: ClusterType
 metadata:
-  name: testtype1
+  name: "azimuth-sample-appliance"
 spec:
-  gitUrl: main
+  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-sample-appliance/ff97632f6d53b801d4149d1c031c1d17e50986ca/ui-meta/sample-appliance.yml"
+  gitUrl: "https://github.com/stackhpc/azimuth-sample-appliance.git"
+  gitVersion: "ff97632f6d53b801d4149d1c031c1d17e50986ca"
+  playbook: "/sample-appliance.yml"
+  extraVars:
+    cluster_image: "f7e6408b-a9b8-4ba2-a4c1-e19f61bebe7e"

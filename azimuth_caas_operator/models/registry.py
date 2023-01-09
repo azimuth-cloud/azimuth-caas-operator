@@ -3,7 +3,7 @@ import kube_custom_resource as crd
 from azimuth_caas_operator.models.v1alpha1 import cluster
 from azimuth_caas_operator.models.v1alpha1 import cluster_type
 
-API_GROUP = "azimuth.stackhpc.com"
+API_GROUP = "caas.azimuth.stackhpc.com"
 CATEGORIES = ["azimuth"]
 
 

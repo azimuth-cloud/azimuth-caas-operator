@@ -1,5 +1,5 @@
 ---
-apiVersion: azimuth.stackhpc.com/v1alpha1
+apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: Cluster
 metadata:
   name: test1

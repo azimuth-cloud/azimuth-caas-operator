@@ -73,7 +73,7 @@ def cleanup(**kwargs):
     LOG.info("cleaned up!")
 
 
-@kopf.on.create("azimuth.stackhpc.com", "clustertypes")
+@kopf.on.create(registry.API_GROUP, "clustertypes")
 async def cluster_type_event(body, name, namespace, labels, **kwargs):
     if type == "DELETED":
         LOG.info(f"cluster_type {name} in {namespace} is deleted")
@@ -85,7 +85,7 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
     # TODO(johngarbutt): fetch ui meta from git repo and update crd
 
 
-@kopf.on.create("azimuth.stackhpc.com", "cluster")
+@kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_event(body, name, namespace, labels, **kwargs):
     LOG.info(f"cluster event for {name} in {namespace}")
     cluster = registry.parse_model(body)
@@ -94,7 +94,7 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
 
     # Fetch the cluster type, if available, get the git ref
     client = get_k8s_client()
-    cluster_type = await client.api("azimuth.stackhpc.com/v1alpha1").resource(
+    cluster_type = await client.api(registry.API_GROUP + "/v1alpha1").resource(
         "clustertype"
     )
     # TODO(johngarbutt) how to catch not found errors?

@@ -10,7 +10,7 @@ class TestModels(base.TestCase):
         for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
-            if name == "clustertypes.azimuth.stackhpc.com":
+            if name == "clustertypes.caas.azimuth.stackhpc.com":
                 cluster_type_crd = resource
 
         actual = json.dumps(cluster_type_crd, indent=2)
@@ -18,10 +18,10 @@ class TestModels(base.TestCase):
   "apiVersion": "apiextensions.k8s.io/v1",
   "kind": "CustomResourceDefinition",
   "metadata": {
-    "name": "clustertypes.azimuth.stackhpc.com"
+    "name": "clustertypes.caas.azimuth.stackhpc.com"
   },
   "spec": {
-    "group": "azimuth.stackhpc.com",
+    "group": "caas.azimuth.stackhpc.com",
     "scope": "Cluster",
     "names": {
       "kind": "ClusterType",
@@ -95,7 +95,7 @@ class TestModels(base.TestCase):
         for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
-            if name == "clusters.azimuth.stackhpc.com":
+            if name == "clusters.caas.azimuth.stackhpc.com":
                 cluster_crd = resource
 
         actual = json.dumps(cluster_crd, indent=2)
@@ -103,10 +103,10 @@ class TestModels(base.TestCase):
   "apiVersion": "apiextensions.k8s.io/v1",
   "kind": "CustomResourceDefinition",
   "metadata": {
-    "name": "clusters.azimuth.stackhpc.com"
+    "name": "clusters.caas.azimuth.stackhpc.com"
   },
   "spec": {
-    "group": "azimuth.stackhpc.com",
+    "group": "caas.azimuth.stackhpc.com",
     "scope": "Cluster",
     "names": {
       "kind": "Cluster",

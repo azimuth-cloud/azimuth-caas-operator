@@ -4,4 +4,4 @@ kind: Cluster
 metadata:
   name: test1
 spec:
-  clusterTypeName: testtype1
+  clusterTypeName: azimuth-sample-appliance

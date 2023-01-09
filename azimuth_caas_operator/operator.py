@@ -104,27 +104,39 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     # job_resource =
     job_resource = await client.api("batch/v1").resource("jobs")
     # TOOD(johngarbutt): template out and include ownership, etc.
-    job_yaml = """apiVersion: batch/v1
+    job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test2
+  generateName: "{name}"
   labels:
-      azimuth-caas-cluster: test1
+      azimuth-caas-cluster: "{name}"
 spec:
   template:
     spec:
       restartPolicy: Never
       initContainers:
       - image: alpine/git
-        name: git
+        name: clone
         command:
         - git
         - clone
-        - https://github.com/ansible/ansible-runner.git
+        - "{cluster_type_raw.spec.gitUrl}"
         - /repo
         volumeMounts:
         - name: playbooks
           mountPath: /repo
+      - image: alpine/git
+        name: checkout
+        command:
+        - git
+        - checkout
+        - "{cluster_type_raw.spec.gitVersion}"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /repo
+        env:
+        - name: PWD
+          value: /repo
       containers:
       - name: run
         image: quay.io/ansible/ansible-runner:latest
@@ -135,14 +147,14 @@ spec:
         - -j
         env:
         - name: RUNNER_PLAYBOOK
-          value: "test.yml"
+          value: "sample-appliance.yml"
         volumeMounts:
         - name: playbooks
-          mountPath: /runner
+          mountPath: /runner/project
           subPath: demo
       volumes:
       - name: playbooks
-        emptyDir: {}
+        emptyDir: {{}}
   backoffLimit: 0"""
     job_data = yaml.safe_load(job_yaml)
     job = await job_resource.create(job_data)

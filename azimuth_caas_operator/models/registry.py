@@ -12,3 +12,14 @@ def get_registry():
     registry.discover_models(cluster)
     registry.discover_models(cluster_type)
     return registry
+
+
+def get_crd_resources():
+    reg = get_registry()
+    for resource in reg:
+        yield resource.kubernetes_resource()
+
+
+def parse_model(raw: str):
+    reg = get_registry()
+    return reg.get_model_instance(raw)

@@ -1,3 +1,4 @@
+import json
 import logging
 
 import easykube
@@ -9,6 +10,13 @@ from azimuth_caas_operator.models import registry
 LOG = logging.getLogger(__name__)
 
 easykube_field_manager = "azimuth-caas-operator"
+CLUSTER_LABEL = "azimuth-caas-cluster"
+
+
+async def register_crds(client):
+    for resource in registry.get_crd_resources():
+        await client.apply_object(resource, force=True)
+    LOG.info("CRDs imported")
 
 
 def get_k8s_client():
@@ -17,12 +25,48 @@ def get_k8s_client():
     ).async_client(default_field_manager=easykube_field_manager)
 
 
-async def register_crds(client):
-    reg = registry.get_registry()
-    for crd in reg:
-        resource = crd.kubernetes_resource()
-        await client.apply_object(resource, force=True)
-    LOG.info("CRDs imported")
+async def get_job_log(client, job_name, namespace):
+    # find the pod fomr the job label
+    pod_resource = await client.api("v1").resource("pods")
+    pods = [
+        pod
+        async for pod in pod_resource.list(
+            labels={"job-name": job_name}, namespace=namespace
+        )
+    ]
+    if len(pods) == 0 or len(pods) > 1:
+        LOG.warning(f"Can't find pod for job {job_name} in {namespace}")
+        return
+    pod_name = pods[0]["metadata"]["name"]
+    log_resource = await client.api("v1").resource("pods/log")
+    # TODO(johngarbutt): we should pass tail here
+    logs = await log_resource.fetch(pod_name, namespace=namespace)
+
+    # split into lines
+    logs = logs.strip()
+    logs = logs.split("\n")
+
+    # check we can parse everything
+    for log in logs:
+        last_log_event = json.loads(log)
+        task = last_log_event["event_data"].get("task")
+        LOG.debug(f"task: {task}")
+        failures = last_log_event["event_data"].get("failures", 0)
+        LOG.debug(f"failures: {failures}")
+
+    return last_log_event["event_data"]
+
+
+@kopf.on.startup()
+async def startup(**kwargs):
+    LOG.info("Starting")
+    client = get_k8s_client()
+    await register_crds(client)
+
+
+@kopf.on.cleanup()
+def cleanup(**kwargs):
+    LOG.info("cleaned up!")
 
 
 @kopf.on.create("azimuth.stackhpc.com", "clustertypes")
@@ -32,20 +76,19 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
         return
 
     LOG.debug(f"cluster_type event for {name} in {namespace}")
-    reg = registry.get_registry()
-    cluster_event = reg.get_model_instance(body)
-    LOG.info(f"seen cluster_type event {cluster_event.spec.gitUrl}")
+    cluster_type = registry.parse_model(body)
+    LOG.info(f"seen cluster_type event {cluster_type.spec.gitUrl}")
     # TODO(johngarbutt): fetch ui meta from git repo and update crd
 
 
 @kopf.on.create("azimuth.stackhpc.com", "cluster")
 async def cluster_event(body, name, namespace, labels, **kwargs):
     LOG.info(f"cluster event for {name} in {namespace}")
-    reg = registry.get_registry()
-    cluster = reg.get_model_instance(body)
+    cluster = registry.parse_model(body)
     cluster_type_name = cluster.spec.clusterTypeName
     LOG.info(f"seen cluster of type {cluster_type_name} with status {cluster.status}")
     # TODO(johngarbutt): fetch the cluster type, if available, get the git ref
+
     # TODO(johngarbutt): create a job to create the cluster!
 
 
@@ -70,6 +113,11 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
         f"success:{success} completed at:{completion_time}"
     )
 
+    if not success and not failed and not active:
+        LOG.error("what happened here?")
+        LOG.info(f"{body}")
+        return
+
     if active:
         LOG.info(f"job is running, pod ready:{ready}")
     if failed:
@@ -77,19 +125,7 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
     if success:
         LOG.info(f"job completed on {completion_time}")
 
-    if not success and not failed and not active:
-        LOG.error("what happened here?")
-        LOG.info(f"{body}")
-
-
-@kopf.on.startup()
-async def startup(**kwargs):
-    LOG.info("Starting")
+    # TODO(johngarbutt) update the CRD with logs
     client = get_k8s_client()
-    await register_crds(client)
-    # TODO(johngarbutt): check for any pending clusters without a job?
-
-
-@kopf.on.cleanup()
-def cleanup(**kwargs):
-    LOG.info("cleaned up!")
+    job_log = await get_job_log(client, name, namespace)
+    LOG.info(f"{job_log}")

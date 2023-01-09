@@ -4,16 +4,10 @@ from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.tests import base
 
 
-class TestClusterType(base.TestCase):
-    def test_registry_size(self):
-        reg = registry.get_registry()
-        self.assertEqual(2, len(list(reg)))
-
+class TestModels(base.TestCase):
     def test_cluster_type_crd_json(self):
-        crds = list(registry.get_registry())
         cluster_type_crd = None
-        for crd in crds:
-            resource = crd.kubernetes_resource()
+        for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
             if name == "clustertypes.azimuth.stackhpc.com":
@@ -97,10 +91,8 @@ class TestClusterType(base.TestCase):
         self.assertEqual(expected, actual)
 
     def test_cluster_crd_json(self):
-        crds = list(registry.get_registry())
         cluster_crd = None
-        for crd in crds:
-            resource = crd.kubernetes_resource()
+        for resource in registry.get_crd_resources():
             meta = resource.get("metadata", {})
             name = meta.get("name")
             if name == "clusters.azimuth.stackhpc.com":

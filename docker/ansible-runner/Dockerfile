@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get upgrade -y && apt-get install python3-pip unzip -y && apt-get clean
+RUN apt-get update && apt-get upgrade -y && apt-get install python3-pip unzip git -y && apt-get clean
 RUN pip install ansible-runner==2.3.1 ansible==7.1.0 ansible-core==2.14.1
 
 RUN for dir in \

@@ -142,6 +142,32 @@ spec:
         env:
         - name: PWD
           value: /repo
+      - image: alpine/git
+        name: permissions
+        workingDir: /repo
+        command:
+        - /bin/ash
+        - -c
+        - "chmod 755 /repo/"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /repo
+        env:
+        - name: PWD
+          value: /repo
+      - image: alpine/git
+        name: inventory
+        workingDir: /inventory
+        command:
+        - /bin/ash
+        - -c
+        - "echo localhost >/inventory/hosts"
+        volumeMounts:
+        - name: inventory
+          mountPath: /inventory
+        env:
+        - name: PWD
+          value: /repo
       containers:
       - name: run
         image: ghcr.io/stackhpc/caas-ee:5289aa7
@@ -156,8 +182,12 @@ spec:
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
+        - name: inventory
+          mountPath: /runner/inventory
       volumes:
       - name: playbooks
+        emptyDir: {{}}
+      - name: inventory
         emptyDir: {{}}
   backoffLimit: 0"""
     job_data = yaml.safe_load(job_yaml)

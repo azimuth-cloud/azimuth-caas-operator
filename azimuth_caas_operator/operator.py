@@ -103,6 +103,10 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     job_resource = await client.api("batch/v1").resource("jobs")
     # TOOD(johngarbutt): template out and include ownership, etc.
     cluster_uid = body["metadata"]["uid"]
+    # TODO(johngarbutt): terrible hard code here, need all extra vars, and merge
+    cluster_image = cluster_type_raw.spec.extraVars.get("cluster_image")
+    # TODO(johngarbutt): need to get the vars from the cluster crd and merge them!
+    # and extra vars should probably be a config map
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
@@ -139,9 +143,6 @@ spec:
         volumeMounts:
         - name: playbooks
           mountPath: /repo
-        env:
-        - name: PWD
-          value: /repo
       - image: alpine/git
         name: permissions
         workingDir: /repo
@@ -152,9 +153,6 @@ spec:
         volumeMounts:
         - name: playbooks
           mountPath: /repo
-        env:
-        - name: PWD
-          value: /repo
       - image: alpine/git
         name: inventory
         workingDir: /inventory
@@ -165,6 +163,20 @@ spec:
         volumeMounts:
         - name: inventory
           mountPath: /inventory
+      - image: alpine/git
+        name: env
+        workingDir: /env
+        command:
+        - /bin/ash
+        - -c
+        - >
+          echo '---' >/env/extravars;
+          echo 'cluster_id: {cluster_uid}' >>/env/extravars;
+          echo 'cluster_name: {name}' >>/env/extravars;
+          echo 'cluster_image: {cluster_image}' >>/env/extravars;
+        volumeMounts:
+        - name: env
+          mountPath: /env
         env:
         - name: PWD
           value: /repo
@@ -183,11 +195,16 @@ spec:
           mountPath: /runner/project
         - name: inventory
           mountPath: /runner/inventory
+        - name: env
+          mountPath: /runner/env
       volumes:
       - name: playbooks
         emptyDir: {{}}
       - name: inventory
         emptyDir: {{}}
+      - name: env
+        emptyDir: {{}}
+
   backoffLimit: 0"""  # noqa
     job_data = yaml.safe_load(job_yaml)
     job = await job_resource.create(job_data)

@@ -94,9 +94,7 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
 
     # Fetch the cluster type, if available, get the git ref
     client = get_k8s_client()
-    cluster_type = await client.api(registry.API_GROUP + "/v1alpha1").resource(
-        "clustertype"
-    )
+    cluster_type = await client.api(registry.API_VERSION).resource("clustertype")
     # TODO(johngarbutt) how to catch not found errors?
     cluster_type_raw = await cluster_type.fetch(cluster_type_name)
     LOG.info(f"Git URL: {cluster_type_raw.spec.gitUrl}")
@@ -104,46 +102,93 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     # job_resource =
     job_resource = await client.api("batch/v1").resource("jobs")
     # TOOD(johngarbutt): template out and include ownership, etc.
-    job_yaml = """apiVersion: batch/v1
+    cluster_uid = body["metadata"]["uid"]
+    job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test2
+  generateName: "{name}"
   labels:
-      azimuth-caas-cluster: test1
+      azimuth-caas-cluster: "{name}"
+  ownerReferences:
+    - apiVersion: "{registry.API_VERSION}"
+      kind: Cluster
+      name: "{name}"
+      uid: "{cluster_uid}"
 spec:
   template:
     spec:
       restartPolicy: Never
       initContainers:
       - image: alpine/git
-        name: git
+        name: clone
         command:
         - git
         - clone
-        - https://github.com/ansible/ansible-runner.git
+        - "{cluster_type_raw.spec.gitUrl}"
         - /repo
         volumeMounts:
         - name: playbooks
           mountPath: /repo
-      containers:
-      - name: run
-        image: quay.io/ansible/ansible-runner:latest
+      - image: alpine/git
+        name: checkout
+        workingDir: /repo
         command:
-        - ansible-runner
-        - run
-        - /runner
-        - -j
-        env:
-        - name: RUNNER_PLAYBOOK
-          value: "test.yml"
+        - git
+        - checkout
+        - "{cluster_type_raw.spec.gitVersion}"
         volumeMounts:
         - name: playbooks
-          mountPath: /runner
-          subPath: demo
+          mountPath: /repo
+        env:
+        - name: PWD
+          value: /repo
+      - image: alpine/git
+        name: permissions
+        workingDir: /repo
+        command:
+        - /bin/ash
+        - -c
+        - "chmod 755 /repo/"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /repo
+        env:
+        - name: PWD
+          value: /repo
+      - image: alpine/git
+        name: inventory
+        workingDir: /inventory
+        command:
+        - /bin/ash
+        - -c
+        - "echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts"
+        volumeMounts:
+        - name: inventory
+          mountPath: /inventory
+        env:
+        - name: PWD
+          value: /repo
+      containers:
+      - name: run
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
+        command:
+        - /bin/bash
+        - -c
+        - "yum update -y; yum install unzip; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: "sample-appliance.yml"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /runner/project
+        - name: inventory
+          mountPath: /runner/inventory
       volumes:
       - name: playbooks
-        emptyDir: {}
-  backoffLimit: 0"""
+        emptyDir: {{}}
+      - name: inventory
+        emptyDir: {{}}
+  backoffLimit: 0"""  # noqa
     job_data = yaml.safe_load(job_yaml)
     job = await job_resource.create(job_data)
     LOG.info(f"{job}")

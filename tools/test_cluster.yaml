@@ -5,3 +5,5 @@ metadata:
   name: test1
 spec:
   clusterTypeName: azimuth-sample-appliance
+  extraVars:
+    foo: bar

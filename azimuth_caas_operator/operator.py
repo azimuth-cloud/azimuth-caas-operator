@@ -127,6 +127,7 @@ spec:
           mountPath: /repo
       - image: alpine/git
         name: checkout
+        workingDir: /repo
         command:
         - git
         - checkout

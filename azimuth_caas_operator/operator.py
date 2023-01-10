@@ -161,7 +161,7 @@ spec:
         command:
         - /bin/ash
         - -c
-        - "echo localhost >/inventory/hosts"
+        - "echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts"
         volumeMounts:
         - name: inventory
           mountPath: /inventory

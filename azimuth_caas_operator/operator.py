@@ -152,7 +152,6 @@ spec:
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
-          subPath: demo
       volumes:
       - name: playbooks
         emptyDir: {{}}

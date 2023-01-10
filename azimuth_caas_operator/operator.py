@@ -94,9 +94,7 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
 
     # Fetch the cluster type, if available, get the git ref
     client = get_k8s_client()
-    cluster_type = await client.api(registry.API_VERSION).resource(
-        "clustertype"
-    )
+    cluster_type = await client.api(registry.API_VERSION).resource("clustertype")
     # TODO(johngarbutt) how to catch not found errors?
     cluster_type_raw = await cluster_type.fetch(cluster_type_name)
     LOG.info(f"Git URL: {cluster_type_raw.spec.gitUrl}")

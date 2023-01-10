@@ -170,7 +170,7 @@ spec:
           value: /repo
       containers:
       - name: run
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
         command:
         - /bin/bash
         - -c

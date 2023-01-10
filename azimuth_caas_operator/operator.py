@@ -94,7 +94,7 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
 
     # Fetch the cluster type, if available, get the git ref
     client = get_k8s_client()
-    cluster_type = await client.api(registry.API_GROUP + "/v1alpha1").resource(
+    cluster_type = await client.api(registry.API_VERSION).resource(
         "clustertype"
     )
     # TODO(johngarbutt) how to catch not found errors?
@@ -104,12 +104,18 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     # job_resource =
     job_resource = await client.api("batch/v1").resource("jobs")
     # TOOD(johngarbutt): template out and include ownership, etc.
+    cluster_uid = body["metadata"]["uid"]
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
   generateName: "{name}"
   labels:
       azimuth-caas-cluster: "{name}"
+  ownerReferences:
+    - apiVersion: "{registry.API_VERSION}"
+      kind: Cluster
+      name: "{name}"
+      uid: "{cluster_uid}"
 spec:
   template:
     spec:
@@ -140,7 +146,7 @@ spec:
           value: /repo
       containers:
       - name: run
-        image: quay.io/ansible/ansible-runner:latest
+        image: ghcr.io/stackhpc/caas-ee:5289aa7
         command:
         - ansible-runner
         - run

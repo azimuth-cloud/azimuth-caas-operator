@@ -172,10 +172,9 @@ spec:
       - name: run
         image: ghcr.io/stackhpc/caas-ee:5289aa7
         command:
-        - ansible-runner
-        - run
-        - /runner
-        - -j
+        - /bin/bash
+        - -c
+        - "ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
         env:
         - name: RUNNER_PLAYBOOK
           value: "sample-appliance.yml"

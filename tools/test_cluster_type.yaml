@@ -6,7 +6,7 @@ metadata:
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-sample-appliance/ff97632f6d53b801d4149d1c031c1d17e50986ca/ui-meta/sample-appliance.yml"
   gitUrl: "https://github.com/stackhpc/azimuth-sample-appliance.git"
-  gitVersion: "ff97632f6d53b801d4149d1c031c1d17e50986ca"
+  gitVersion: "bf6d8f644736a18783763d9ebded86204ad7f7be"
   playbook: "/sample-appliance.yml"
   extraVars:
     cluster_image: "f7e6408b-a9b8-4ba2-a4c1-e19f61bebe7e"

@@ -188,7 +188,7 @@ spec:
         emptyDir: {{}}
       - name: inventory
         emptyDir: {{}}
-  backoffLimit: 0"""
+  backoffLimit: 0"""  # noqa
     job_data = yaml.safe_load(job_yaml)
     job = await job_resource.create(job_data)
     LOG.info(f"{job}")

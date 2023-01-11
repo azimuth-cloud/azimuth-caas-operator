@@ -1,7 +1,7 @@
+import json
 import yaml
 
 from azimuth_caas_operator import ansible_runner
-from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.tests import base
@@ -9,30 +9,8 @@ from azimuth_caas_operator.tests import base
 
 class TestAnsibleRunner(base.TestCase):
     def test_get_job(self):
-        cluster = cluster_crd.Cluster(
-            apiVersion=registry.API_VERSION,
-            kind="Cluster",
-            metadata=dict(name="test1", uid="fakeuid1"),
-            spec=dict(
-                clusterTypeName="type1",
-                cloudCredentialsSecretName="cloudsyaml",
-                extraVars=dict(foo="bar"),
-            ),
-        )
-        cluster_type = cluster_type_crd.ClusterType(
-            apiVersion=registry.API_VERSION,
-            kind="ClusterType",
-            metadata=dict(name="test1"),
-            spec=dict(
-                uiMetaUrl="https://url1",
-                gitUrl="https://github.com/test.git",
-                gitVersion="12345ab",
-                playbook="sample.yaml",
-                extraVars=dict(
-                    cluster_image="testimage1",
-                ),
-            ),
-        )
+        cluster = cluster_crd.get_fake()
+        cluster_type = cluster_type_crd.get_fake()
 
         job = ansible_runner.get_job(cluster, cluster_type)
 
@@ -112,28 +90,40 @@ spec:
         - mountPath: /inventory
           name: inventory
         workingDir: /inventory
-      - command:
-        - /bin/ash
-        - -c
-        - 'echo ''---'' >/env/extravars; echo ''cluster_id: fakeuid1'' >>/env/extravars;
-          echo ''cluster_name: test1'' >>/env/extravars; echo ''cluster_image: testimage1''
-          >>/env/extravars;'
-        env:
-        - name: PWD
-          value: /repo
-        image: alpine/git
-        name: env
-        volumeMounts:
-        - mountPath: /env
-          name: env
-        workingDir: /env
       restartPolicy: Never
       volumes:
       - emptyDir: {}
         name: playbooks
       - emptyDir: {}
         name: inventory
-      - emptyDir: {}
+      - configMap:
+          name: test1
         name: env
 """  # noqa
         self.assertEqual(expected, yaml.dump(job))
+
+    def test_get_job_env_configmap(self):
+        cluster = cluster_crd.get_fake()
+        cluster_type = cluster_type_crd.get_fake()
+
+        config = ansible_runner.get_env_configmap(cluster, cluster_type)
+        expected = """\
+{
+  "apiVersion": "v1",
+  "kind": "ConfigMap",
+  "metadata": {
+    "name": "test1",
+    "ownerReferences": [
+      {
+        "apiVersion": "caas.azimuth.stackhpc.com/v1alpha1",
+        "kind": "Cluster",
+        "name": "test1",
+        "uid": "fakeuid1"
+      }
+    ]
+  },
+  "data": {
+    "extravars": "---\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\nfoo: bar\\n"
+  }
+}"""  # noqa
+        self.assertEqual(expected, json.dumps(config, indent=2))

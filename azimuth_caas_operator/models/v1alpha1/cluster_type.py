@@ -26,3 +26,20 @@ class ClusterTypeSpec(schema.BaseModel):
 class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
     spec: ClusterTypeSpec
     status: ClusterTypeStatus = pydantic.Field(default_factory=ClusterTypeStatus)
+
+
+def get_fake():
+    return ClusterType(
+        apiVersion="fake",
+        kind="ClusterType",
+        metadata=dict(name="test1"),
+        spec=dict(
+            uiMetaUrl="https://url1",
+            gitUrl="https://github.com/test.git",
+            gitVersion="12345ab",
+            playbook="sample.yaml",
+            extraVars=dict(
+                cluster_image="testimage1",
+            ),
+        ),
+    )

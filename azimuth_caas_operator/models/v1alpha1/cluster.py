@@ -26,3 +26,16 @@ class ClusterSpec(schema.BaseModel):
 class Cluster(crd.CustomResource, scope=crd.Scope.CLUSTER):
     spec: ClusterSpec
     status: ClusterStatus = pydantic.Field(default_factory=ClusterStatus)
+
+
+def get_fake():
+    return Cluster(
+        apiVersion="fake",
+        kind="Cluster",
+        metadata=dict(name="test1", uid="fakeuid1"),
+        spec=dict(
+            clusterTypeName="type1",
+            cloudCredentialsSecretName="cloudsyaml",
+            extraVars=dict(foo="bar"),
+        ),
+    )

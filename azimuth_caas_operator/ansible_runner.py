@@ -5,14 +5,35 @@ from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 
 
+def get_env_configmap(
+    cluster: cluster_crd.Cluster, cluster_type: cluster_type_crd.ClusterType
+):
+    extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
+    extraVars["cluster_name"] = cluster.metadata.name
+    extraVars["cluster_id"] = cluster.metadata.uid
+    extras = "---\n" + yaml.dump(extraVars)
+
+    template = f"""apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {cluster.metadata.name}
+  ownerReferences:
+    - apiVersion: "{registry.API_VERSION}"
+      kind: Cluster
+      name: "{cluster.metadata.name}"
+      uid: "{cluster.metadata.uid}"
+data:
+  extravars: |
+    cluster_name: asdf""
+"""
+    config_map = yaml.safe_load(template)
+    config_map["data"]["extravars"] = extras
+    return config_map
+
+
 def get_job(cluster: cluster_crd.Cluster, cluster_type: cluster_type_crd.ClusterType):
-    # TOOD(johngarbutt): template out and include ownership, etc.
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
-    # TODO(johngarbutt): terrible hard code here, need all extra vars, and merge
-    cluster_image = cluster_type.spec.extraVars.get("cluster_image")
-    # TODO(johngarbutt): need to get the vars from the cluster crd and merge them!
-    # and extra vars should probably be a config map
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
@@ -69,23 +90,6 @@ spec:
         volumeMounts:
         - name: inventory
           mountPath: /inventory
-      - image: alpine/git
-        name: env
-        workingDir: /env
-        command:
-        - /bin/ash
-        - -c
-        - >-
-          echo '---' >/env/extravars;
-          echo 'cluster_id: {cluster_uid}' >>/env/extravars;
-          echo 'cluster_name: {name}' >>/env/extravars;
-          echo 'cluster_image: {cluster_image}' >>/env/extravars;
-        volumeMounts:
-        - name: env
-          mountPath: /env
-        env:
-        - name: PWD
-          value: /repo
       containers:
       - name: run
         image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
@@ -109,7 +113,8 @@ spec:
       - name: inventory
         emptyDir: {{}}
       - name: env
-        emptyDir: {{}}
+        configMap:
+          name: {name}
 
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)

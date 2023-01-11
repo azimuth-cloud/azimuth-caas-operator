@@ -54,7 +54,11 @@ async def get_job_log(client, job_name, namespace):
 
     # check we can parse everything
     for log in logs:
-        last_log_event = json.loads(log)
+        last_log_event = {}
+        try:
+            last_log_event = json.loads(log)
+        except json.decoder.JSONDecodeError:
+            continue
         task = last_log_event["event_data"].get("task")
         LOG.debug(f"task: {task}")
         failures = last_log_event["event_data"].get("failures", 0)
@@ -99,6 +103,11 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     cluster_type_raw = await cluster_type.fetch(cluster_type_name)
     cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
     # TODO(johngarbutt) cache cluster_type in a config map for doing delete?
+
+    # Create the config map for extra vars
+    configmap_data = ansible_runner.get_env_configmap(cluster, cluster_type)
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    await configmap_resource.create(configmap_data, namespace=namespace)
 
     # Create the ansible runner job to create this cluster
     job_data = ansible_runner.get_job(cluster, cluster_type)

@@ -18,9 +18,10 @@ class TestAnsibleRunner(base.TestCase):
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test1
   labels:
     azimuth-caas-cluster: test1
+    azimuth-cass-action: create
+  name: test1-create
   ownerReferences:
   - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
     kind: Cluster

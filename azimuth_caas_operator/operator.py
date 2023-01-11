@@ -122,6 +122,37 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     )
 
 
+@kopf.on.delete(registry.API_GROUP, "cluster")
+async def cluster_delete(body, name, namespace, labels, **kwargs):
+    cluster = cluster_crd.Cluster(**body)
+    # TODO(johngarbutt): run ansible to do the delete
+
+    # TODO(johngarbutt): cache this in a config map?
+    cluster_type_name = cluster.spec.clusterTypeName
+    client = get_k8s_client()
+    cluster_type = await client.api(registry.API_VERSION).resource("clustertype")
+    cluster_type_raw = await cluster_type.fetch(cluster_type_name)
+    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
+
+    configmap_data = ansible_runner.get_env_configmap(
+        cluster, cluster_type, remove=True
+    )
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    config_map_raw = await configmap_resource.fetch(
+        cluster.metadata.name, namespace=namespace
+    )
+    LOG.info(f"found {config_map_raw}")
+    await configmap_resource.patch(
+        config_map_raw.metadata.name, configmap_data, namespace=namespace
+    )
+
+    job_data = ansible_runner.get_job(cluster, cluster_type, remove=True)
+    job_resource = await client.api("batch/v1").resource("jobs")
+    job = await job_resource.create(job_data, namespace=namespace)
+
+    raise Exception(f"wait for job {job} to finish!")
+
+
 @kopf.on.event("job", labels={"azimuth-caas-cluster": kopf.PRESENT})
 async def job_event(type, body, name, namespace, labels, **kwargs):
     cluster_name = labels.get("azimuth-caas-cluster")

@@ -6,12 +6,16 @@ from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_c
 
 
 def get_env_configmap(
-    cluster: cluster_crd.Cluster, cluster_type: cluster_type_crd.ClusterType
+    cluster: cluster_crd.Cluster,
+    cluster_type: cluster_type_crd.ClusterType,
+    remove=False,
 ):
     extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
     # TODO(johngarbutt) need to lookup deployment ssh key pair!
+    if remove:
+        extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
 
     envvars = dict(
@@ -40,16 +44,22 @@ data:
     return config_map
 
 
-def get_job(cluster: cluster_crd.Cluster, cluster_type: cluster_type_crd.ClusterType):
+def get_job(
+    cluster: cluster_crd.Cluster,
+    cluster_type: cluster_type_crd.ClusterType,
+    remove=False,
+):
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
+    action = "remove" if remove else "create"
     # TODO(johngarbutt): need delete to work, and inject a deploy ssh key!
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: "{name}"
+  name: "{name}-{action}"
   labels:
       azimuth-caas-cluster: "{name}"
+      azimuth-cass-action: "{action}"
   ownerReferences:
     - apiVersion: "{registry.API_VERSION}"
       kind: Cluster

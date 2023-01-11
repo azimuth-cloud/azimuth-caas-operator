@@ -11,7 +11,15 @@ def get_env_configmap(
     extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
-    extras = "---\n" + yaml.dump(extraVars)
+    # TODO(johngarbutt) need to lookup deployment ssh key pair!
+    extraVars = "---\n" + yaml.dump(extraVars)
+
+    envvars = dict(
+        CONSUL_HTTP_ADDR="172.17.0.7:8500",
+        OS_CLOUD="openstack",
+        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
+    )
+    envvars = "---\n" + yaml.dump(envvars)
 
     template = f"""apiVersion: v1
 kind: ConfigMap
@@ -23,17 +31,19 @@ metadata:
       name: "{cluster.metadata.name}"
       uid: "{cluster.metadata.uid}"
 data:
-  extravars: |
-    cluster_name: asdf""
+  envvars: ""
+  extravars: ""
 """
     config_map = yaml.safe_load(template)
-    config_map["data"]["extravars"] = extras
+    config_map["data"]["extravars"] = extraVars
+    config_map["data"]["envvars"] = envvars
     return config_map
 
 
 def get_job(cluster: cluster_crd.Cluster, cluster_type: cluster_type_crd.ClusterType):
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
+    # TODO(johngarbutt): need delete to work, and inject a deploy ssh key!
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
@@ -107,6 +117,8 @@ spec:
           mountPath: /runner/inventory
         - name: env
           mountPath: /runner/env
+        - name: cloudcreds
+          mountPath: /openstack
       volumes:
       - name: playbooks
         emptyDir: {{}}
@@ -115,6 +127,9 @@ spec:
       - name: env
         configMap:
           name: {name}
+      - name: cloudcreds
+        secret:
+          secretName: "{cluster.spec.cloudCredentialsSecretName}"
 
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)

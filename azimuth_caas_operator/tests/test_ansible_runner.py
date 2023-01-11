@@ -48,6 +48,8 @@ spec:
           name: inventory
         - mountPath: /runner/env
           name: env
+        - mountPath: /openstack
+          name: cloudcreds
       initContainers:
       - command:
         - git
@@ -99,6 +101,9 @@ spec:
       - configMap:
           name: test1
         name: env
+      - name: cloudcreds
+        secret:
+          secretName: cloudsyaml
 """  # noqa
         self.assertEqual(expected, yaml.dump(job))
 
@@ -123,6 +128,7 @@ spec:
     ]
   },
   "data": {
+    "envvars": "---\\nCONSUL_HTTP_ADDR: 172.17.0.7:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
     "extravars": "---\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\nfoo: bar\\n"
   }
 }"""  # noqa

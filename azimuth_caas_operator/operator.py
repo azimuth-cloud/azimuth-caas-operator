@@ -53,18 +53,19 @@ async def get_job_log(client, job_name, namespace):
     logs = logs.split("\n")
 
     # check we can parse everything
+    last_log_event = {}
     for log in logs:
-        last_log_event = {}
         try:
             last_log_event = json.loads(log)
         except json.decoder.JSONDecodeError:
             continue
+        last_log_event = json.loads(log)
         task = last_log_event["event_data"].get("task")
         LOG.debug(f"task: {task}")
         failures = last_log_event["event_data"].get("failures", 0)
         LOG.debug(f"failures: {failures}")
 
-    return last_log_event["event_data"]
+    return last_log_event.get("event_data")
 
 
 @kopf.on.startup()

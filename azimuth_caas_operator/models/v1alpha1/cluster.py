@@ -18,6 +18,7 @@ class ClusterStatus(schema.BaseModel):
 
 class ClusterSpec(schema.BaseModel):
     clusterTypeName: str
+    cloudCredentialsSecretName: str
     # as described by the cluster type ui-meta
     extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
 

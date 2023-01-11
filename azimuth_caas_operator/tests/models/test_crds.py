@@ -158,6 +158,9 @@ class TestModels(base.TestCase):
                   "clusterTypeName": {
                     "type": "string"
                   },
+                  "cloudCredentialsSecretName": {
+                    "type": "string"
+                  },
                   "extraVars": {
                     "type": "object",
                     "additionalProperties": {
@@ -166,7 +169,8 @@ class TestModels(base.TestCase):
                   }
                 },
                 "required": [
-                  "clusterTypeName"
+                  "clusterTypeName",
+                  "cloudCredentialsSecretName"
                 ]
               },
               "status": {

@@ -4,9 +4,11 @@ import logging
 import easykube
 import kopf
 from pydantic.json import pydantic_encoder
-import yaml
 
+from azimuth_caas_operator import ansible_runner
 from azimuth_caas_operator.models import registry
+from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
+from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 
 LOG = logging.getLogger(__name__)
 
@@ -87,128 +89,27 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
 
 @kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_event(body, name, namespace, labels, **kwargs):
-    LOG.info(f"cluster event for {name} in {namespace}")
-    cluster = registry.parse_model(body)
+    cluster = cluster_crd.Cluster(**body)
     cluster_type_name = cluster.spec.clusterTypeName
-    LOG.info(f"seen cluster of type {cluster_type_name} with status {cluster.status}")
 
-    # Fetch the cluster type, if available, get the git ref
+    # Fetch cluster type
     client = get_k8s_client()
     cluster_type = await client.api(registry.API_VERSION).resource("clustertype")
     # TODO(johngarbutt) how to catch not found errors?
     cluster_type_raw = await cluster_type.fetch(cluster_type_name)
-    LOG.info(f"Git URL: {cluster_type_raw.spec.gitUrl}")
+    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
+    # TODO(johngarbutt) cache cluster_type in a config map for doing delete?
 
-    # job_resource =
+    # Create the ansible runner job to create this cluster
+    job_data = ansible_runner.get_job(cluster, cluster_type)
     job_resource = await client.api("batch/v1").resource("jobs")
-    # TOOD(johngarbutt): template out and include ownership, etc.
-    cluster_uid = body["metadata"]["uid"]
-    # TODO(johngarbutt): terrible hard code here, need all extra vars, and merge
-    cluster_image = cluster_type_raw.spec.extraVars.get("cluster_image")
-    # TODO(johngarbutt): need to get the vars from the cluster crd and merge them!
-    # and extra vars should probably be a config map
-    job_yaml = f"""apiVersion: batch/v1
-kind: Job
-metadata:
-  generateName: "{name}"
-  labels:
-      azimuth-caas-cluster: "{name}"
-  ownerReferences:
-    - apiVersion: "{registry.API_VERSION}"
-      kind: Cluster
-      name: "{name}"
-      uid: "{cluster_uid}"
-spec:
-  template:
-    spec:
-      restartPolicy: Never
-      initContainers:
-      - image: alpine/git
-        name: clone
-        command:
-        - git
-        - clone
-        - "{cluster_type_raw.spec.gitUrl}"
-        - /repo
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: checkout
-        workingDir: /repo
-        command:
-        - git
-        - checkout
-        - "{cluster_type_raw.spec.gitVersion}"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: permissions
-        workingDir: /repo
-        command:
-        - /bin/ash
-        - -c
-        - "chmod 755 /repo/"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: inventory
-        workingDir: /inventory
-        command:
-        - /bin/ash
-        - -c
-        - "echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts"
-        volumeMounts:
-        - name: inventory
-          mountPath: /inventory
-      - image: alpine/git
-        name: env
-        workingDir: /env
-        command:
-        - /bin/ash
-        - -c
-        - >
-          echo '---' >/env/extravars;
-          echo 'cluster_id: {cluster_uid}' >>/env/extravars;
-          echo 'cluster_name: {name}' >>/env/extravars;
-          echo 'cluster_image: {cluster_image}' >>/env/extravars;
-        volumeMounts:
-        - name: env
-          mountPath: /env
-        env:
-        - name: PWD
-          value: /repo
-      containers:
-      - name: run
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
-        command:
-        - /bin/bash
-        - -c
-        - "yum update -y; yum install unzip; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
-        env:
-        - name: RUNNER_PLAYBOOK
-          value: "sample-appliance.yml"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /runner/project
-        - name: inventory
-          mountPath: /runner/inventory
-        - name: env
-          mountPath: /runner/env
-      volumes:
-      - name: playbooks
-        emptyDir: {{}}
-      - name: inventory
-        emptyDir: {{}}
-      - name: env
-        emptyDir: {{}}
+    job = await job_resource.create(job_data, namespace=namespace)
 
-  backoffLimit: 0"""  # noqa
-    job_data = yaml.safe_load(job_yaml)
-    job = await job_resource.create(job_data)
-    LOG.info(f"{job}")
+    # TODO(johngarbutt) update cluster now job has been created
+    LOG.info(
+        f"Created job {job.metadata.name} for cluster {name} "
+        f"of type {cluster_type_name} in {namespace}"
+    )
 
 
 @kopf.on.event("job", labels={"azimuth-caas-cluster": kopf.PRESENT})

@@ -5,3 +5,15 @@ metadata:
   name: test1
 spec:
   clusterTypeName: azimuth-sample-appliance
+  cloudCredentialsSecretName: openstack
+  extraVars:
+    foo: bar
+    cluster_network: portal-internal
+    cluster_deploy_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMhmHZTh1eNNi0vOGBFS4m/+SNSFFtKetJJMPsFDI1sJ"
+    cluster_ssh_private_key_file: "./id_deploy"
+    cluster_user_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOIsQx4oETtZDSdpru0zunp/rOnfjxUH1HxDYJqMHGNk"
+    cluster_floating_ip_pool: "CUDN-Internet"
+    cluster_floating_network: "CUDN-Internet"
+    load_balancer_flavor: "0d1dc6e7-260c-4ab2-8d48-e21c855deb6a"
+    backend_count: "2"
+    backend_flavor: "0d1dc6e7-260c-4ab2-8d48-e21c855deb6a"

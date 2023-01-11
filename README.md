@@ -17,6 +17,13 @@ We tox, and uses python3.9:
 You can test it with tox too:
 
     minkube start
+
+    helm repo add hashicorp https://helm.releases.hashicorp.com
+    helm install consul hashicorp/consul --set global.name=consul \
+        --create-namespace --namespace consul
+
+    kubectl create secret generic openstack --from-file=clouds.yaml
+
     tox -e kopf &
     kubctl apply -f tools/test_cluster_type.yaml
     kubctl apply -f tools/test_cluster.yaml

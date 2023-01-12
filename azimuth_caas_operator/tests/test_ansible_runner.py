@@ -18,7 +18,7 @@ class TestAnsibleRunner(base.TestCase):
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test1-create
+  generateName: test1-create-
   labels:
     azimuth-caas-action: create
     azimuth-caas-cluster: test1
@@ -129,7 +129,7 @@ spec:
     ]
   },
   "data": {
-    "envvars": "---\\nCONSUL_HTTP_ADDR: 172.17.0.7:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
+    "envvars": "---\\nCONSUL_HTTP_ADDR: 172.17.0.8:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
     "extravars": "---\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\nfoo: bar\\n"
   }
 }"""  # noqa

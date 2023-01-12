@@ -198,6 +198,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             LOG.info(f"delete job has an error, need to retry {job.metadata.name}")
             continue
 
+    if len(delete_jobs) == 3:
+        # TODO(johngarbutt) probably need to raise a permenant error here
+        LOG.warning("on dear, we tried three times, lets just give up!")
+        return
+
     LOG.info("must be no delete jobs in progress, and none that worked")
 
     # TODO(johngarbutt): cache this in a config map?

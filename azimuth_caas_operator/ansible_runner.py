@@ -19,7 +19,7 @@ def get_env_configmap(
     extraVars = "---\n" + yaml.dump(extraVars)
 
     envvars = dict(
-        CONSUL_HTTP_ADDR="172.17.0.7:8500",
+        CONSUL_HTTP_ADDR="172.17.0.8:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
     )
@@ -57,7 +57,7 @@ def get_job(
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: "{name}-{action}"
+  generateName: "{name}-{action}-"
   labels:
       azimuth-caas-cluster: "{name}"
       azimuth-caas-action: "{action}"

@@ -2,7 +2,7 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: Cluster
 metadata:
-  name: test1
+  generateName: test
 spec:
   clusterTypeName: azimuth-sample-appliance
   cloudCredentialsSecretName: openstack

@@ -201,7 +201,13 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     if len(delete_jobs) == 3:
         # TODO(johngarbutt) probably need to raise a permenant error here
         LOG.warning("on dear, we tried three times, lets just give up!")
-        return
+        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        await cluster_resource.patch(
+            name,
+            dict(status=dict(phase=cluster_crd.ClusterPhase.Failed)),
+            namespace=namespace,
+        )
+        raise kopf.PermanentError(f"failed to delete {name}")
 
     LOG.info("must be no delete jobs in progress, and none that worked")
 

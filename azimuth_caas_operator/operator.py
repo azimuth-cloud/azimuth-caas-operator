@@ -281,13 +281,22 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
     job_log = await get_job_log(client, name, namespace)
     LOG.info(f"{job_log}")
 
+    # TODO(johngarbutt) this is horrible!
     if success:
         cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
         await cluster_resource.patch(
-            name,
+            cluster_name,
             dict(status=dict(phase=cluster_crd.ClusterPhase.READY)),
             namespace=namespace,
         )
+    if failed:
+        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        await cluster_resource.patch(
+            cluster_name,
+            dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
+            namespace=namespace,
+        )
+
     #     job_resource = await client.api("batch/v1").resource("jobs")
     #     # TODO(johngarbutt): send propagationPolicy="Background" like kubectl
     #     await job_resource.delete(name, namespace=namespace)

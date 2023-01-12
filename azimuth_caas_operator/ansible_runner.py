@@ -151,6 +151,6 @@ spec:
       - name: ssh
         secret:
           secretName: "azimuth-sshkey"
-
+          defaultMode: 256
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)

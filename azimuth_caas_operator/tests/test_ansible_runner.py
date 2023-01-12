@@ -109,6 +109,7 @@ spec:
           secretName: cloudsyaml
       - name: ssh
         secret:
+          defaultMode: 256
           secretName: azimuth-sshkey
 """  # noqa
         self.assertEqual(expected, yaml.dump(job))

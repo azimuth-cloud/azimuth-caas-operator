@@ -27,3 +27,8 @@ You can test it with tox too:
     tox -e kopf &
     kubctl apply -f tools/test_cluster_type.yaml
     kubctl apply -f tools/test_cluster.yaml
+
+    kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster test1
+    kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster test1
+    kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster test1
+    kubctl delete -f tools/test_cluster.yaml

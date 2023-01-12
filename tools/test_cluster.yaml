@@ -2,15 +2,13 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: Cluster
 metadata:
-  name: test1
+  generateName: test
 spec:
   clusterTypeName: azimuth-sample-appliance
   cloudCredentialsSecretName: openstack
   extraVars:
     foo: bar
     cluster_network: portal-internal
-    cluster_deploy_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMhmHZTh1eNNi0vOGBFS4m/+SNSFFtKetJJMPsFDI1sJ"
-    cluster_ssh_private_key_file: "./id_deploy"
     cluster_user_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOIsQx4oETtZDSdpru0zunp/rOnfjxUH1HxDYJqMHGNk"
     cluster_floating_ip_pool: "CUDN-Internet"
     cluster_floating_network: "CUDN-Internet"

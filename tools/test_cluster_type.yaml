@@ -9,5 +9,5 @@ spec:
   gitVersion: "bf6d8f644736a18783763d9ebded86204ad7f7be"
   playbook: "/sample-appliance.yml"
   extraVars:
-    cluster_image: "f7e6408b-a9b8-4ba2-a4c1-e19f61bebe7e"
-    #??cluster_image: "136d3959-c59b-4016-a4e7-2ee2ed25d490"
+    #?cluster_image: "f7e6408b-a9b8-4ba2-a4c1-e19f61bebe7e"
+    cluster_image: "8be8c170-cd91-4c05-b2eb-269bfd68316d"

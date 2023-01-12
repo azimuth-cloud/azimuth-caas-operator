@@ -115,14 +115,141 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     job_resource = await client.api("batch/v1").resource("jobs")
     job = await job_resource.create(job_data, namespace=namespace)
 
-    # TODO(johngarbutt) update cluster now job has been created
+    # update the cluster phase to creating
+    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    await cluster_resource.patch(
+        name,
+        dict(status=dict(phase=cluster_crd.ClusterPhase.CREATING)),
+        namespace=namespace,
+    )
+
     LOG.info(
         f"Created job {job.metadata.name} for cluster {name} "
         f"of type {cluster_type_name} in {namespace}"
     )
 
 
-@kopf.on.event("job", labels={"azimuth-caas-cluster": kopf.PRESENT})
+def get_job_completed_state(job):
+    if not job:
+        return
+
+    active = job.status.get("active", 0) == 1
+    success = job.status.get("succeeded", 0) == 1
+    failed = job.status.get("failed", 0) == 1
+
+    if success:
+        return True
+    if failed:
+        return False
+    if active:
+        return None
+    if not active:
+        LOG.warning(f"job has not started yet {job}")
+    else:
+        LOG.warning(f"job in a strange state {job}")
+
+
+@kopf.on.delete(registry.API_GROUP, "cluster")
+async def cluster_delete(body, name, namespace, labels, **kwargs):
+    LOG.info(f"Attempt cluster delete for {name} in {namespace}")
+    cluster = cluster_crd.Cluster(**body)
+    client = get_k8s_client()
+
+    # Check for any running create jobs, wait till they error out
+    job_resource = await client.api("batch/v1").resource("jobs")
+    create_jobs = [
+        job
+        async for job in job_resource.list(
+            labels={"azimuth-caas-cluster": name, "azimuth-caas-action": "create"},
+            namespace=namespace,
+        )
+    ]
+    if not create_jobs:
+        LOG.error(f"can't find any create jobs for {name} in {namespace}")
+        raise Exception("waiting for create to start")
+    for job in create_jobs:
+        if get_job_completed_state(job) is None:
+            raise Exception(f"waiting for create job to finish {job.metadata.name}")
+
+    # Check for any running delete jobs, success if its completed
+    job_resource = await client.api("batch/v1").resource("jobs")
+    delete_jobs = [
+        job
+        async for job in job_resource.list(
+            labels={"azimuth-caas-cluster": name, "azimuth-caas-action": "remove"},
+            namespace=namespace,
+        )
+    ]
+    if len(delete_jobs) == 0:
+        LOG.info("found no delete jobs")
+    if len(delete_jobs) > 1:
+        LOG.warning("found more than one delete job, need to limit retries!")
+    for job in delete_jobs:
+        completed_state = get_job_completed_state(job)
+        if completed_state is None:
+            # TODO(johngarbutt): check for any other pending delete jobs?
+            raise Exception(f"waiting for delete job {job.metadata.name}")
+        if completed_state is True:
+            LOG.info(f"delete job has completed {job.metadata.name}")
+            # we are done, so just return and let the cluster delete
+            return
+        else:
+            # delete job is an error, allow a retry
+            LOG.info(f"delete job has an error, need to retry {job.metadata.name}")
+            continue
+
+    if len(delete_jobs) == 3:
+        # TODO(johngarbutt) probably need to raise a permenant error here
+        LOG.warning("on dear, we tried three times, lets just give up!")
+        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        await cluster_resource.patch(
+            name,
+            dict(status=dict(phase=cluster_crd.ClusterPhase.Failed)),
+            namespace=namespace,
+        )
+        raise kopf.PermanentError(f"failed to delete {name}")
+
+    LOG.info("must be no delete jobs in progress, and none that worked")
+
+    # TODO(johngarbutt): cache this in a config map?
+    cluster_type_name = cluster.spec.clusterTypeName
+    cluster_type_resource = await client.api(registry.API_VERSION).resource(
+        "clustertype"
+    )
+    cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
+    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
+
+    # update the configmap for the delete job
+    # TODO(johngarbutt) create a new one!
+    configmap_data = ansible_runner.get_env_configmap(
+        cluster, cluster_type, remove=True
+    )
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    await configmap_resource.create_or_patch(
+        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
+    )
+
+    # Create a job to delete the cluster
+    job_data = ansible_runner.get_job(cluster, cluster_type, remove=True)
+    job_resource = await client.api("batch/v1").resource("jobs")
+    job = await job_resource.create(job_data, namespace=namespace)
+
+    # update the cluster phase to deleting
+    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    await cluster_resource.patch(
+        name,
+        dict(status=dict(phase=cluster_crd.ClusterPhase.DELETING)),
+        namespace=namespace,
+    )
+
+    # trigger a retry to check on the job
+    raise Exception(f"wait for job {job.metadata.name} to finish!")
+
+
+@kopf.on.event(
+    "job",
+    labels={"azimuth-caas-cluster": kopf.PRESENT, "azimuth-caas-action": "create"},
+)
 async def job_event(type, body, name, namespace, labels, **kwargs):
     cluster_name = labels.get("azimuth-caas-cluster")
     if type == "DELETED":
@@ -165,19 +292,34 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
     job_log = await get_job_log(client, name, namespace)
     LOG.info(f"{job_log}")
 
+    # TODO(johngarbutt) this is horrible!
     if success:
-        job_resource = await client.api("batch/v1").resource("jobs")
-        # TODO(johngarbutt): send propagationPolicy="Background" like kubectl
-        await job_resource.delete(name, namespace=namespace)
-        LOG.info(f"deleted job {name} in {namespace}")
+        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        await cluster_resource.patch(
+            cluster_name,
+            dict(status=dict(phase=cluster_crd.ClusterPhase.READY)),
+            namespace=namespace,
+        )
+    if failed:
+        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        await cluster_resource.patch(
+            cluster_name,
+            dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
+            namespace=namespace,
+        )
 
-        # delete pods so they are not orphaned
-        pod_resource = await client.api("v1").resource("pods")
-        pods = [
-            pod
-            async for pod in pod_resource.list(
-                labels={"job-name": name}, namespace=namespace
-            )
-        ]
-        for pod in pods:
-            await pod_resource.delete(pod["metadata"]["name"], namespace=namespace)
+    #     job_resource = await client.api("batch/v1").resource("jobs")
+    #     # TODO(johngarbutt): send propagationPolicy="Background" like kubectl
+    #     await job_resource.delete(name, namespace=namespace)
+    #     LOG.info(f"deleted job {name} in {namespace}")
+
+    #     # delete pods so they are not orphaned
+    #     pod_resource = await client.api("v1").resource("pods")
+    #     pods = [
+    #         pod
+    #         async for pod in pod_resource.list(
+    #             labels={"job-name": name}, namespace=namespace
+    #         )
+    #     ]
+    #     for pod in pods:
+    #         await pod_resource.delete(pod["metadata"]["name"], namespace=namespace)

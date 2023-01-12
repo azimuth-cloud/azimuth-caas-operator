@@ -5,7 +5,7 @@ import pydantic
 
 class ClusterPhase(str, schema.Enum):
 
-    PENDING = "Pending"
+    CREATING = "Creating"
     CONFIG = "Configuring"
     READY = "Ready"
     FAILED = "Failed"
@@ -13,7 +13,7 @@ class ClusterPhase(str, schema.Enum):
 
 
 class ClusterStatus(schema.BaseModel):
-    phase: ClusterPhase = pydantic.Field(ClusterPhase.PENDING)
+    phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
 
 
 class ClusterSpec(schema.BaseModel):

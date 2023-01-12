@@ -14,6 +14,11 @@ def get_env_configmap(
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
     # TODO(johngarbutt) need to lookup deployment ssh key pair!
+    extraVars[
+        "cluster_deploy_ssh_public_key"
+    ] = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8= johng"  # noqa
+    extraVars["cluster_ssh_private_key_file"] = "/runner/ssh/id_rsa"
+
     if remove:
         extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
@@ -53,7 +58,7 @@ def get_job(
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
     action = "remove" if remove else "create"
-    # TODO(johngarbutt): need delete to work, and inject a deploy ssh key!
+    # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
@@ -130,6 +135,8 @@ spec:
           mountPath: /runner/env
         - name: cloudcreds
           mountPath: /openstack
+        - name: ssh
+          mountPath: /runner/ssh
       volumes:
       - name: playbooks
         emptyDir: {{}}
@@ -141,6 +148,9 @@ spec:
       - name: cloudcreds
         secret:
           secretName: "{cluster.spec.cloudCredentialsSecretName}"
+      - name: ssh
+        secret:
+          secretName: "azimuth-sshkey"
 
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)

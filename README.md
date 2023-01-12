@@ -23,6 +23,8 @@ You can test it with tox too:
         --create-namespace --namespace consul
 
     kubectl create secret generic openstack --from-file=clouds.yaml
+    ssh-keygen -f id_rsa -P ""
+    kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub
 
     tox -e kopf &
     kubctl apply -f tools/test_cluster_type.yaml

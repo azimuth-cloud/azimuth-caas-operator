@@ -180,7 +180,7 @@ class TestModels(base.TestCase):
                   "phase": {
                     "description": "An enumeration.",
                     "enum": [
-                      "Pending",
+                      "Creating",
                       "Configuring",
                       "Ready",
                       "Failed",

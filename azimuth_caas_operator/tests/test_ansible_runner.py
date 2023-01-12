@@ -18,10 +18,10 @@ class TestAnsibleRunner(base.TestCase):
 apiVersion: batch/v1
 kind: Job
 metadata:
+  generateName: test1-create
   labels:
+    azimuth-caas-action: create
     azimuth-caas-cluster: test1
-    azimuth-cass-action: create
-  name: test1-create
   ownerReferences:
   - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
     kind: Cluster
@@ -100,7 +100,7 @@ spec:
       - emptyDir: {}
         name: inventory
       - configMap:
-          name: test1
+          name: test1-create
         name: env
       - name: cloudcreds
         secret:
@@ -118,7 +118,7 @@ spec:
   "apiVersion": "v1",
   "kind": "ConfigMap",
   "metadata": {
-    "name": "test1",
+    "name": "test1-create",
     "ownerReferences": [
       {
         "apiVersion": "caas.azimuth.stackhpc.com/v1alpha1",

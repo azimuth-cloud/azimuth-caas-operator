@@ -25,10 +25,11 @@ def get_env_configmap(
     )
     envvars = "---\n" + yaml.dump(envvars)
 
+    action = "remove" if remove else "create"
     template = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {cluster.metadata.name}
+  name: {cluster.metadata.name}-{action}
   ownerReferences:
     - apiVersion: "{registry.API_VERSION}"
       kind: Cluster
@@ -56,10 +57,10 @@ def get_job(
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{name}-{action}"
+  generateName: "{name}-{action}"
   labels:
       azimuth-caas-cluster: "{name}"
-      azimuth-cass-action: "{action}"
+      azimuth-caas-action: "{action}"
   ownerReferences:
     - apiVersion: "{registry.API_VERSION}"
       kind: Cluster
@@ -136,7 +137,7 @@ spec:
         emptyDir: {{}}
       - name: env
         configMap:
-          name: {name}
+          name: {name}-{action}
       - name: cloudcreds
         secret:
           secretName: "{cluster.spec.cloudCredentialsSecretName}"

@@ -1,0 +1,18 @@
+common:
+  ingress:
+    # Services will be made available as [subdomain].apps.example.cloud
+    baseDomain: 192-168-49-2.sslip.io
+    # TLS is disabled (services will use HTTP only)
+    tls:
+      enabled: false
+
+registrar:
+  config:
+    # The subdomain signing key
+    subdomainTokenSigningKey: "f1f64b8f12c78eee006cd76fde0a27928bb08428ee50ef6b44e1c961f58825ae"
+
+sshd:
+  service:
+    type: NodePort
+    port: 22
+    nodePort: 32222

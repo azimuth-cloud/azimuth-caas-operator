@@ -11,3 +11,15 @@ spec:
   extraVars:
     #?cluster_image: "f7e6408b-a9b8-4ba2-a4c1-e19f61bebe7e"
     cluster_image: "8be8c170-cd91-4c05-b2eb-269bfd68316d"
+---
+apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+kind: ClusterType
+metadata:
+  name: "workstation"
+spec:
+  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/caas-workstation/953c9b1098f4ebffc40e8dd5eb984affcc4d3fc4/ui-meta/workstation.yml"
+  gitUrl: "https://github.com/stackhpc/caas-workstation.git"
+  gitVersion: "953c9b1098f4ebffc40e8dd5eb984affcc4d3fc4"
+  playbook: "workstation.yml"
+  extraVars:
+    cluster_image: "6c30d015-6193-4479-b962-653a1a18d622"

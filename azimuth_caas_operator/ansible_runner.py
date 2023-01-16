@@ -13,6 +13,7 @@ def get_env_configmap(
     extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
+    extraVars["cluster_type"] = cluster_type.metadata.name
     # TODO(johngarbutt) need to lookup deployment ssh key pair!
     extraVars[
         "cluster_deploy_ssh_public_key"
@@ -23,8 +24,9 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
 
+    # TODO(johngarbutt): consul address must come from config!
     envvars = dict(
-        CONSUL_HTTP_ADDR="172.17.0.8:8500",
+        CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
     )
@@ -122,10 +124,10 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "yum update -y; yum install unzip; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        - "ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
         env:
         - name: RUNNER_PLAYBOOK
-          value: "sample-appliance.yml"
+          value: "{cluster_type.spec.playbook}"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project

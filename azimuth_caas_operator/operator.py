@@ -96,6 +96,7 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
 async def cluster_event(body, name, namespace, labels, **kwargs):
     cluster = cluster_crd.Cluster(**body)
     cluster_type_name = cluster.spec.clusterTypeName
+    LOG.info(f"Create cluster started for {cluster.metadata}")
 
     # Fetch cluster type
     client = get_k8s_client()
@@ -204,9 +205,10 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
         await cluster_resource.patch(
             name,
-            dict(status=dict(phase=cluster_crd.ClusterPhase.Failed)),
+            dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
             namespace=namespace,
         )
+        # TODO(johngarbutt): this seems to allow clusters to delete, which is bad!
         raise kopf.PermanentError(f"failed to delete {name}")
 
     LOG.info("must be no delete jobs in progress, and none that worked")

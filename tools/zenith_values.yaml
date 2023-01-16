@@ -1,7 +1,7 @@
 common:
   ingress:
     # Services will be made available as [subdomain].apps.example.cloud
-    baseDomain: 192-168-49-2.sslip.io
+    baseDomain: 128-232-227-193.sslip.io
     # TLS is disabled (services will use HTTP only)
     tls:
       enabled: false
@@ -13,6 +13,5 @@ registrar:
 
 sshd:
   service:
-    type: NodePort
-    port: 22
-    nodePort: 32222
+    type: LoadBalancer
+    port: 32222

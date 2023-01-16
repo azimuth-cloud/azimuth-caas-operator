@@ -17,15 +17,16 @@ We tox, and uses python3.9:
 You can test it with tox too:
 
     # test with k3s on a VM reachable from the platforms you want to deploy
-    curl -sfL https://get.k3s.io | sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" sh -s -
 
     # reach that k3s on your dev box, via ssh tunnel or otherwise
     k3s kubectl get node
 
     # ingress and zenith only needed when platforms need zenith
     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    helm install ingress-nginx ingress-nginx/ingress-nginx \
-      --version 4.4.0 --create-namespace --namespace ingress-nginx
+    helm upgrade ingress-nginx ingress-nginx/ingress-nginx \
+      --version 4.4.0 --create-namespace --namespace ingress-nginx \
+      -i -f tools/nginx_values.yaml
     helm repo add zenith https://stackhpc.github.io/zenith
     helm upgrade zenith zenith/zenith-server \
       --version 0.1.0-dev.0.update-consul.169 -i -f tools/zenith_values.yaml \

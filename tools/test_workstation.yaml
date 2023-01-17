@@ -3,8 +3,9 @@ apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: Cluster
 metadata:
   generateName: test-workstation
+  namespace: zenith
 spec:
-  clusterTypeName: azimuth-sample-appliance
+  clusterTypeName: workstation
   cloudCredentialsSecretName: openstack
   extraVars:
     cluster_network: portal-internal
@@ -13,4 +14,16 @@ spec:
     cluster_floating_network: "CUDN-Internet"
     # from ui meta answers
     cluster_volume_size: "10"
-    cluster_flavor: "0d1dc6e7-260c-4ab2-8d48-e21c855deb6a"
+    # too small cluster_flavor: "0d1dc6e7-260c-4ab2-8d48-e21c855deb6a"
+    cluster_flavor: "327b7a8b-8705-475b-b684-4f23f6a9e4c8"
+    cluster_floating_ip: ""
+    # TODO: probably from CRD config?
+    zenith_registrar_url: "http://registrar.128-232-227-193.sslip.io"
+    zenith_sshd_host: "128-232-227-193.sslip.io"
+    zenith_sshd_port: "32222"
+    # TODO: auto generate from ui meta
+    # or curl -X POST -s http://localhost:8000/admin/reserve
+    zenith_fqdn_webconsole: "phcisggv0osedibaiw23gyyze9dmzdyvy0wyyk.128-232-227-193.sslip.io"
+    zenith_token_webconsole: "cGhjaXNnZ3Ywb3NlZGliYWl3MjNneXl6ZTlkbYpkeXZ5MHd5eTRrLjY0Ni40ZTg2MWZjMjNhNWNmZjMyMDdmNDBjZjkzODQxYmI4ZmNiZGE0YWM4"
+    zenith_fqdn_monitoring: "xry3y6fdaiyvilc11mw9bxvk4cxrqt5j961w5q.128-232-227-193.sslip.io"
+    zenith_token_monitoring: "eHJ5M3k2ZmRhaXl2aWxjMTFtdzlieHZrNGN4cNF0NWo5NjF3NXhxLjY0NC5iY2E4YmFmNjJjYmVmMTQ4ZGU3NDUyYTFkNGM5ZGMxNGQ5MWExYjMy"

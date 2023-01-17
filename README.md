@@ -28,6 +28,7 @@ You can test it with tox too:
       --version 4.4.0 --create-namespace --namespace ingress-nginx \
       -i -f tools/nginx_values.yaml
     helm repo add zenith https://stackhpc.github.io/zenith
+    # TODO: this is broken, need consul client enabled? or update sshd config
     helm upgrade zenith zenith/zenith-server \
       --version 0.1.0-dev.0.update-consul.169 -i -f tools/zenith_values.yaml \
       --create-namespace --namespace zenith

@@ -1,8 +1,11 @@
+import logging
 import yaml
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
+
+LOG = logging.getLogger(__name__)
 
 
 def get_env_configmap(
@@ -176,3 +179,47 @@ async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
             namespace=namespace,
         )
     ]
+
+
+def get_job_completed_state(job):
+    if not job:
+        return
+
+    active = job.status.get("active", 0) == 1
+    success = job.status.get("succeeded", 0) == 1
+    failed = job.status.get("failed", 0) == 1
+
+    if success:
+        return True
+    if failed:
+        return False
+    if active:
+        return None
+    if not active:
+        LOG.debug(f"job has not started yet {job.metadata.name}")
+    else:
+        LOG.warning(f"job in a strange state {job.metadata.name}")
+
+
+async def ensure_create_jobs_finished(client, cluster_name, namespace):
+    create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
+    if not create_jobs:
+        LOG.error(f"can't find any create jobs for {cluster_name} in {namespace}")
+        raise RuntimeError("waiting for create job to start")
+    for job in create_jobs:
+        if get_job_completed_state(job) is None:
+            raise RuntimeError(f"waiting for create job to finish {job.metadata.name}")
+
+
+async def get_delete_jobs_status(client, cluster_name, namespace):
+    """List of jobs and thier states.
+
+    Status returned for all created jobs.
+    None means the job has not completed.
+    True means the job was a success.
+    False means the job hit an error."""
+    # TODO(johngarbutt): add current task if running
+    delete_jobs = await get_jobs_for_cluster(
+        client, cluster_name, namespace, remove=True
+    )
+    return [get_job_completed_state(job) for job in delete_jobs]

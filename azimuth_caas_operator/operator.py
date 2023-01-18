@@ -119,65 +119,36 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     )
 
 
-def get_job_completed_state(job):
-    if not job:
-        return
-
-    active = job.status.get("active", 0) == 1
-    success = job.status.get("succeeded", 0) == 1
-    failed = job.status.get("failed", 0) == 1
-
-    if success:
-        return True
-    if failed:
-        return False
-    if active:
-        return None
-    if not active:
-        LOG.warning(f"job has not started yet {job}")
-    else:
-        LOG.warning(f"job in a strange state {job}")
-
-
 @kopf.on.delete(registry.API_GROUP, "cluster")
 async def cluster_delete(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster delete for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
 
-    # Check for any running create jobs, wait till they error out
-    create_jobs = ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
-    if not create_jobs:
-        LOG.error(f"can't find any create jobs for {name} in {namespace}")
-        raise Exception("waiting for create to start")
-    for job in create_jobs:
-        if get_job_completed_state(job) is None:
-            raise Exception(f"waiting for create job to finish {job.metadata.name}")
+    # Check for any running create jobs, raise exception  till they error out
+    ansible_runner.ensure_create_jobs_finished(K8S_CLIENT, name, namespace)
 
     # Check for any running delete jobs, success if its completed
-    delete_jobs = ansible_runner.get_jobs_for_cluster(
-        K8S_CLIENT, name, namespace, remove=True
+    delete_jobs_status = await ansible_runner.get_delete_jobs_status(
+        K8S_CLIENT, name, namespace
     )
-    if len(delete_jobs) == 0:
+    if len(delete_jobs_status) == 0:
         LOG.info("found no delete jobs")
-    if len(delete_jobs) > 1:
+    if len(delete_jobs_status) > 1:
         LOG.warning("found more than one delete job, need to limit retries!")
-    for job in delete_jobs:
-        completed_state = get_job_completed_state(job)
+    for completed_state in delete_jobs_status:
         if completed_state is None:
             # TODO(johngarbutt): check for any other pending delete jobs?
-            raise Exception(f"waiting for delete job {job.metadata.name}")
+            raise RuntimeError(f"waiting for delete job for {name} in {namespace}")
         if completed_state is True:
-            LOG.info(f"delete job has completed {job.metadata.name}")
+            # LOG.info(f"delete job has completed {job.metadata.name}")
             # we are done, so just return and let the cluster delete
             return
         else:
             # delete job is an error, allow a retry
-            LOG.info(f"delete job has an error, need to retry {job.metadata.name}")
+            # LOG.info(f"delete job has an error, need to retry {job.metadata.name}")
             continue
 
-    if len(delete_jobs) == 3:
-        # TODO(johngarbutt) probably need to raise a permenant error here
-        LOG.warning("on dear, we tried three times, lets just give up!")
+    if len(delete_jobs_status) == 3:
         cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
             "cluster"
         )
@@ -186,8 +157,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
             namespace=namespace,
         )
-        # TODO(johngarbutt): this seems to allow clusters to delete, which is bad!
-        raise kopf.PermanentError(f"failed to delete {name}")
+        LOG.error(
+            f"Tried to delete {name} three times,"
+            " please fix and delete jobs to trigger a retry"
+        )
+        raise RuntimeError(f"failed to delete {name}")
 
     LOG.info("must be no delete jobs in progress, and none that worked")
 

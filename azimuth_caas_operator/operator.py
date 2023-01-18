@@ -27,44 +27,47 @@ async def cleanup(**kwargs):
     LOG.info("Cleanup complete.")
 
 
-async def get_job_log(client, job_name, namespace):
-    # find the pod fomr the job label
-    pod_resource = await client.api("v1").resource("pods")
-    pods = [
-        pod
+async def _get_pod_names_for_job(job_name, namespace):
+    pod_resource = await k8s.get_pod_resource(K8S_CLIENT)
+    return [
+        pod["metadata"]["name"]
         async for pod in pod_resource.list(
             labels={"job-name": job_name}, namespace=namespace
         )
     ]
-    if len(pods) == 0 or len(pods) > 1:
-        LOG.warning(f"Can't find pod for job {job_name} in {namespace}")
+
+
+async def _get_pod_log_lines(pod_name, namespace):
+    log_resource = await K8S_CLIENT.api("v1").resource("pods/log")
+    # TODO(johngarbutt): we should pass tail param here?
+    log_string = await log_resource.fetch(pod_name, namespace=namespace)
+    # remove trailing space
+    log_string = log_string.strip()
+    # return a list of log lines
+    return log_string.split("\n")
+
+
+async def get_job_log(client, job_name, namespace):
+    pod_names = _get_pod_names_for_job(job_name, namespace)
+    if len(pod_names) == 0 or len(pod_names) > 1:
+        # TODO(johngarbutt) only works because our jobs don't retry,
+        # and we don't yet check the pod is running or finished
+        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
         return
-    pod_name = pods[0]["metadata"]["name"]
-    log_resource = await client.api("v1").resource("pods/log")
-    # TODO(johngarbutt): we should pass tail here
-    logs = await log_resource.fetch(pod_name, namespace=namespace)
-    # TODO(johngarbutt): easykube.kubernetes.client.errors.ApiError:
-    # container "run" in pod "test2rfc6z-5zw84" is waiting to start:
-    # PodInitializing
+    pod_name = pod_names[0]
 
-    # split into lines
-    logs = logs.strip()
-    logs = logs.split("\n")
+    log_lines = _get_pod_log_lines(pod_name, namespace)
+    last_log_line = log_lines[-1]
 
-    # check we can parse everything
-    last_log_event = {}
-    for log in logs:
-        try:
-            last_log_event = json.loads(log)
-        except json.decoder.JSONDecodeError:
-            continue
-        last_log_event = json.loads(log)
-        task = last_log_event["event_data"].get("task")
-        LOG.debug(f"task: {task}")
-        failures = last_log_event["event_data"].get("failures", 0)
-        LOG.debug(f"failures: {failures}")
-
-    return last_log_event.get("event_data")
+    try:
+        last_log_event = json.loads(last_log_line)
+        event_data = last_log_event.get("event_data", {})
+        task = event_data.get("task")
+        if task:
+            LOG.debug(f"For job {job_name} in {namespace} seen task: {task}")
+        return event_data
+    except json.decoder.JSONDecodeError:
+        LOG.debug("failed to decode log, most likely not ansible json output.")
 
 
 @kopf.on.create(registry.API_GROUP, "clustertypes")

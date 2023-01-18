@@ -1,31 +1,30 @@
 import json
 import logging
 
-import easykube
 import kopf
-from pydantic.json import pydantic_encoder
 
 from azimuth_caas_operator import ansible_runner
+from azimuth_caas_operator import k8s
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 
 LOG = logging.getLogger(__name__)
-
-easykube_field_manager = "azimuth-caas-operator"
 CLUSTER_LABEL = "azimuth-caas-cluster"
+K8S_CLIENT = k8s.get_k8s_client()
 
 
-async def register_crds(client):
+@kopf.on.startup()
+async def startup(**kwargs):
     for resource in registry.get_crd_resources():
-        await client.apply_object(resource, force=True)
-    LOG.info("CRDs imported")
+        await K8S_CLIENT.apply_object(resource, force=True)
+    LOG.info("All CRDs updated.")
 
 
-def get_k8s_client():
-    return easykube.Configuration.from_environment(
-        json_encoder=pydantic_encoder
-    ).async_client(default_field_manager=easykube_field_manager)
+@kopf.on.cleanup()
+async def cleanup(**kwargs):
+    await K8S_CLIENT.aclose()
+    LOG.info("Cleanup complete.")
 
 
 async def get_job_log(client, job_name, namespace):
@@ -68,18 +67,6 @@ async def get_job_log(client, job_name, namespace):
     return last_log_event.get("event_data")
 
 
-@kopf.on.startup()
-async def startup(**kwargs):
-    LOG.info("Starting")
-    client = get_k8s_client()
-    await register_crds(client)
-
-
-@kopf.on.cleanup()
-def cleanup(**kwargs):
-    LOG.info("cleaned up!")
-
-
 @kopf.on.create(registry.API_GROUP, "clustertypes")
 async def cluster_type_event(body, name, namespace, labels, **kwargs):
     if type == "DELETED":
@@ -99,8 +86,7 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
     LOG.info(f"Create cluster started for {cluster.metadata}")
 
     # Fetch cluster type
-    client = get_k8s_client()
-    cluster_type = await client.api(registry.API_VERSION).resource("clustertype")
+    cluster_type = await K8S_CLIENT.api(registry.API_VERSION).resource("clustertype")
     # TODO(johngarbutt) how to catch not found errors?
     cluster_type_raw = await cluster_type.fetch(cluster_type_name)
     cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
@@ -108,16 +94,16 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
 
     # Create the config map for extra vars
     configmap_data = ansible_runner.get_env_configmap(cluster, cluster_type)
-    configmap_resource = await client.api("v1").resource("ConfigMap")
+    configmap_resource = await K8S_CLIENT.api("v1").resource("ConfigMap")
     await configmap_resource.create(configmap_data, namespace=namespace)
 
     # Create the ansible runner job to create this cluster
     job_data = ansible_runner.get_job(cluster, cluster_type)
-    job_resource = await client.api("batch/v1").resource("jobs")
+    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
     job = await job_resource.create(job_data, namespace=namespace)
 
     # update the cluster phase to creating
-    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(
         name,
         dict(status=dict(phase=cluster_crd.ClusterPhase.CREATING)),
@@ -154,10 +140,9 @@ def get_job_completed_state(job):
 async def cluster_delete(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster delete for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
-    client = get_k8s_client()
 
     # Check for any running create jobs, wait till they error out
-    job_resource = await client.api("batch/v1").resource("jobs")
+    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
     create_jobs = [
         job
         async for job in job_resource.list(
@@ -173,7 +158,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             raise Exception(f"waiting for create job to finish {job.metadata.name}")
 
     # Check for any running delete jobs, success if its completed
-    job_resource = await client.api("batch/v1").resource("jobs")
+    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
     delete_jobs = [
         job
         async for job in job_resource.list(
@@ -202,7 +187,9 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     if len(delete_jobs) == 3:
         # TODO(johngarbutt) probably need to raise a permenant error here
         LOG.warning("on dear, we tried three times, lets just give up!")
-        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
+            "cluster"
+        )
         await cluster_resource.patch(
             name,
             dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
@@ -215,7 +202,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
 
     # TODO(johngarbutt): cache this in a config map?
     cluster_type_name = cluster.spec.clusterTypeName
-    cluster_type_resource = await client.api(registry.API_VERSION).resource(
+    cluster_type_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
         "clustertype"
     )
     cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
@@ -226,18 +213,18 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     configmap_data = ansible_runner.get_env_configmap(
         cluster, cluster_type, remove=True
     )
-    configmap_resource = await client.api("v1").resource("ConfigMap")
+    configmap_resource = await K8S_CLIENT.api("v1").resource("ConfigMap")
     await configmap_resource.create_or_patch(
         configmap_data["metadata"]["name"], configmap_data, namespace=namespace
     )
 
     # Create a job to delete the cluster
     job_data = ansible_runner.get_job(cluster, cluster_type, remove=True)
-    job_resource = await client.api("batch/v1").resource("jobs")
+    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
     job = await job_resource.create(job_data, namespace=namespace)
 
     # update the cluster phase to deleting
-    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(
         name,
         dict(status=dict(phase=cluster_crd.ClusterPhase.DELETING)),
@@ -290,20 +277,23 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
         LOG.info(f"job completed on {completion_time}")
 
     # TODO(johngarbutt) update the CRD with logs
-    client = get_k8s_client()
-    job_log = await get_job_log(client, name, namespace)
+    job_log = await get_job_log(K8S_CLIENT, name, namespace)
     LOG.info(f"{job_log}")
 
     # TODO(johngarbutt) this is horrible!
     if success:
-        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
+            "cluster"
+        )
         await cluster_resource.patch(
             cluster_name,
             dict(status=dict(phase=cluster_crd.ClusterPhase.READY)),
             namespace=namespace,
         )
     if failed:
-        cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
+            "cluster"
+        )
         await cluster_resource.patch(
             cluster_name,
             dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),

@@ -47,8 +47,8 @@ async def _get_pod_log_lines(pod_name, namespace):
     return log_string.split("\n")
 
 
-async def get_job_log(client, job_name, namespace):
-    pod_names = _get_pod_names_for_job(job_name, namespace)
+async def get_ansible_runner_event(job_name, namespace):
+    pod_names = await _get_pod_names_for_job(job_name, namespace)
     if len(pod_names) == 0 or len(pod_names) > 1:
         # TODO(johngarbutt) only works because our jobs don't retry,
         # and we don't yet check the pod is running or finished
@@ -56,7 +56,7 @@ async def get_job_log(client, job_name, namespace):
         return
     pod_name = pod_names[0]
 
-    log_lines = _get_pod_log_lines(pod_name, namespace)
+    log_lines = await _get_pod_log_lines(pod_name, namespace)
     last_log_line = log_lines[-1]
 
     try:
@@ -64,7 +64,7 @@ async def get_job_log(client, job_name, namespace):
         event_data = last_log_event.get("event_data", {})
         task = event_data.get("task")
         if task:
-            LOG.debug(f"For job {job_name} in {namespace} seen task: {task}")
+            LOG.info(f"For job: {job_name} in: {namespace} seen task: {task}")
         return event_data
     except json.decoder.JSONDecodeError:
         LOG.debug("failed to decode log, most likely not ansible json output.")
@@ -280,8 +280,8 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
         LOG.info(f"job completed on {completion_time}")
 
     # TODO(johngarbutt) update the CRD with logs
-    job_log = await get_job_log(K8S_CLIENT, name, namespace)
-    LOG.info(f"{job_log}")
+    job_log = await get_ansible_runner_event(name, namespace)
+    LOG.info(f"Job for {cluster_name} had log {job_log}")
 
     # TODO(johngarbutt) this is horrible!
     if success:

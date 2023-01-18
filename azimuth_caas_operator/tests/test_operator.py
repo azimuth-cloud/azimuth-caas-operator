@@ -16,7 +16,7 @@ class AsyncIter:
             yield item
 
 
-class TesOperator(unittest.IsolatedAsyncioTestCase):
+class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch("azimuth_caas_operator.models.registry.get_crd_resources")
     @mock.patch.object(operator, "K8S_CLIENT", new_callable=mock.AsyncMock)
     async def test_startup_register_crds(self, mock_client, mock_crds):
@@ -34,7 +34,7 @@ class TesOperator(unittest.IsolatedAsyncioTestCase):
         mock_client.aclose.assert_awaited_once_with()
 
     @mock.patch(
-        "azimuth_caas_operator.k8s.get_pod_resource", new_callable=mock.AsyncMock
+        "azimuth_caas_operator.utils.k8s.get_pod_resource", new_callable=mock.AsyncMock
     )
     async def test_get_pod_names_for_job(self, mock_pod):
         mock_iter = AsyncIter(

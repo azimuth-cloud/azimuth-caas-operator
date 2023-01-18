@@ -156,3 +156,22 @@ spec:
           defaultMode: 256
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)
+
+
+async def get_job_resource(client):
+    return await client.api("batch/v1").resource("jobs")
+
+
+async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
+    job_resource = await get_job_resource(client)
+    action = "remove" if remove else "create"
+    return [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": action,
+            },
+            namespace=namespace,
+        )
+    ]

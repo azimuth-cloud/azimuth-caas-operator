@@ -3,17 +3,7 @@ import unittest
 from unittest import mock
 
 from azimuth_caas_operator import operator
-
-
-class AsyncIter:
-    def __init__(self, items):
-        self.items = items
-        self.kwargs = None
-
-    async def list(self, **kwargs):
-        self.kwargs = kwargs
-        for item in self.items:
-            yield item
+from azimuth_caas_operator.tests import async_utils
 
 
 class TestOperator(unittest.IsolatedAsyncioTestCase):
@@ -37,7 +27,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         "azimuth_caas_operator.utils.k8s.get_pod_resource", new_callable=mock.AsyncMock
     )
     async def test_get_pod_names_for_job(self, mock_pod):
-        mock_iter = AsyncIter(
+        mock_iter = async_utils.AsyncIterList(
             [
                 dict(metadata=dict(name="pod1")),
                 dict(metadata=dict(name="pod2")),

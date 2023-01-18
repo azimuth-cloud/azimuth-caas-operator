@@ -1,8 +1,11 @@
 import json
+import unittest
+from unittest import mock
 import yaml
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
+from azimuth_caas_operator.tests import async_utils
 from azimuth_caas_operator.tests import base
 from azimuth_caas_operator.utils import ansible_runner
 
@@ -140,3 +143,14 @@ spec:
   }
 }"""  # noqa
         self.assertEqual(expected, json.dumps(config, indent=2))
+
+
+class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
+    @mock.patch.object(ansible_runner, "get_job_resource")
+    async def test_get_jobs_for_cluster(self, mock_job_resource):
+        fake_job_list = ["fakejob1", "fakejob2"]
+        mock_job_resource.return_value = async_utils.AsyncIterList(fake_job_list)
+
+        jobs = await ansible_runner.get_jobs_for_cluster("client", "cluster1", "ns")
+
+        self.assertEqual(fake_job_list, jobs)

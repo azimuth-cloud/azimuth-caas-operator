@@ -159,6 +159,7 @@ spec:
 
 
 async def get_job_resource(client):
+    # TODO(johngarbutt): how to test this?
     return await client.api("batch/v1").resource("jobs")
 
 

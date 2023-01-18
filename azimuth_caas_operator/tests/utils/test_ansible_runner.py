@@ -147,10 +147,45 @@ spec:
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "get_job_resource")
-    async def test_get_jobs_for_cluster(self, mock_job_resource):
+    async def test_get_jobs_for_cluster_create(self, mock_job_resource):
         fake_job_list = ["fakejob1", "fakejob2"]
-        mock_job_resource.return_value = async_utils.AsyncIterList(fake_job_list)
+        list_iter = async_utils.AsyncIterList(fake_job_list)
+        mock_job_resource.return_value = list_iter
 
         jobs = await ansible_runner.get_jobs_for_cluster("client", "cluster1", "ns")
 
         self.assertEqual(fake_job_list, jobs)
+        mock_job_resource.assert_awaited_once_with("client")
+        self.assertEqual(
+            dict(
+                labels={
+                    "azimuth-caas-action": "create",
+                    "azimuth-caas-cluster": "cluster1",
+                },
+                namespace="ns",
+            ),
+            list_iter.kwargs,
+        )
+
+    @mock.patch.object(ansible_runner, "get_job_resource")
+    async def test_get_jobs_for_cluster_remove(self, mock_job_resource):
+        fake_job_list = ["fakejob1", "fakejob2"]
+        list_iter = async_utils.AsyncIterList(fake_job_list)
+        mock_job_resource.return_value = list_iter
+
+        jobs = await ansible_runner.get_jobs_for_cluster(
+            "client", "cluster1", "ns", remove=True
+        )
+
+        self.assertEqual(fake_job_list, jobs)
+        mock_job_resource.assert_awaited_once_with("client")
+        self.assertEqual(
+            dict(
+                labels={
+                    "azimuth-caas-action": "remove",
+                    "azimuth-caas-cluster": "cluster1",
+                },
+                namespace="ns",
+            ),
+            list_iter.kwargs,
+        )

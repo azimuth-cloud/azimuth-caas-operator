@@ -145,14 +145,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     cluster = cluster_crd.Cluster(**body)
 
     # Check for any running create jobs, wait till they error out
-    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
-    create_jobs = [
-        job
-        async for job in job_resource.list(
-            labels={"azimuth-caas-cluster": name, "azimuth-caas-action": "create"},
-            namespace=namespace,
-        )
-    ]
+    create_jobs = ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
     if not create_jobs:
         LOG.error(f"can't find any create jobs for {name} in {namespace}")
         raise Exception("waiting for create to start")
@@ -161,14 +154,9 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             raise Exception(f"waiting for create job to finish {job.metadata.name}")
 
     # Check for any running delete jobs, success if its completed
-    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
-    delete_jobs = [
-        job
-        async for job in job_resource.list(
-            labels={"azimuth-caas-cluster": name, "azimuth-caas-action": "remove"},
-            namespace=namespace,
-        )
-    ]
+    delete_jobs = ansible_runner.get_jobs_for_cluster(
+        K8S_CLIENT, name, namespace, remove=True
+    )
     if len(delete_jobs) == 0:
         LOG.info("found no delete jobs")
     if len(delete_jobs) > 1:

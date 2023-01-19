@@ -8,8 +8,10 @@ from azimuth_caas_operator.tests import async_utils
 
 class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch("azimuth_caas_operator.models.registry.get_crd_resources")
-    @mock.patch.object(operator, "K8S_CLIENT", new_callable=mock.AsyncMock)
-    async def test_startup_register_crds(self, mock_client, mock_crds):
+    @mock.patch("azimuth_caas_operator.utils.k8s.get_k8s_client")
+    async def test_startup_register_crds(self, mock_get, mock_crds):
+        mock_client = mock.AsyncMock()
+        mock_get.return_value = mock_client
         mock_crds.return_value = ["fakecrd1", "fakecrd2"]
 
         await operator.startup()

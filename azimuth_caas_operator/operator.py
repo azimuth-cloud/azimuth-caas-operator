@@ -11,11 +11,12 @@ from azimuth_caas_operator.utils import k8s
 
 LOG = logging.getLogger(__name__)
 CLUSTER_LABEL = "azimuth-caas-cluster"
-K8S_CLIENT = k8s.get_k8s_client()
+K8S_CLIENT = None
 
 
 @kopf.on.startup()
 async def startup(**kwargs):
+    K8S_CLIENT = k8s.get_k8s_client()
     for resource in registry.get_crd_resources():
         await K8S_CLIENT.apply_object(resource, force=True)
     LOG.info("All CRDs updated.")

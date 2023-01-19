@@ -4,6 +4,7 @@ import yaml
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
+from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -201,6 +202,14 @@ def get_job_completed_state(job):
         LOG.warning(f"job in a strange state {job.metadata.name}")
 
 
+def is_any_successful_jobs(job_list):
+    for job in job_list:
+        state = get_job_completed_state(job)
+        if state:
+            return True
+    return False
+
+
 async def ensure_create_jobs_finished(client, cluster_name, namespace):
     create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
     if not create_jobs:
@@ -223,3 +232,20 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
         client, cluster_name, namespace, remove=True
     )
     return [get_job_completed_state(job) for job in delete_jobs]
+
+
+async def start_job(client, cluster, namespace, remove=False):
+    cluster_type = cluster_type_utils.get_cluster_type_info(cluster)
+    configmap_data = get_env_configmap(
+        cluster,
+        cluster_type,
+        remove=remove,
+    )
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    await configmap_resource.create_or_patch(
+        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
+    )
+    # Create a job to delete the cluster
+    job_data = get_job(cluster, cluster_type, remove=True)
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.create(job_data, namespace=namespace)

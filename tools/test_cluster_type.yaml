@@ -2,6 +2,16 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: ClusterType
 metadata:
+  name: "quick-test"
+spec:
+  uiMetaUrl: "todo"
+  gitUrl: "https://github.com/ansible/ansible-runner"
+  gitVersion: "devel"
+  playbook: "demo/project/test.yml"
+---
+apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+kind: ClusterType
+metadata:
   name: "azimuth-sample-appliance"
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-sample-appliance/ff97632f6d53b801d4149d1c031c1d17e50986ca/ui-meta/sample-appliance.yml"

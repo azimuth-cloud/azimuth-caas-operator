@@ -5,8 +5,8 @@ import kopf
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
-from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import ansible_runner
+from azimuth_caas_operator.utils import cluster as cluster_utils
 from azimuth_caas_operator.utils import k8s
 
 LOG = logging.getLogger(__name__)
@@ -27,49 +27,6 @@ async def cleanup(**kwargs):
     LOG.info("Cleanup complete.")
 
 
-async def _get_pod_names_for_job(job_name, namespace):
-    pod_resource = await k8s.get_pod_resource(K8S_CLIENT)
-    return [
-        pod["metadata"]["name"]
-        async for pod in pod_resource.list(
-            labels={"job-name": job_name}, namespace=namespace
-        )
-    ]
-
-
-async def _get_pod_log_lines(pod_name, namespace):
-    log_resource = await K8S_CLIENT.api("v1").resource("pods/log")
-    # TODO(johngarbutt): we should pass tail param here?
-    log_string = await log_resource.fetch(pod_name, namespace=namespace)
-    # remove trailing space
-    log_string = log_string.strip()
-    # return a list of log lines
-    return log_string.split("\n")
-
-
-async def get_ansible_runner_event(job_name, namespace):
-    pod_names = await _get_pod_names_for_job(job_name, namespace)
-    if len(pod_names) == 0 or len(pod_names) > 1:
-        # TODO(johngarbutt) only works because our jobs don't retry,
-        # and we don't yet check the pod is running or finished
-        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
-        return
-    pod_name = pod_names[0]
-
-    log_lines = await _get_pod_log_lines(pod_name, namespace)
-    last_log_line = log_lines[-1]
-
-    try:
-        last_log_event = json.loads(last_log_line)
-        event_data = last_log_event.get("event_data", {})
-        task = event_data.get("task")
-        if task:
-            LOG.info(f"For job: {job_name} in: {namespace} seen task: {task}")
-        return event_data
-    except json.decoder.JSONDecodeError:
-        LOG.debug("failed to decode log, most likely not ansible json output.")
-
-
 @kopf.on.create(registry.API_GROUP, "clustertypes")
 async def cluster_type_event(body, name, namespace, labels, **kwargs):
     if type == "DELETED":
@@ -84,39 +41,20 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
 
 @kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_event(body, name, namespace, labels, **kwargs):
+    LOG.info(f"Attempt cluster create for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
-    cluster_type_name = cluster.spec.clusterTypeName
-    LOG.info(f"Create cluster started for {cluster.metadata}")
 
-    # Fetch cluster type
-    cluster_type = await K8S_CLIENT.api(registry.API_VERSION).resource("clustertype")
-    # TODO(johngarbutt) how to catch not found errors?
-    cluster_type_raw = await cluster_type.fetch(cluster_type_name)
-    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
-    # TODO(johngarbutt) cache cluster_type in a config map for doing delete?
+    create_jobs = await ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
+    if ansible_runner.is_any_successful_jobs(create_jobs):
+        LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
+        return
 
-    # Create the config map for extra vars
-    configmap_data = ansible_runner.get_env_configmap(cluster, cluster_type)
-    configmap_resource = await K8S_CLIENT.api("v1").resource("ConfigMap")
-    await configmap_resource.create(configmap_data, namespace=namespace)
-
-    # Create the ansible runner job to create this cluster
-    job_data = ansible_runner.get_job(cluster, cluster_type)
-    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
-    job = await job_resource.create(job_data, namespace=namespace)
-
-    # update the cluster phase to creating
-    cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource("cluster")
-    await cluster_resource.patch(
-        name,
-        dict(status=dict(phase=cluster_crd.ClusterPhase.CREATING)),
-        namespace=namespace,
+    ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=False)
+    await cluster_utils.update_cluster(
+        K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.CREATING
     )
-
-    LOG.info(
-        f"Created job {job.metadata.name} for cluster {name} "
-        f"of type {cluster_type_name} in {namespace}"
-    )
+    LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
+    raise Exception(f"wait for create job to complete for {name} in {namespace}")
 
 
 @kopf.on.delete(registry.API_GROUP, "cluster")
@@ -124,85 +62,62 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster delete for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
 
-    # Check for any running create jobs, raise exception  till they error out
+    # Check for any pending jobs
+    # and fail if we are still running a create job
     ansible_runner.ensure_create_jobs_finished(K8S_CLIENT, name, namespace)
-
-    # Check for any running delete jobs, success if its completed
     delete_jobs_status = await ansible_runner.get_delete_jobs_status(
         K8S_CLIENT, name, namespace
     )
-    if len(delete_jobs_status) == 0:
-        LOG.info("found no delete jobs")
-    if len(delete_jobs_status) > 1:
-        LOG.warning("found more than one delete job, need to limit retries!")
-    for completed_state in delete_jobs_status:
-        if completed_state is None:
-            # TODO(johngarbutt): check for any other pending delete jobs?
-            raise RuntimeError(f"waiting for delete job for {name} in {namespace}")
-        if completed_state is True:
-            # LOG.info(f"delete job has completed {job.metadata.name}")
-            # we are done, so just return and let the cluster delete
-            return
-        else:
-            # delete job is an error, allow a retry
-            # LOG.info(f"delete job has an error, need to retry {job.metadata.name}")
-            continue
 
-    if len(delete_jobs_status) == 3:
-        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
-            "cluster"
-        )
-        await cluster_resource.patch(
-            name,
-            dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
-            namespace=namespace,
+    # If we find a completed delete job, we are done.
+    # If we find a running job, trigger a retry in the hope its complete soon
+    for completed_state in delete_jobs_status:
+        if completed_state is True:
+            LOG.info(f"Delete job complete for {name} in {namespace}")
+            return
+        if completed_state is None:
+            # TODO(johngarbutt): check for multiple pending delete jobs?
+            # TODO(johngarbutt): update cluster with current tasks from job log?
+            raise RuntimeError(
+                f"wait for delete job to complete for {name} in {namespace}"
+            )
+        LOG.debug("This job failed, keep looking at other jobs.")
+
+    # Don't create a new delete job if we hit max retries
+    if len(delete_jobs_status) >= 3:
+        await cluster_utils.update_cluster(
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED
         )
         LOG.error(
-            f"Tried to delete {name} three times,"
-            " please fix and delete jobs to trigger a retry"
+            f"Tried to delete {name} in {namespace} three times, but they all failed. "
+            "Please fix the problem, "
+            "then delete all failed jobs to trigger a new delete job."
         )
         raise RuntimeError(f"failed to delete {name}")
 
-    LOG.info("must be no delete jobs in progress, and none that worked")
+    # OK, so there are no running delete job,
+    # and if there are any completed jobs they failed,
+    # but equally we have not yet hit the max retry count.
+    # As such we should create a new delete job
+    if len(delete_jobs_status) == 0:
+        LOG.info(f"No delete jobs so lets create one for {name} in {namespace}")
+    else:
+        LOG.warning(
+            f"Previous delete jobs have failed, "
+            "create a new one for {name} in {namespace}"
+        )
 
-    # TODO(johngarbutt): cache this in a config map?
-    cluster_type_name = cluster.spec.clusterTypeName
-    cluster_type_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
-        "clustertype"
+    await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)
+    await cluster_utils.update_cluster(
+        K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
     )
-    cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
-    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
-
-    # update the configmap for the delete job
-    # TODO(johngarbutt) create a new one!
-    configmap_data = ansible_runner.get_env_configmap(
-        cluster, cluster_type, remove=True
-    )
-    configmap_resource = await K8S_CLIENT.api("v1").resource("ConfigMap")
-    await configmap_resource.create_or_patch(
-        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
-    )
-
-    # Create a job to delete the cluster
-    job_data = ansible_runner.get_job(cluster, cluster_type, remove=True)
-    job_resource = await K8S_CLIENT.api("batch/v1").resource("jobs")
-    job = await job_resource.create(job_data, namespace=namespace)
-
-    # update the cluster phase to deleting
-    cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource("cluster")
-    await cluster_resource.patch(
-        name,
-        dict(status=dict(phase=cluster_crd.ClusterPhase.DELETING)),
-        namespace=namespace,
-    )
-
-    # trigger a retry to check on the job
-    raise Exception(f"wait for job {job.metadata.name} to finish!")
+    raise Exception(f"wait for delete job to complete for {name} in {namespace}")
 
 
+# TODO(johngarbutt): work this into the above loops
 @kopf.on.event(
     "job",
-    labels={"azimuth-caas-cluster": kopf.PRESENT, "azimuth-caas-action": "create"},
+    labels={"azimuth-caas-cluster": kopf.PRESENT, "azimuth-caas-action-todo": "create"},
 )
 async def job_event(type, body, name, namespace, labels, **kwargs):
     cluster_name = labels.get("azimuth-caas-cluster")
@@ -280,3 +195,46 @@ async def job_event(type, body, name, namespace, labels, **kwargs):
     #     ]
     #     for pod in pods:
     #         await pod_resource.delete(pod["metadata"]["name"], namespace=namespace)
+
+
+async def _get_pod_names_for_job(job_name, namespace):
+    pod_resource = await k8s.get_pod_resource(K8S_CLIENT)
+    return [
+        pod["metadata"]["name"]
+        async for pod in pod_resource.list(
+            labels={"job-name": job_name}, namespace=namespace
+        )
+    ]
+
+
+async def _get_pod_log_lines(pod_name, namespace):
+    log_resource = await K8S_CLIENT.api("v1").resource("pods/log")
+    # TODO(johngarbutt): we should pass tail param here?
+    log_string = await log_resource.fetch(pod_name, namespace=namespace)
+    # remove trailing space
+    log_string = log_string.strip()
+    # return a list of log lines
+    return log_string.split("\n")
+
+
+async def get_ansible_runner_event(job_name, namespace):
+    pod_names = await _get_pod_names_for_job(job_name, namespace)
+    if len(pod_names) == 0 or len(pod_names) > 1:
+        # TODO(johngarbutt) only works because our jobs don't retry,
+        # and we don't yet check the pod is running or finished
+        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
+        return
+    pod_name = pod_names[0]
+
+    log_lines = await _get_pod_log_lines(pod_name, namespace)
+    last_log_line = log_lines[-1]
+
+    try:
+        last_log_event = json.loads(last_log_line)
+        event_data = last_log_event.get("event_data", {})
+        task = event_data.get("task")
+        if task:
+            LOG.info(f"For job: {job_name} in: {namespace} seen task: {task}")
+        return event_data
+    except json.decoder.JSONDecodeError:
+        LOG.debug("failed to decode log, most likely not ansible json output.")

@@ -1,8 +1,12 @@
+import logging
 import yaml
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
+from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
+
+LOG = logging.getLogger(__name__)
 
 
 def get_env_configmap(
@@ -13,6 +17,7 @@ def get_env_configmap(
     extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
+    extraVars["cluster_type"] = cluster_type.metadata.name
     # TODO(johngarbutt) need to lookup deployment ssh key pair!
     extraVars[
         "cluster_deploy_ssh_public_key"
@@ -23,8 +28,9 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
 
+    # TODO(johngarbutt): consul address must come from config!
     envvars = dict(
-        CONSUL_HTTP_ADDR="172.17.0.8:8500",
+        CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
     )
@@ -122,10 +128,10 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "yum update -y; yum install unzip; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        - "ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
         env:
         - name: RUNNER_PLAYBOOK
-          value: "sample-appliance.yml"
+          value: "{cluster_type.spec.playbook}"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
@@ -154,3 +160,105 @@ spec:
           defaultMode: 256
   backoffLimit: 0"""  # noqa
     return yaml.safe_load(job_yaml)
+
+
+async def get_job_resource(client):
+    # TODO(johngarbutt): how to test this?
+    return await client.api("batch/v1").resource("jobs")
+
+
+async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
+    job_resource = await get_job_resource(client)
+    action = "remove" if remove else "create"
+    return [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": action,
+            },
+            namespace=namespace,
+        )
+    ]
+
+
+def get_job_completed_state(job):
+    if not job:
+        return
+
+    active = job.status.get("active", 0) == 1
+    success = job.status.get("succeeded", 0) == 1
+    failed = job.status.get("failed", 0) == 1
+
+    if success:
+        return True
+    if failed:
+        return False
+    if active:
+        return None
+    if not active:
+        LOG.debug(f"job has not started yet {job.metadata.name}")
+    else:
+        LOG.warning(f"job in a strange state {job.metadata.name}")
+
+
+def is_any_successful_jobs(job_list):
+    for job in job_list:
+        state = get_job_completed_state(job)
+        if state:
+            return True
+    return False
+
+
+def are_all_jobs_in_error_state(job_list):
+    if not job_list:
+        return False
+    for job in job_list:
+        state = get_job_completed_state(job)
+        if state is not False:
+            return False
+    return True
+
+
+async def ensure_create_jobs_finished(client, cluster_name, namespace):
+    create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
+    if not create_jobs:
+        LOG.error(f"can't find any create jobs for {cluster_name} in {namespace}")
+        raise RuntimeError("waiting for create job to start")
+    for job in create_jobs:
+        if get_job_completed_state(job) is None:
+            raise RuntimeError(f"waiting for create job to finish {job.metadata.name}")
+
+
+async def get_delete_jobs_status(client, cluster_name, namespace):
+    """List of jobs and thier states.
+
+    Status returned for all created jobs.
+    None means the job has not completed.
+    True means the job was a success.
+    False means the job hit an error."""
+    # TODO(johngarbutt): add current task if running
+    delete_jobs = await get_jobs_for_cluster(
+        client, cluster_name, namespace, remove=True
+    )
+    return [get_job_completed_state(job) for job in delete_jobs]
+
+
+async def start_job(client, cluster, namespace, remove=False):
+    cluster_type = await cluster_type_utils.get_cluster_type_info(client, cluster)
+
+    # generate config
+    configmap_data = get_env_configmap(
+        cluster,
+        cluster_type,
+        remove=remove,
+    )
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    await configmap_resource.create_or_patch(
+        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
+    )
+
+    # create the job
+    job_data = get_job(cluster, cluster_type, remove=remove)
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.create(job_data, namespace=namespace)

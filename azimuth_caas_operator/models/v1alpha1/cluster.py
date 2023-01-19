@@ -23,7 +23,7 @@ class ClusterSpec(schema.BaseModel):
     extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
 
 
-class Cluster(crd.CustomResource, scope=crd.Scope.CLUSTER):
+class Cluster(crd.CustomResource, scope=crd.Scope.NAMESPACED):
     spec: ClusterSpec
     status: ClusterStatus = pydantic.Field(default_factory=ClusterStatus)
 

@@ -131,7 +131,7 @@ class TestModels(base.TestCase):
   },
   "spec": {
     "group": "caas.azimuth.stackhpc.com",
-    "scope": "Cluster",
+    "scope": "Namespaced",
     "names": {
       "kind": "Cluster",
       "singular": "cluster",

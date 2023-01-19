@@ -1,10 +1,13 @@
 import json
+import unittest
+from unittest import mock
 import yaml
 
-from azimuth_caas_operator import ansible_runner
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
+from azimuth_caas_operator.tests import async_utils
 from azimuth_caas_operator.tests import base
+from azimuth_caas_operator.utils import ansible_runner
 
 
 class TestAnsibleRunner(base.TestCase):
@@ -35,11 +38,11 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - yum update -y; yum install unzip; ansible-galaxy install -r /runner/project/roles/requirements.yml;
-          ansible-runner run /runner -j
+        - ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner
+          run /runner -j
         env:
         - name: RUNNER_PLAYBOOK
-          value: sample-appliance.yml
+          value: sample.yaml
         image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
         name: run
         volumeMounts:
@@ -135,8 +138,54 @@ spec:
     ]
   },
   "data": {
-    "envvars": "---\\nCONSUL_HTTP_ADDR: 172.17.0.8:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
-    "extravars": "---\\ncluster_deploy_ssh_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8=\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /runner/ssh/id_rsa\\nfoo: bar\\n"
+    "envvars": "---\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
+    "extravars": "---\\ncluster_deploy_ssh_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8=\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /runner/ssh/id_rsa\\ncluster_type: test1\\nfoo: bar\\n"
   }
 }"""  # noqa
         self.assertEqual(expected, json.dumps(config, indent=2))
+
+
+class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
+    @mock.patch.object(ansible_runner, "get_job_resource")
+    async def test_get_jobs_for_cluster_create(self, mock_job_resource):
+        fake_job_list = ["fakejob1", "fakejob2"]
+        list_iter = async_utils.AsyncIterList(fake_job_list)
+        mock_job_resource.return_value = list_iter
+
+        jobs = await ansible_runner.get_jobs_for_cluster("client", "cluster1", "ns")
+
+        self.assertEqual(fake_job_list, jobs)
+        mock_job_resource.assert_awaited_once_with("client")
+        self.assertEqual(
+            dict(
+                labels={
+                    "azimuth-caas-action": "create",
+                    "azimuth-caas-cluster": "cluster1",
+                },
+                namespace="ns",
+            ),
+            list_iter.kwargs,
+        )
+
+    @mock.patch.object(ansible_runner, "get_job_resource")
+    async def test_get_jobs_for_cluster_remove(self, mock_job_resource):
+        fake_job_list = ["fakejob1", "fakejob2"]
+        list_iter = async_utils.AsyncIterList(fake_job_list)
+        mock_job_resource.return_value = list_iter
+
+        jobs = await ansible_runner.get_jobs_for_cluster(
+            "client", "cluster1", "ns", remove=True
+        )
+
+        self.assertEqual(fake_job_list, jobs)
+        mock_job_resource.assert_awaited_once_with("client")
+        self.assertEqual(
+            dict(
+                labels={
+                    "azimuth-caas-action": "remove",
+                    "azimuth-caas-cluster": "cluster1",
+                },
+                namespace="ns",
+            ),
+            list_iter.kwargs,
+        )

@@ -210,6 +210,16 @@ def is_any_successful_jobs(job_list):
     return False
 
 
+def are_all_jobs_in_error_state(job_list):
+    if not job_list:
+        return False
+    for job in job_list:
+        state = get_job_completed_state(job)
+        if state is not False:
+            return False
+    return True
+
+
 async def ensure_create_jobs_finished(client, cluster_name, namespace):
     create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
     if not create_jobs:
@@ -235,7 +245,9 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
 
 
 async def start_job(client, cluster, namespace, remove=False):
-    cluster_type = cluster_type_utils.get_cluster_type_info(cluster)
+    cluster_type = await cluster_type_utils.get_cluster_type_info(client, cluster)
+
+    # generate config
     configmap_data = get_env_configmap(
         cluster,
         cluster_type,
@@ -245,7 +257,8 @@ async def start_job(client, cluster, namespace, remove=False):
     await configmap_resource.create_or_patch(
         configmap_data["metadata"]["name"], configmap_data, namespace=namespace
     )
-    # Create a job to delete the cluster
-    job_data = get_job(cluster, cluster_type, remove=True)
+
+    # create the job
+    job_data = get_job(cluster, cluster_type, remove=remove)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)

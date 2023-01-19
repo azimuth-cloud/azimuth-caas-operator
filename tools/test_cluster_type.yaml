@@ -4,7 +4,7 @@ kind: ClusterType
 metadata:
   name: "quick-test"
 spec:
-  uiMetaUrl: "todo"
+  uiMetaUrl: "http://todo"
   gitUrl: "https://github.com/ansible/ansible-runner"
   gitVersion: "devel"
   playbook: "demo/project/test.yml"

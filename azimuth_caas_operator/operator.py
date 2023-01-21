@@ -16,6 +16,7 @@ K8S_CLIENT = None
 
 @kopf.on.startup()
 async def startup(**kwargs):
+    global K8S_CLIENT
     K8S_CLIENT = k8s.get_k8s_client()
     for resource in registry.get_crd_resources():
         await K8S_CLIENT.apply_object(resource, force=True)
@@ -24,7 +25,8 @@ async def startup(**kwargs):
 
 @kopf.on.cleanup()
 async def cleanup(**kwargs):
-    await K8S_CLIENT.aclose()
+    if K8S_CLIENT:
+        await K8S_CLIENT.aclose()
     LOG.info("Cleanup complete.")
 
 

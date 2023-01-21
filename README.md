@@ -47,7 +47,7 @@ You can test it with tox too:
     kubctl apply -f tools/test_cluster_type.yaml
     kubctl apply -f tools/test_quick.yaml
 
-    kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster test1
-    kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster test1
-    kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster test1
+    kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test
+    kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test
+    kubectl get jobs
     kubctl delete -f tools/test_quick.yaml

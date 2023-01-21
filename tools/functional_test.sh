@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -24,6 +24,7 @@ kubectl get pods
 kubectl get jobs -o yaml
 kubectl get pods -o yaml
 
+sleep 10
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 kubectl get cluster
 kill %1

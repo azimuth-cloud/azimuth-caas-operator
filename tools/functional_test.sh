@@ -7,6 +7,12 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 tox -e kopf &
 sleep 10
 
+# add required secrets, not that they care used for this test
+echo "foo" >clouds.yaml
+kubectl create secret generic openstack --from-file=clouds.yaml
+ssh-keygen -f id_rsa -P ""
+kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub
+
 until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crds"; sleep 5; done
 kubectl get crds
 

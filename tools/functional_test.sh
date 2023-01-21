@@ -1,11 +1,14 @@
 #!/bin/bash
 
-set -eux
+set -x
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 tox -e kopf &
-until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crds"; done
+sleep 10
+
+until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crds"; sleep 5; done
+kubectl get crds
 
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
 kubectl create -f $SCRIPT_DIR/test_quick.yaml

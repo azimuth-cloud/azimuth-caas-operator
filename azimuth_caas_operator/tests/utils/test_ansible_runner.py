@@ -31,6 +31,7 @@ metadata:
     name: test1
     uid: fakeuid1
 spec:
+  activeDeadlineSeconds: 600
   backoffLimit: 0
   template:
     spec:

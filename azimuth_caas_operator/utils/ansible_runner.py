@@ -158,7 +158,9 @@ spec:
         secret:
           secretName: "azimuth-sshkey"
           defaultMode: 256
-  backoffLimit: 0"""  # noqa
+  backoffLimit: 0
+  # timeout after 10 mins
+  activeDeadlineSeconds: 600"""  # noqa
     return yaml.safe_load(job_yaml)
 
 

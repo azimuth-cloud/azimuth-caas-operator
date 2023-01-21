@@ -160,7 +160,7 @@ spec:
           defaultMode: 256
   backoffLimit: 0
   # timeout after 10 mins
-  activeDeadlineSeconds: 600"""  # noqa
+  activeDeadlineSeconds: 1200"""  # noqa
     return yaml.safe_load(job_yaml)
 
 

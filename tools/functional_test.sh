@@ -20,7 +20,7 @@ kubectl get clustertype
 kubectl get jobs
 kubectl get pods
 
-until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for status to appear"; sleep 5; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 5; kubectl describe pods; done
 
 kubectl get cluster
 kubectl get clustertype

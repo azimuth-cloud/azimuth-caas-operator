@@ -13,7 +13,7 @@ kubectl get crds
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
 kubectl create -f $SCRIPT_DIR/test_quick.yaml
 
-kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test
+until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 5; done
 kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test
 
 kubectl get cluster
@@ -24,9 +24,6 @@ kubectl get pods
 kubectl get jobs -o yaml
 kubectl get pods -o yaml
 
-kubectl delete -f $SCRIPT_DIR/test_quick.yaml --wait=false
-kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test
-kubectl wait --for=delete cluster quick-test
-
+kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 kubectl get cluster
 kill %1

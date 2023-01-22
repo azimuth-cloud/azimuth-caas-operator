@@ -30,3 +30,12 @@ jobs:
 
     - name: Test with tox
       run: tox
+
+    - name: Generate coverage reports
+      run: tox -e cover
+
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: cover/

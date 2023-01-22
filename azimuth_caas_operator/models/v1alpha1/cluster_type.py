@@ -29,7 +29,11 @@ class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
 
 
 def get_fake():
-    return ClusterType(
+    return ClusterType(**get_fake_dict())
+
+
+def get_fake_dict():
+    return dict(
         apiVersion="fake",
         kind="ClusterType",
         metadata=dict(name="test1"),

@@ -53,6 +53,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         return
     if len(create_jobs) != 0:
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
+            # TODO(johngarbutt): update cluster with the last event name from job log
             raise RuntimeError(
                 f"wait for create job to complete for {name} in {namespace}"
             )
@@ -133,89 +134,6 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     )
     LOG.info(f"Success creating a delete job for {name} in {namespace}")
     raise Exception(f"wait for delete job to complete for {name} in {namespace}")
-
-
-# TODO(johngarbutt): work this into the above loops
-@kopf.on.event(
-    "job",
-    labels={"azimuth-caas-cluster": kopf.PRESENT, "azimuth-caas-action-todo": "create"},
-)
-async def job_event(type, body, name, namespace, labels, **kwargs):
-    cluster_name = labels.get("azimuth-caas-cluster")
-    if type == "DELETED":
-        LOG.info(f"job deleted cluster {cluster_name} in {namespace}")
-        return
-
-    LOG.debug(f"seen job update for cluster {cluster_name} in {namespace}")
-
-    job_status = body.get("status", {})
-    ready = job_status.get("ready", 0) == 1
-    success = job_status.get("succeeded", 0) == 1
-    failed = job_status.get("failed", 0) == 1
-    active = job_status.get("active", 0) == 1
-
-    completion_time = job_status.get("completionTime")
-    LOG.debug(
-        f"job {cluster_name} status - ready:{ready} "
-        f"success:{success} completed at:{completion_time}"
-    )
-
-    if not success and not failed and not active:
-        LOG.error("what happened here?")
-        LOG.info(f"{body}")
-        return
-
-    if active and not ready:
-        LOG.info(f"job is running, pod not ready.")
-        # skip checking logs until pod init container finished
-        return
-
-    if active:
-        LOG.info(f"job is running, pod ready:{ready}")
-    if failed:
-        LOG.error("job failed!!")
-    if success:
-        LOG.info(f"job completed on {completion_time}")
-
-    # TODO(johngarbutt) update the CRD with logs
-    job_log = await get_ansible_runner_event(name, namespace)
-    LOG.info(f"Job for {cluster_name} had log {job_log}")
-
-    # TODO(johngarbutt) this is horrible!
-    if success:
-        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
-            "cluster"
-        )
-        await cluster_resource.patch(
-            cluster_name,
-            dict(status=dict(phase=cluster_crd.ClusterPhase.READY)),
-            namespace=namespace,
-        )
-    if failed:
-        cluster_resource = await K8S_CLIENT.api(registry.API_VERSION).resource(
-            "cluster"
-        )
-        await cluster_resource.patch(
-            cluster_name,
-            dict(status=dict(phase=cluster_crd.ClusterPhase.FAILED)),
-            namespace=namespace,
-        )
-
-    #     job_resource = await client.api("batch/v1").resource("jobs")
-    #     # TODO(johngarbutt): send propagationPolicy="Background" like kubectl
-    #     await job_resource.delete(name, namespace=namespace)
-    #     LOG.info(f"deleted job {name} in {namespace}")
-
-    #     # delete pods so they are not orphaned
-    #     pod_resource = await client.api("v1").resource("pods")
-    #     pods = [
-    #         pod
-    #         async for pod in pod_resource.list(
-    #             labels={"job-name": name}, namespace=namespace
-    #         )
-    #     ]
-    #     for pod in pods:
-    #         await pod_resource.delete(pod["metadata"]["name"], namespace=namespace)
 
 
 async def _get_pod_names_for_job(job_name, namespace):

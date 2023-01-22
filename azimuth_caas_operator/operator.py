@@ -31,23 +31,19 @@ async def cleanup(**kwargs):
     LOG.info("Cleanup complete.")
 
 
+# TODO(johngarbutt): fetch ui meta from git repo and update crd
 @kopf.on.create(registry.API_GROUP, "clustertypes")
-async def cluster_type_event(body, name, namespace, labels, **kwargs):
-    if type == "DELETED":
-        LOG.info(f"cluster_type {name} in {namespace} is deleted")
-        return
-
-    LOG.debug(f"cluster_type event for {name} in {namespace}")
+async def cluster_type_create(body, name, namespace, labels, **kwargs):
     cluster_type = cluster_type_crd.ClusterType(**body)
-    LOG.info(f"seen cluster_type event {cluster_type.spec.gitUrl}")
-    # TODO(johngarbutt): fetch ui meta from git repo and update crd
+    LOG.debug(f"seen cluster_type event {cluster_type.spec.gitUrl}")
 
 
 @kopf.on.create(registry.API_GROUP, "cluster", backoff=20)
-async def cluster_event(body, name, namespace, labels, **kwargs):
+async def cluster_create(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster create for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
 
+    # TODO(johngarbutt): share more code with delete!
     create_jobs = await ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
     if ansible_runner.is_any_successful_jobs(create_jobs):
         await cluster_utils.update_cluster(
@@ -55,11 +51,9 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
         )
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return
-
-    # TODO(johngarbutt): share more code with delete!
     if len(create_jobs) != 0:
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
-            raise Exception(
+            raise RuntimeError(
                 f"wait for create job to complete for {name} in {namespace}"
             )
         else:
@@ -69,17 +63,18 @@ async def cluster_event(body, name, namespace, labels, **kwargs):
                 await cluster_utils.update_cluster(
                     K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED
                 )
-                raise Exception(msg)
+                raise RuntimeError(msg)
             LOG.warning(
                 f"Some failed jobs for {name} in {namespace}, tiggering a retry."
             )
 
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=False)
+    # TODO(johngarbutt): not always needed on a retry
     await cluster_utils.update_cluster(
         K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.CREATING
     )
     LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
-    raise Exception(f"wait for create job to complete for {name} in {namespace}")
+    raise RuntimeError(f"wait for create job to complete for {name} in {namespace}")
 
 
 @kopf.on.delete(registry.API_GROUP, "cluster", backoff=20)

@@ -5,6 +5,7 @@ import kopf
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
+from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
 from azimuth_caas_operator.utils import k8s
@@ -37,7 +38,7 @@ async def cluster_type_event(body, name, namespace, labels, **kwargs):
         return
 
     LOG.debug(f"cluster_type event for {name} in {namespace}")
-    cluster_type = registry.parse_model(body)
+    cluster_type = cluster_type_crd.ClusterType(**body)
     LOG.info(f"seen cluster_type event {cluster_type.spec.gitUrl}")
     # TODO(johngarbutt): fetch ui meta from git repo and update crd
 

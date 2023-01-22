@@ -85,7 +85,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
 
     # Check for any pending jobs
     # and fail if we are still running a create job
-    ansible_runner.ensure_create_jobs_finished(K8S_CLIENT, name, namespace)
+    await ansible_runner.ensure_create_jobs_finished(K8S_CLIENT, name, namespace)
     delete_jobs_status = await ansible_runner.get_delete_jobs_status(
         K8S_CLIENT, name, namespace
     )
@@ -97,11 +97,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             LOG.info(f"Delete job complete for {name} in {namespace}")
             return
         if completed_state is None:
-            # TODO(johngarbutt): check for multiple pending delete jobs?
             # TODO(johngarbutt): update cluster with current tasks from job log?
             raise RuntimeError(
                 f"wait for delete job to complete for {name} in {namespace}"
             )
+            # TODO(johngarbutt): check for multiple pending delete jobs?
         LOG.debug("This job failed, keep looking at other jobs.")
 
     # Don't create a new delete job if we hit max retries
@@ -133,7 +133,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
     )
     LOG.info(f"Success creating a delete job for {name} in {namespace}")
-    raise Exception(f"wait for delete job to complete for {name} in {namespace}")
+    raise RuntimeError(f"wait for delete job to complete for {name} in {namespace}")
 
 
 async def _get_pod_names_for_job(job_name, namespace):

@@ -11,7 +11,8 @@ sleep 10
 echo "foo" >clouds.yaml
 kubectl create secret generic openstack --from-file=clouds.yaml
 ssh-keygen -f id_rsa -P ""
-kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub
+kubectl create namespace azimuth-caas-operator
+kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub -n azimuth-caas-operator
 
 until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crds"; sleep 5; done
 kubectl get crds

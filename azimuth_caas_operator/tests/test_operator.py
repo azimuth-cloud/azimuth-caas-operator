@@ -126,11 +126,16 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
         )
 
+    @mock.patch.object(cluster_utils, "create_scheduled_delete_job")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "is_any_successful_jobs")
     @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
     async def test_cluster_create_spots_successful_job(
-        self, mock_get_jobs, mock_success, mock_update
+        self,
+        mock_get_jobs,
+        mock_success,
+        mock_update,
+        mock_auto,
     ):
         mock_get_jobs.return_value = ["fakejob"]
         mock_success.return_value = True
@@ -141,6 +146,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.READY
         )
+        mock_auto.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")

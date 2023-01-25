@@ -260,6 +260,20 @@ async def start_job(client, cluster, namespace, remove=False):
         configmap_data["metadata"]["name"], configmap_data, namespace=namespace
     )
 
+    # ensure deploy secret, copy across for now
+    # TODO(johngarbutt): generate?
+    sshkey_secret_name = "azimuth-sshkey"
+    copy_from_namespace = "azimuth-caas-operator"
+    secrets_resource = await client.api("v1").resource("secrets")
+    ssh_secret = await secrets_resource.fetch(
+        sshkey_secret_name, namespace=copy_from_namespace
+    )
+    await secrets_resource.create_or_patch(
+        sshkey_secret_name,
+        {"metadata": {"name": sshkey_secret_name}, "data": ssh_secret.data},
+        namespace=namespace,
+    )
+
     # create the job
     job_data = get_job(cluster, cluster_type, remove=remove)
     job_resource = await client.api("batch/v1").resource("jobs")

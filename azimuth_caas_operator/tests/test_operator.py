@@ -146,7 +146,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.READY
         )
-        mock_auto.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_auto.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns", "fakeuid1"
+        )
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")

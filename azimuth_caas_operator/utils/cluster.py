@@ -14,9 +14,9 @@ async def update_cluster(client, name, namespace, phase):
     )
 
 
-async def create_scheduled_delete_job(client, name, namespace):
+async def create_scheduled_delete_job(client, name, namespace, uid):
     now = datetime.datetime.now(datetime.timezone.utc)
-    delete_time = now - datetime.timedelta(minutes=2)
+    delete_time = now + datetime.timedelta(minutes=2)
     cron_schedule = (
         f"{delete_time.minute} {delete_time.hour} "
         f"{delete_time.day} {delete_time.month} *"
@@ -24,20 +24,31 @@ async def create_scheduled_delete_job(client, name, namespace):
     configmap_yaml = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: delete-pod-{name}
+  name: autodelete-{name}
+  ownerReferences:
+  - apiVersion: {registry.API_VERSION}
+    kind: Cluster
+    name: "{name}"
+    uid: "{uid}"
 data:
   delete.py: |
     import easykube
     config = easykube.Configuration.from_environment()
-    client = config.sync_client(default_namespace="{namespace}")
+    client = config.sync_client(
+        default_field_manager="autodelete", default_namespace="{namespace}")
     cluster_resource = client.api("{registry.API_VERSION}").resource("cluster")
-    cluster.delete("{name}")
+    cluster_resource.delete("{name}")
 """
     print(configmap_yaml)
     job_yaml = f"""apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: delete-pod-{name}
+  name: autodelete-{name}
+  ownerReferences:
+  - apiVersion: {registry.API_VERSION}
+    kind: Cluster
+    name: "{name}"
+    uid: "{uid}"
 spec:
   schedule: "{cron_schedule}"
   jobTemplate:
@@ -50,16 +61,17 @@ spec:
             command: ["/bin/sh"]
             args:
             - "-c"
-            - "python3 delete.py"
+            - "python3 /delete.py"
             volumeMounts:
             - name: python-delete
               mountPath: /delete.py
               subPath: delete.py
           restartPolicy: Never
           volumes:
-            - name: delete-pod-{name}
+            - name: python-delete
               configMap:
-                name: python-delete"""
+                name: autodelete-{name}
+"""
     print(job_yaml)
 
     configmap_data = yaml.safe_load(configmap_yaml)

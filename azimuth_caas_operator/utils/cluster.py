@@ -16,7 +16,7 @@ async def update_cluster(client, name, namespace, phase):
 
 async def create_scheduled_delete_job(client, name, namespace, uid):
     now = datetime.datetime.now(datetime.timezone.utc)
-    delete_time = now + datetime.timedelta(minutes=2)
+    delete_time = now + datetime.timedelta(minutes=1)
     cron_schedule = (
         f"{delete_time.minute} {delete_time.hour} "
         f"{delete_time.day} {delete_time.month} *"

@@ -39,7 +39,6 @@ data:
     cluster_resource = client.api("{registry.API_VERSION}").resource("cluster")
     cluster_resource.delete("{name}")
 """
-    print(configmap_yaml)
     job_yaml = f"""apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -72,7 +71,6 @@ spec:
               configMap:
                 name: autodelete-{name}
 """
-    print(job_yaml)
 
     configmap_data = yaml.safe_load(configmap_yaml)
     configmap_resource = await client.api("v1").resource("ConfigMap")

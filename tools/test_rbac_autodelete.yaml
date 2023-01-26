@@ -1,0 +1,22 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: autodelete
+rules:
+- apiGroups: ["caas.azimuth.stackhpc.com"]
+  resources: ["clusters"]
+  verbs: ["list","delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: autodelete
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: caas-3a06571936a0424bb40bc5c672c4ccb1
+roleRef:
+  kind: ClusterRole
+  name: autodelete
+  apiGroup: rbac.authorization.k8s.io

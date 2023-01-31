@@ -1,7 +1,9 @@
 import json
 import logging
 
+import aiohttp
 import kopf
+import yaml
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
@@ -31,11 +33,39 @@ async def cleanup(**kwargs):
     LOG.info("Cleanup complete.")
 
 
+async def update_cluster_type(client, name, namespace, status):
+    cluster_type_resource = await client.api(registry.API_VERSION).resource(
+        "clustertype"
+    )
+    await cluster_type_resource.patch(
+        name,
+        dict(status=status),
+        namespace=namespace,
+    )
+
+
 # TODO(johngarbutt): fetch ui meta from git repo and update crd
 @kopf.on.create(registry.API_GROUP, "clustertypes")
 async def cluster_type_create(body, name, namespace, labels, **kwargs):
     cluster_type = cluster_type_crd.ClusterType(**body)
     LOG.debug(f"seen cluster_type event {cluster_type.spec.gitUrl}")
+    print(cluster_type.spec.uiMetaUrl)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(cluster_type.spec.uiMetaUrl) as response:
+            raw_yaml_str = await response.text()
+            ui_meta = yaml.safe_load(raw_yaml_str)
+            print(ui_meta)
+            ui_meta.setdefault("requiresSshKey", False)
+            ui_meta.setdefault("services", [])
+            ui_meta.setdefault("usageTemplate", [])
+            ui_meta_obj = cluster_type_crd.ClusterUiMeta(**ui_meta)
+            print(ui_meta_obj)
+            cluster_type.status.uiMeta = ui_meta_obj
+            cluster_type.status = cluster_type_crd.ClusterTypeStatus(
+                phase=cluster_type_crd.ClusterTypePhase.AVAILABLE, uiMeta=ui_meta_obj
+            )
+    print(cluster_type.spec.uiMetaUrl)
+    update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
 @kopf.on.create(registry.API_GROUP, "cluster", backoff=20)

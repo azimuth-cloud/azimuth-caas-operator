@@ -95,10 +95,23 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_pod_names.assert_awaited_once_with("job", "ns")
         mock_get_lines.assert_not_awaited()
 
-    async def test_cluster_type_create(self):
+    @mock.patch.object(operator, "update_cluster_type")
+    @mock.patch.object(operator, "_fetch_text_from_url")
+    async def test_cluster_type_create(self, mock_fetch, mock_update):
+        mock_fetch.return_value = """\
+name: "todo"
+label: "todo"
+"""
         # TODO(johngarbutt): probably need to actually fetch the ui meta!
         await operator.cluster_type_create(
             cluster_type_crd.get_fake_dict(), "type1", "ns", {}
+        )
+        mock_fetch.assert_awaited_once_with("https://url1")
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "type1",
+            "ns",
+            mock.ANY,  # TODO(johngarbutt) finish this test!
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")

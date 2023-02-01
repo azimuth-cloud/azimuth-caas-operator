@@ -29,7 +29,7 @@ class ClusterParameter:
     #: Indicates if the parameter is required
     required: bool
     #: A default value for the parameter
-    default: str  # TODO(johngarbutt): k8s said no if this was any!
+    default: typing.Optional[str]  # TODO(johngarbutt): k8s said no if this was any!
 
 
 @dataclasses.dataclass
@@ -57,13 +57,13 @@ class ClusterUiMeta:
     #: Indicates whether the cluster requires a user SSH key
     requiresSshKey: typing.Optional[bool]
     #: The parameters for the cluster type
-    parameters: typing.Optional[typing.Sequence[ClusterParameter]]
+    parameters: typing.Sequence[ClusterParameter]
     #: The services for the cluster type
-    services: typing.Optional[typing.Sequence[ClusterServiceSpec]]
+    services: typing.Sequence[ClusterServiceSpec]
     #: Template for the usage of the clusters deployed using this type
     #: Can use Jinja2 syntax and should produce valid Markdown
     #: Receives the cluster parameters, as defined in `parameters`, as template args
-    usageTemplate: typing.Optional[typing.Optional[str]]
+    usageTemplate: typing.Optional[str]
 
 
 class ClusterTypeStatus(schema.BaseModel):

@@ -278,3 +278,8 @@ async def start_job(client, cluster, namespace, remove=False):
     job_data = get_job(cluster, cluster_type, remove=remove)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)
+
+
+async def delete_secret(client, secret_name, namespace):
+    secrets_resource = await client.api("v1").resource("secrets")
+    await secrets_resource.delete(secret_name, namespace=namespace)

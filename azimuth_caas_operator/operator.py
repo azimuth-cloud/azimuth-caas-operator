@@ -155,6 +155,10 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     # If we find a running job, trigger a retry in the hope its complete soon
     for completed_state in delete_jobs_status:
         if completed_state is True:
+            # TODO(johngarbutt): how to delete app cred in openstack?
+            await ansible_runner.delete_secret(
+                K8S_CLIENT, cluster.spec.cloudCredentialsSecretName, namespace
+            )
             LOG.info(f"Delete job complete for {name} in {namespace}")
             return
         if completed_state is None:

@@ -106,9 +106,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         )
 
         # TODO(johngarbutt) hack to autodelete
-        await cluster_utils.create_scheduled_delete_job(
-            K8S_CLIENT, name, namespace, cluster.metadata.uid
-        )
+        # await cluster_utils.create_scheduled_delete_job(
+        #    K8S_CLIENT, name, namespace, cluster.metadata.uid
+        # )
 
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return

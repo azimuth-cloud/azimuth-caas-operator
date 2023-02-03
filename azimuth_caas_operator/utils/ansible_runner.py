@@ -8,6 +8,9 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 
 LOG = logging.getLogger(__name__)
 
+# TODO(johngarbutt) move to config!
+POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:db20c92"
+
 
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
@@ -124,7 +127,7 @@ spec:
           mountPath: /inventory
       containers:
       - name: run
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
+        image: "{POD_IMAGE}"
         command:
         - /bin/bash
         - -c

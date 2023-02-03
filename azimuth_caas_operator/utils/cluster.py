@@ -4,6 +4,9 @@ import yaml
 
 from azimuth_caas_operator.models import registry
 
+# TODO(johngarbutt) move to config!
+POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:db20c92"
+
 
 async def update_cluster(client, name, namespace, phase):
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
@@ -56,7 +59,7 @@ spec:
         spec:
           containers:
           - name: delete
-            image: ghcr.io/stackhpc/azimuth-caas-operator-ar:69b9bdc
+            image: "{POD_IMAGE}"
             command: ["/bin/sh"]
             args:
             - "-c"

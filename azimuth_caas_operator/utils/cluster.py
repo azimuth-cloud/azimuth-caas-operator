@@ -5,7 +5,7 @@ import yaml
 from azimuth_caas_operator.models import registry
 
 # TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:db20c92"
+POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
 
 
 async def update_cluster(client, name, namespace, phase):

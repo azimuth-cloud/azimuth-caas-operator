@@ -9,7 +9,7 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 LOG = logging.getLogger(__name__)
 
 # TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:db20c92"
+POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
 
 
 def get_env_configmap(

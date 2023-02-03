@@ -4,7 +4,6 @@ import pydantic
 
 
 class ClusterPhase(str, schema.Enum):
-
     CREATING = "Creating"
     CONFIG = "Configuring"
     READY = "Ready"

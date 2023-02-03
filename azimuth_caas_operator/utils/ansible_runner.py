@@ -8,6 +8,9 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 
 LOG = logging.getLogger(__name__)
 
+# TODO(johngarbutt) move to config!
+POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+
 
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
@@ -124,7 +127,7 @@ spec:
           mountPath: /inventory
       containers:
       - name: run
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:49bd308
+        image: "{POD_IMAGE}"
         command:
         - /bin/bash
         - -c
@@ -278,3 +281,8 @@ async def start_job(client, cluster, namespace, remove=False):
     job_data = get_job(cluster, cluster_type, remove=remove)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)
+
+
+async def delete_secret(client, secret_name, namespace):
+    secrets_resource = await client.api("v1").resource("secrets")
+    await secrets_resource.delete(secret_name, namespace=namespace)

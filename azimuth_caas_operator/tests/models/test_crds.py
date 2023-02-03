@@ -90,6 +90,110 @@ class TestModels(base.TestCase):
                       "Failed"
                     ],
                     "type": "string"
+                  },
+                  "uiMeta": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "logo": {
+                        "type": "string"
+                      },
+                      "requiresSshKey": {
+                        "type": "boolean"
+                      },
+                      "parameters": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "options": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "string"
+                              }
+                            },
+                            "immutable": {
+                              "type": "boolean"
+                            },
+                            "required": {
+                              "type": "boolean"
+                            },
+                            "default": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "label",
+                            "description",
+                            "kind",
+                            "options",
+                            "immutable",
+                            "required",
+                            "default"
+                          ]
+                        }
+                      },
+                      "services": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "iconUrl": {
+                              "type": "string"
+                            },
+                            "when": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "label",
+                            "iconUrl",
+                            "when"
+                          ]
+                        }
+                      },
+                      "usageTemplate": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "label",
+                      "description",
+                      "logo",
+                      "requiresSshKey",
+                      "parameters",
+                      "services",
+                      "usageTemplate"
+                    ]
                   }
                 }
               }

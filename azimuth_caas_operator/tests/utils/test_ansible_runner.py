@@ -44,7 +44,7 @@ spec:
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:db20c92
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b
         name: run
         volumeMounts:
         - mountPath: /runner/project

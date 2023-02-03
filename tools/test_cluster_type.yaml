@@ -31,7 +31,7 @@ metadata:
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/caas-workstation/953c9b1098f4ebffc40e8dd5eb984affcc4d3fc4/ui-meta/workstation.yml"
   gitUrl: "https://github.com/stackhpc/caas-workstation.git"
-  gitVersion: "1284ead7e6dd340bc04376faf10a7878a8495fda"
+  gitVersion: "0ded31815d0124a789ab89db87c6d1a61f5b0767"
   playbook: "workstation.yml"
   extraVars:
     cluster_image: "6c30d015-6193-4479-b962-653a1a18d622"

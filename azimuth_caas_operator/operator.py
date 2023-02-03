@@ -125,7 +125,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 f"wait for create job to complete for {name} in {namespace}"
             )
         else:
-            if len(create_jobs) >= 1:
+            if len(create_jobs) >= 2:
                 msg = f"Too many failed creates for {name} in {namespace}"
                 LOG.error(msg)
                 await cluster_utils.update_cluster(
@@ -176,7 +176,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         LOG.debug("This job failed, keep looking at other jobs.")
 
     # Don't create a new delete job if we hit max retries
-    if len(delete_jobs_status) >= 1:
+    if len(delete_jobs_status) >= 2:
         await cluster_utils.update_cluster(
             K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED
         )

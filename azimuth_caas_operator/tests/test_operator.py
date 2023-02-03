@@ -216,7 +216,7 @@ label: "todo"
         self, mock_get_jobs, mock_success, mock_all_error, mock_update, mock_start
     ):
         # TODO(johngarbutt): should generate a working fake job list!
-        mock_get_jobs.return_value = ["fakejob", "fakejob2"]
+        mock_get_jobs.return_value = ["fakejob"]
         mock_success.return_value = False
         mock_all_error.return_value = True
         fake_body = cluster_crd.get_fake_dict()

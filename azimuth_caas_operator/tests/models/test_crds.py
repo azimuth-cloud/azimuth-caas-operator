@@ -127,7 +127,10 @@ class TestModels(base.TestCase):
                               "type": "string"
                             },
                             "options": {
-                              "type": "object"
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "string"
+                              }
                             },
                             "immutable": {
                               "type": "boolean"

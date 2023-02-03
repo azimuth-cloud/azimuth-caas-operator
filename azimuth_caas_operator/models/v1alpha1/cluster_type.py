@@ -23,7 +23,7 @@ class ClusterParameter:
     #: The kind of the parameter
     kind: str
     #: A dictionary of kind-specific options for the parameter
-    options: typing.Mapping[str, typing.Any]
+    options: typing.Mapping[str, str]
     #: Indicates if the option is immutable, i.e. cannot be updated
     immutable: bool
     #: Indicates if the parameter is required

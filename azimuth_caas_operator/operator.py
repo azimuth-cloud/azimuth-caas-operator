@@ -61,9 +61,9 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
     # check its a dict at the top level?
     print(ui_meta)
     ui_meta.setdefault("requiresSshKey", False)
-    ui_meta.setdefault("usageTemplate", "")
     ui_meta.setdefault("description", "")
     ui_meta.setdefault("logo", "")
+    ui_meta["usageTemplate"] = ui_meta.get("usage_template", "")
 
     raw_parameters = ui_meta.get("parameters", [])
     params = []
@@ -73,14 +73,20 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
         raw.setdefault("default", "")
         if raw.get("default") is None:
             raw["default"] = ""
-        params.append(cluster_type_crd.ClusterParameter(**raw))
+        raw_options = raw.get("options", {})
+        options = {}
+        for key, value in raw_options.items():
+            options[key] = str(value)
+        raw["options"] = options
+        cluster_param = cluster_type_crd.ClusterParameter(**raw)
+        params.append(cluster_param)
     ui_meta["parameters"] = params
 
     raw_services = ui_meta.get("services", [])
     services = []
     for raw in raw_services:
         raw.setdefault("when", "")
-        raw.setdefault("iconUrl", "")
+        raw["iconUrl"] = raw.get("icon_url", "")
         services.append(cluster_type_crd.ClusterServiceSpec(**raw))
     ui_meta["services"] = services
 
@@ -119,7 +125,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 f"wait for create job to complete for {name} in {namespace}"
             )
         else:
-            if len(create_jobs) >= 3:
+            if len(create_jobs) >= 1:
                 msg = f"Too many failed creates for {name} in {namespace}"
                 LOG.error(msg)
                 await cluster_utils.update_cluster(
@@ -170,7 +176,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         LOG.debug("This job failed, keep looking at other jobs.")
 
     # Don't create a new delete job if we hit max retries
-    if len(delete_jobs_status) >= 3:
+    if len(delete_jobs_status) >= 1:
         await cluster_utils.update_cluster(
             K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED
         )

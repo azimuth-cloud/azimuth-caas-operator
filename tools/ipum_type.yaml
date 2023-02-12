@@ -9,7 +9,7 @@ spec:
   gitVersion: "0ded31815d0124a789ab89db87c6d1a61f5b0767"
   playbook: "workstation.yml"
   extraVars:
-    cluster_image: "6c30d015-6193-4479-b962-653a1a18d622"
+    cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"
 ---
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: ClusterType
@@ -18,7 +18,7 @@ metadata:
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/graphcore/caas-poplar-appliance/c6d3a20a3b0925d88293ca994a73c6d4388eb1b8/ui-meta/poplar-appliance.yml"
   gitUrl: "https://github.com/stackhpc/caas-poplar-appliance"
-  gitVersion: "c6d3a20a3b0925d88293ca994a73c6d4388eb1b8"
+  gitVersion: "johng-crd-tests"
   playbook: "poplar-appliance.yml"
   extraVars:
-    cluster_image: "6c30d015-6193-4479-b962-653a1a18d622"
+    cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"

@@ -76,6 +76,8 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
         raw_options = raw.get("options", {})
         options = {}
         for key, value in raw_options.items():
+            if value is list:
+                value = json.dumps(value)
             options[key] = str(value)
         raw["options"] = options
         cluster_param = cluster_type_crd.ClusterParameter(**raw)

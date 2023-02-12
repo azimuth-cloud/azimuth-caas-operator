@@ -9,7 +9,8 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 LOG = logging.getLogger(__name__)
 
 # TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+POD_TAG = "e02efaf"
+POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 
 def get_env_configmap(
@@ -36,6 +37,12 @@ def get_env_configmap(
         CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
+        # TODO(johngarbutt) make this optional via config?
+        ANSIBLE_CALLBACK_PLUGINS=(
+            "/usr/local/lib/python3.10/dist-packages/ara/plugins/callback"
+        ),
+        ARA_API_CLIENT="http",
+        ARA_API_SERVER="http://azimuth-ara.azimuth-caas-operator:8000",
     )
     envvars = "---\n" + yaml.dump(envvars)
 

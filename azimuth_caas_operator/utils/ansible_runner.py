@@ -9,7 +9,7 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 LOG = logging.getLogger(__name__)
 
 # TODO(johngarbutt) move to config!
-POD_TAG = "e02efaf"
+POD_TAG = "cd711d3"
 POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 

@@ -21,4 +21,7 @@ spec:
   gitVersion: "johng-crd-tests"
   playbook: "poplar-appliance.yml"
   extraVars:
-    cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"
+    #cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"
+    # this is clearly wrong, but lets try it for now...
+    gc_cloud: "gbnwp_cl1"
+    gc_tenancy: "gbnwp_dev1"

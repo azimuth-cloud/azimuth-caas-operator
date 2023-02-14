@@ -25,3 +25,4 @@ spec:
     # this is clearly wrong, but lets try it for now...
     gc_cloud: "gbnwp_cl1"
     gc_tenancy: "gbnwp_dev1"
+    admin_clouds_yaml: "/home/runner/.ssh/ipuops.yaml"

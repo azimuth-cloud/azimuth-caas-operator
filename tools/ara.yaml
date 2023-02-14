@@ -28,7 +28,8 @@ spec:
           env:
           - name: ARA_ALLOWED_HOSTS
             value: '["127.0.0.1", "localhost", "::1", "azimuth-ara.azimuth-caas-operator"]'
-
+          - name: ARA_IGNORED_FACTS
+            value: '["ansible_env_skip"]'
       volumes:
         # TODO: PVC!!
         - name: data

@@ -2,18 +2,6 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: ClusterType
 metadata:
-  name: "workstation"
-spec:
-  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/caas-workstation/953c9b1098f4ebffc40e8dd5eb984affcc4d3fc4/ui-meta/workstation.yml"
-  gitUrl: "https://github.com/stackhpc/caas-workstation.git"
-  gitVersion: "0ded31815d0124a789ab89db87c6d1a61f5b0767"
-  playbook: "workstation.yml"
-  extraVars:
-    cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"
----
-apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-kind: ClusterType
-metadata:
   name: "ipum"
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/graphcore/caas-poplar-appliance/c6d3a20a3b0925d88293ca994a73c6d4388eb1b8/ui-meta/poplar-appliance.yml"
@@ -24,5 +12,8 @@ spec:
     #cluster_image: "c6f4a7fc-69c2-4ecf-82ac-0d6e3e8d1d4c"
     # this is clearly wrong, but lets try it for now...
     gc_cloud: "gbnwp_cl1"
-    gc_tenancy: "gbnwp_dev1"
+    gc_tenancy: "gbnwp_cl1"
     admin_clouds_yaml: "/home/runner/.ssh/ipuops.yaml"
+    vipu_server_ssh: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
+    vipu_server_ip: "10.3.47.102"
+    control_network_name: "azimuth-vpod-common-ctrl"

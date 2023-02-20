@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-RUN apt-get update && apt-get upgrade -y && apt-get install python3-pip unzip git wget -y && apt-get clean
+RUN apt-get update && apt-get upgrade -y && apt-get install python3-pip unzip git wget python-is-python3 -y && apt-get clean
 
 RUN useradd runner
 RUN for dir in \

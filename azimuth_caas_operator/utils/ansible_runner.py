@@ -9,7 +9,7 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 LOG = logging.getLogger(__name__)
 
 # TODO(johngarbutt) move to config!
-POD_TAG = "ef07140"
+POD_TAG = "227c806"
 POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 
@@ -39,7 +39,7 @@ def get_env_configmap(
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
         # TODO(johngarbutt) make this optional via config?
         ANSIBLE_CALLBACK_PLUGINS=(
-            "/usr/local/lib/python3.10/dist-packages/ara/plugins/callback"
+            "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
         ),
         ARA_API_CLIENT="http",
         ARA_API_SERVER="http://azimuth-ara.azimuth-caas-operator:8000",
@@ -90,55 +90,39 @@ metadata:
 spec:
   template:
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       restartPolicy: Never
       initContainers:
-      - image: alpine/git
-        name: clone
-        command:
-        - git
-        - clone
-        - "{cluster_type.spec.gitUrl}"
-        - /repo
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: checkout
-        workingDir: /repo
-        command:
-        - git
-        - checkout
-        - "{cluster_type.spec.gitVersion}"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: permissions
-        workingDir: /repo
-        command:
-        - /bin/ash
-        - -c
-        - "chmod 755 /repo/"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
+      - image: "{POD_IMAGE}"
         name: inventory
         workingDir: /inventory
         command:
-        - /bin/ash
+        - /bin/bash
         - -c
-        - "echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts"
+        - "echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts"
         volumeMounts:
         - name: inventory
-          mountPath: /inventory
+          mountPath: /runner/inventory
+      - image: "{POD_IMAGE}"
+        name: clone
+        workingDir: /runner
+        command:
+        - /bin/bash
+        - -c
+        - "chmod 755 /runner/project; git clone {cluster_type.spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type.spec.gitVersion}; ls -al"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /runner/project
       containers:
       - name: run
         image: "{POD_IMAGE}"
         command:
         - /bin/bash
         - -c
-        - "ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -vvv"
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type.spec.playbook}"

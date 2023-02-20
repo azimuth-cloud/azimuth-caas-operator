@@ -33,15 +33,17 @@ RUN pip install "easykube @ git+https://github.com/stackhpc/easykube.git@f8212a0
 
 ENV TF_PLUGIN_CACHE_DIR=/home/runner/.terraform.d/plugin-cache
 ARG terraform_version=1.3.7
+USER root
 RUN wget https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip && \
     unzip terraform_${terraform_version}_linux_amd64.zip && rm terraform_${terraform_version}_linux_amd64.zip && \
-    mv terraform ~/.local/bin && \
-    mkdir -p /home/runner/terraform_setup && \
+    mv terraform /usr/local/bin
+
+USER runner
+RUN mkdir -p /home/runner/terraform_setup && \
     mkdir -p $TF_PLUGIN_CACHE_DIR
 COPY main.tf /home/runner/terraform_setup/main.tf
 RUN cd /home/runner/terraform_setup && terraform init
 
 COPY requirements.yaml /home/runner/terraform_setup/requirements.yaml
 RUN ansible-galaxy install -r /home/runner/terraform_setup/requirements.yaml
-
 CMD ["ansible-runner", "run", "/runner", "-j"]

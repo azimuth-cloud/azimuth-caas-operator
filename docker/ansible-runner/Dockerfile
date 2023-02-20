@@ -37,5 +37,7 @@ RUN cd /home/runner/terraform_setup && terraform init
 COPY requirements.yaml /home/runner/terraform_setup/requirements.yaml
 RUN ansible-galaxy install -r /home/runner/terraform_setup/requirements.yaml
 
+RUN useradd runner
+USER runner
 WORKDIR /runner
 CMD ["ansible-runner", "run", "/runner", "-j"]

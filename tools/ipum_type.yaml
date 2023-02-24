@@ -19,6 +19,8 @@ spec:
     vipu_server_ssh_bow: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
     vipu_server_ssh_classic: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
     vipu_server_ip: "10.3.47.102"
+    vipu_server_ip_bow: "10.3.47.102"
+    vipu_server_ip_classic: "10.3.47.102"
     control_network_name: "azimuth-vpod-common-ctrl"
     ldap_auth_token: "dummy1"
     cephfs_nethome_secret: "dummy2"

@@ -24,5 +24,6 @@ spec:
     control_network_name: "azimuth-vpod-common-ctrl"
     ldap_auth_token: "dummy1"
     cephfs_nethome_secret: "dummy2"
+    cephfs_public_secret: "dummy3"
     vipu_rnic_physnet: "physnet2"
     awx_skip: "true"

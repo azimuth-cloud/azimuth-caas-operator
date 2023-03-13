@@ -10,6 +10,6 @@ metadata:
     rbac.authorization.k8s.io/aggregate-to-view: "true"
 rules:
   # Grant access to the azimuth-caas objects
-  - apiGroups: ["azimuth-caas.stackhpc.com"]
+  - apiGroups: ["caas.azimuth.stackhpc.com"]
     resources: ["*"]
     verbs: ["*"]

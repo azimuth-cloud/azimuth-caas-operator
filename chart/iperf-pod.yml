@@ -1,8 +1,0 @@
-apiVersion: azimuth-caas.stackhpc.com/v1alpha1
-kind: IPerf
-metadata:
-  generateName: iperf-hostnet-johng-1
-spec:
-  imagePullPolicy: Always
-  duration: 120
-  streams: 20

@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   azimuth-caas-operator:
   - apiVersion: v2
+    appVersion: 68bc68d
+    created: "2023-03-13T14:25:41.654020438Z"
+    description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
+    digest: 8592589cedd94e376db645856485511c66781ce451e970fa254ff30a31454377
+    name: azimuth-caas-operator
+    type: application
+    urls:
+    - azimuth-caas-operator-0.1.0-dev.0.add-helm.115.tgz
+    version: 0.1.0-dev.0.add-helm.115
+  - apiVersion: v2
     appVersion: e305198
-    created: "2023-03-13T14:15:53.846212804Z"
+    created: "2023-03-13T14:25:41.65374844Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cffc051cbfce2404c6aee982a74cecf5f7267c0edfacd9a6661caad82c8a61f7
     name: azimuth-caas-operator
@@ -13,7 +23,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.114
   - apiVersion: v2
     appVersion: 5eeff93
-    created: "2023-03-13T14:15:53.845731312Z"
+    created: "2023-03-13T14:25:41.653463243Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: ac6246833ae69d45db7979d61a1f63cb20ac2c2b94937433a76ac530daf7e4d5
     name: azimuth-caas-operator
@@ -23,7 +33,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.113
   - apiVersion: v2
     appVersion: 6bbc3d6
-    created: "2023-03-13T14:15:53.845367717Z"
+    created: "2023-03-13T14:25:41.653168845Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 0978d960a91b08fc47bda052041fce1e190a26baf9228cdf3db53d0e90f94b5c
     name: azimuth-caas-operator
@@ -33,7 +43,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.110
   - apiVersion: v2
     appVersion: e3995d2
-    created: "2023-03-13T14:15:53.845021822Z"
+    created: "2023-03-13T14:25:41.652909047Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 90cd14908e4b2176ab3713114ae7dd8aa76bd67bdd60d1afc8ab09aa5a011275
     name: azimuth-caas-operator
@@ -43,7 +53,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.109
   - apiVersion: v2
     appVersion: "7149609"
-    created: "2023-03-13T14:15:53.844667128Z"
+    created: "2023-03-13T14:25:41.652642349Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 77aaf66eb746ae5f2b0fb26bfa7e1bdecb04463a7b59d400ea72de351bd726a6
     name: azimuth-caas-operator
@@ -53,7 +63,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.108
   - apiVersion: v2
     appVersion: b697418
-    created: "2023-03-13T14:15:53.844282834Z"
+    created: "2023-03-13T14:25:41.652343651Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: d6b9517a9ff31af131643eb8c50e1a36689254d069f796e305991126b022b0d2
     name: azimuth-caas-operator
@@ -63,7 +73,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.107
   - apiVersion: v2
     appVersion: 14fc8e1
-    created: "2023-03-13T14:15:53.843911539Z"
+    created: "2023-03-13T14:25:41.652030253Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 82f553cef6cb7959d0b2a08b85d84480e918a05df3a740302f617302bb2378bc
     name: azimuth-caas-operator
@@ -73,7 +83,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.106
   - apiVersion: v2
     appVersion: fc6eb8f
-    created: "2023-03-13T14:15:53.843510545Z"
+    created: "2023-03-13T14:25:41.651718856Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 238d9ffd6218d8fed83dc9464116fefd85878ce97a3538332d9c863fe5204bf4
     name: azimuth-caas-operator
@@ -83,7 +93,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.105
   - apiVersion: v2
     appVersion: bfe6d54
-    created: "2023-03-13T14:15:53.843136751Z"
+    created: "2023-03-13T14:25:41.651390758Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 44b4afa4d48c5cb0a8251c1d85f09beaec7574bba83234874d16130f1e0a0804
     name: azimuth-caas-operator
@@ -91,4 +101,4 @@ entries:
     urls:
     - azimuth-caas-operator-0.1.0-dev.0.add-helm.104.tgz
     version: 0.1.0-dev.0.add-helm.104
-generated: "2023-03-13T14:15:53.84256546Z"
+generated: "2023-03-13T14:25:41.650887162Z"

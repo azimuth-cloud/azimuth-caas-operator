@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Operator functional tests via tox
     timeout-minutes: 10
     runs-on: ubuntu-latest
     strategy:

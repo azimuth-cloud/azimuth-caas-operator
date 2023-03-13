@@ -34,4 +34,4 @@ RUN pip install --no-deps -e /azimuth-caas-operator
 # By default, run the operator using kopf
 USER $APP_UID
 ENTRYPOINT ["tini", "-g", "--"]
-CMD ["kopf", "run", "--module", "azimuth-caas-operator.operator", "--all-namespaces"]
+CMD ["kopf", "run", "--module", "azimuth_caas_operator.operator", "--all-namespaces"]

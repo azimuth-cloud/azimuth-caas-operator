@@ -16,11 +16,8 @@ rules:
     resources: ["events"]
     verbs: ["create"]
   # Required by azimuth-caas
-  - apiGroups: ["azimuth-caas.stackhpc.com"]
+  - apiGroups: ["caas.azimuth.stackhpc.com"]
     resources: ["*"]
-    verbs: ["*"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
     verbs: ["*"]
   - apiGroups: ["batch"]
     resources: ["jobs"]
@@ -28,8 +25,8 @@ rules:
   - apiGroups: [""]
     resources:
       - configmaps
-      - services
       - persistentvolumeclaims
       - pods
       - pods/log
+      - secrets
     verbs: ["*"]

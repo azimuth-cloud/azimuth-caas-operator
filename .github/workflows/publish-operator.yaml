@@ -32,7 +32,7 @@ jobs:
       - name: Build and push image
         uses: stackhpc/github-actions/docker-multiarch-build-push@master
         with:
-          cache-key: kube-perftest-controller
+          cache-key: azimuth-caas-operator
           context: .
           platforms: linux/amd64,linux/arm64
           push: true

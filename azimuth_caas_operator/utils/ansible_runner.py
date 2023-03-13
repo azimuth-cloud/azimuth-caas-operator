@@ -1,3 +1,4 @@
+import base64
 import logging
 import yaml
 
@@ -16,16 +17,14 @@ POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
     cluster_type: cluster_type_crd.ClusterType,
+    cluster_deploy_ssh_public_key: str,
     remove=False,
 ):
     extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
     extraVars["cluster_type"] = cluster_type.metadata.name
-    # TODO(johngarbutt) need to lookup deployment ssh public key!
-    extraVars[
-        "cluster_deploy_ssh_public_key"
-    ] = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8="  # noqa
+    extraVars["cluster_deploy_ssh_public_key"] = cluster_deploy_ssh_public_key
     extraVars["cluster_ssh_private_key_file"] = "/home/runner/.ssh/id_rsa"
 
     if remove:
@@ -37,7 +36,7 @@ def get_env_configmap(
         CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
-        # TODO(johngarbutt) make this optional via config?
+        # TODO(johngarbutt) make this set via config?
         ANSIBLE_CALLBACK_PLUGINS=(
             "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
         ),
@@ -243,20 +242,10 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
 async def start_job(client, cluster, namespace, remove=False):
     cluster_type = await cluster_type_utils.get_cluster_type_info(client, cluster)
 
-    # generate config
-    configmap_data = get_env_configmap(
-        cluster,
-        cluster_type,
-        remove=remove,
-    )
-    configmap_resource = await client.api("v1").resource("ConfigMap")
-    await configmap_resource.create_or_patch(
-        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
-    )
-
     # ensure deploy secret, copy across for now
     # TODO(johngarbutt): generate?
     sshkey_secret_name = "azimuth-sshkey"
+    # TODO(johngarbutt): this namesapce should in config!
     copy_from_namespace = "azimuth-caas-operator"
     secrets_resource = await client.api("v1").resource("secrets")
     ssh_secret = await secrets_resource.fetch(
@@ -266,6 +255,19 @@ async def start_job(client, cluster, namespace, remove=False):
         sshkey_secret_name,
         {"metadata": {"name": sshkey_secret_name}, "data": ssh_secret.data},
         namespace=namespace,
+    )
+
+    cluster_deploy_ssh_public_key = base64.b64decode(ssh_secret.data.get("id_rsa.pub"))
+    # generate config
+    configmap_data = get_env_configmap(
+        cluster,
+        cluster_type,
+        cluster_deploy_ssh_public_key,
+        remove=remove,
+    )
+    configmap_resource = await client.api("v1").resource("ConfigMap")
+    await configmap_resource.create_or_patch(
+        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
     )
 
     # create the job

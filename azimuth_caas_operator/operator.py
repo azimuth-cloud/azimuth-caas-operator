@@ -50,7 +50,6 @@ async def _fetch_text_from_url(url):
             return await response.text()
 
 
-# TODO(johngarbutt): fetch ui meta from git repo and update crd
 @kopf.on.create(registry.API_GROUP, "clustertypes")
 async def cluster_type_create(body, name, namespace, labels, **kwargs):
     cluster_type = cluster_type_crd.ClusterType(**body)

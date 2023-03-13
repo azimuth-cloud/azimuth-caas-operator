@@ -6,6 +6,37 @@ K8s operator to create clusters using K8s CRDs
 
 This is still very much work in progress!!
 
+## Installation of Operator
+
+The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
+
+```sh
+helm repo add kube-perftest https://stackhpc.github.io/azimuth-caas-operator
+# Use the most recent published chart for the main branch
+helm upgrade \
+  azimuth-caas-operator \
+  azimuth-caas-operator/azimuth-caas-operator \
+  -i \
+  --version ">=0.1.0-dev.0.main.0,<0.1.0-dev.0.main.99999999999"
+```
+
+Once the operator is up and running you will then need to create
+CRDs to configure the appropriate Cluster templates.
+For testing you can create a cluster and run ansible jobs,
+without actually creating any openstack infrastructure,
+try this:
+
+```sh
+kubctl apply -f tools/test_cluster_type.yaml
+```
+
+To try this manually without using the Azimuth UI,
+you can create a test cluster of the above by running:
+
+```sh
+kubctl apply -f tools/test_quick.yaml
+```
+
 ## Run unit tests
 
 We tox, and uses python3.9:
@@ -13,7 +44,7 @@ We tox, and uses python3.9:
     pip install tox
     tox
 
-## Test opertor locally
+## Test opertor locally using tox
 
 You can test it with tox too:
 

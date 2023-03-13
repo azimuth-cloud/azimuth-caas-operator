@@ -18,6 +18,7 @@ helm search repo azimuth-caas-operator --devel
 helm upgrade \
   azimuth-caas-operator \
   azimuth-caas-operator/azimuth-caas-operator \
+  -n azimuth-caas-operator \
   -i \
   --version ">=0.1.0-dev.0.main.0,<0.1.0-dev.0.main.99999999999"
 ```
@@ -30,14 +31,23 @@ try this:
 
 ```sh
 kubectl apply -f tools/test_cluster_type.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Ready clustertype quick-test
+kubectl get clustertype -o yaml
 ```
 
 To try this manually without using the Azimuth UI,
 you can create a test cluster of the above by running:
 
 ```sh
+kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub -n azimuth-caas-operator
 kubectl apply -f tools/test_quick.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test
+kubectl get cluster -o yaml
+kubectl delete -f tools/test_quick.yaml
 ```
+
+Note the above is very similar to what is run in the
+functional test scripts.
 
 ## Run unit tests
 

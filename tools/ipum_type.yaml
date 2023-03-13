@@ -12,8 +12,9 @@ spec:
   extraVars:
     # injected via deploy ssh secret, along with known_hosts file
     admin_clouds_yaml: "/home/runner/.ssh/ipuops.yaml"
-    vipu_server_ssh_bow: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
-    vipu_server_ssh_classic: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
+    vipu_ssh_extra: "-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    vipu_server_ssh_bow: "ipuuser@38.83.162.174"
+    vipu_server_ssh_classic: "ipuuser@38.83.162.174"
     control_network_name: "azimuth-vpod-common-ctrl"
     vipu_rnic_physnet: "physnet2"
     awx_skip: "true"
@@ -23,3 +24,5 @@ spec:
     ldap_auth_token: "dummy1"
     cephfs_nethome_secret: "dummy2"
     cephfs_public_secret: "dummy3"
+    vipu_server_ip_bow: "10.3.47.102"
+    vipu_server_ip_classic: "10.3.47.102"

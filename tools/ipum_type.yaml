@@ -1,0 +1,25 @@
+---
+apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+kind: ClusterType
+metadata:
+  name: "ipum"
+spec:
+  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/caas-poplar-appliance/crd-merge-1.4/ui-meta/poplar-appliance.yml"
+  gitUrl: "https://github.com/stackhpc/caas-poplar-appliance"
+  # TODO: using a branch here is an anti-pattern! should be a tag
+  gitVersion: "crd-merge-1.5"
+  playbook: "poplar-appliance.yml"
+  extraVars:
+    # injected via deploy ssh secret, along with known_hosts file
+    admin_clouds_yaml: "/home/runner/.ssh/ipuops.yaml"
+    vipu_server_ssh_bow: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
+    vipu_server_ssh_classic: "ssh -i /home/runner/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ipuuser@38.83.162.174"
+    control_network_name: "azimuth-vpod-common-ctrl"
+    vipu_rnic_physnet: "physnet2"
+    awx_skip: "true"
+    # TODO: can we remove these?
+    gc_cloud: "gc_test"
+    gc_tenancy: "gc_test"
+    ldap_auth_token: "dummy1"
+    cephfs_nethome_secret: "dummy2"
+    cephfs_public_secret: "dummy3"

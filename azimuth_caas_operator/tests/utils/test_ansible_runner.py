@@ -39,12 +39,12 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner
-          run /runner -j
+        - chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml;
+          ansible-runner run /runner -vvv
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:347d4ea
         name: run
         volumeMounts:
         - mountPath: /runner/project
@@ -55,51 +55,37 @@ spec:
           name: env
         - mountPath: /openstack
           name: cloudcreds
-        - mountPath: /runner/ssh
+        - mountPath: /home/runner/.ssh
           name: ssh
       initContainers:
       - command:
-        - git
-        - clone
-        - https://github.com/test.git
-        - /repo
-        image: alpine/git
-        name: clone
-        volumeMounts:
-        - mountPath: /repo
-          name: playbooks
-      - command:
-        - git
-        - checkout
-        - 12345ab
-        image: alpine/git
-        name: checkout
-        volumeMounts:
-        - mountPath: /repo
-          name: playbooks
-        workingDir: /repo
-      - command:
-        - /bin/ash
+        - /bin/bash
         - -c
-        - chmod 755 /repo/
-        image: alpine/git
-        name: permissions
-        volumeMounts:
-        - mountPath: /repo
-          name: playbooks
-        workingDir: /repo
-      - command:
-        - /bin/ash
-        - -c
-        - echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local
-          ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts
-        image: alpine/git
+        - echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local
+          ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:347d4ea
         name: inventory
         volumeMounts:
-        - mountPath: /inventory
+        - mountPath: /runner/inventory
           name: inventory
         workingDir: /inventory
+      - command:
+        - /bin/bash
+        - -c
+        - chmod 755 /runner/project; git clone https://github.com/test.git /runner/project;
+          git config --global --add safe.directory /runner/project; cd /runner/project;
+          git checkout 12345ab; ls -al
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:347d4ea
+        name: clone
+        volumeMounts:
+        - mountPath: /runner/project
+          name: playbooks
+        workingDir: /runner
       restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
       volumes:
       - emptyDir: {}
         name: playbooks
@@ -139,8 +125,8 @@ spec:
     ]
   },
   "data": {
-    "envvars": "---\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
-    "extravars": "---\\ncluster_deploy_ssh_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8=\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /runner/ssh/id_rsa\\ncluster_type: test1\\nfoo: bar\\n"
+    "envvars": "---\\nANSIBLE_CALLBACK_PLUGINS: /home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback\\nARA_API_CLIENT: http\\nARA_API_SERVER: http://azimuth-ara.azimuth-caas-operator:8000\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
+    "extravars": "---\\ncluster_deploy_ssh_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8=\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: test1\\nfoo: bar\\n"
   }
 }"""  # noqa
         self.assertEqual(expected, json.dumps(config, indent=2))

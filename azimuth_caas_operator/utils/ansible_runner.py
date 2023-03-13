@@ -9,7 +9,8 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 LOG = logging.getLogger(__name__)
 
 # TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+POD_TAG = "347d4ea"
+POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 
 def get_env_configmap(
@@ -21,11 +22,11 @@ def get_env_configmap(
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
     extraVars["cluster_type"] = cluster_type.metadata.name
-    # TODO(johngarbutt) need to lookup deployment ssh key pair!
+    # TODO(johngarbutt) need to lookup deployment ssh public key!
     extraVars[
         "cluster_deploy_ssh_public_key"
     ] = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDE8MwOaScxQTIYpXXHawwhiZ4+9HbsUT354BTh+eaNE4cw7xmqMfUsz3yxJ1IIgmNKwHHdKz/kLjqWeynio6gxMHWEG05pGRyTpziGI/jBFSpRwfEQ5ISavrzJacMuDy3qtgsdaUXQ6Bj9HZvNzdOD/YcnrN+RhqgJ/oMP0lwC/XzF+YZWnkjmFZ7IaOTVlQW3pnTZNi8D7Sr7Acxwejw7NSHh7gKWhcs4bSMZocyIUYVyhXykZhKHrfGNN0dzbrACyFQY3W27QbhYMGFM4+rUyTe1h9DG9LzgNSyqAe6zpibUlZQZVxLxOJJNCKFHX8zXXuiNC6+KLEHjJCj5zvW8XCFlLbUy7mh/FEX2X5U5Ghw4irbX5XKUg6tgJN4cKnYhqN62jsK7YaxQ2OAcyfpBlEu/zq/7+t6AJiY93DEr7H7Og8mjsXNrchNMwrV+BLbuymcwtpDolZfdLGonj6bjSYUoJLKKsFfF2sAhc64qKDjVbbpvb52Ble1YNHcOPZ8="  # noqa
-    extraVars["cluster_ssh_private_key_file"] = "/runner/ssh/id_rsa"
+    extraVars["cluster_ssh_private_key_file"] = "/home/runner/.ssh/id_rsa"
 
     if remove:
         extraVars["cluster_state"] = "absent"
@@ -36,6 +37,12 @@ def get_env_configmap(
         CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
+        # TODO(johngarbutt) make this optional via config?
+        ANSIBLE_CALLBACK_PLUGINS=(
+            "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
+        ),
+        ARA_API_CLIENT="http",
+        ARA_API_SERVER="http://azimuth-ara.azimuth-caas-operator:8000",
     )
     envvars = "---\n" + yaml.dump(envvars)
 
@@ -83,55 +90,39 @@ metadata:
 spec:
   template:
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       restartPolicy: Never
       initContainers:
-      - image: alpine/git
-        name: clone
-        command:
-        - git
-        - clone
-        - "{cluster_type.spec.gitUrl}"
-        - /repo
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: checkout
-        workingDir: /repo
-        command:
-        - git
-        - checkout
-        - "{cluster_type.spec.gitVersion}"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
-        name: permissions
-        workingDir: /repo
-        command:
-        - /bin/ash
-        - -c
-        - "chmod 755 /repo/"
-        volumeMounts:
-        - name: playbooks
-          mountPath: /repo
-      - image: alpine/git
+      - image: "{POD_IMAGE}"
         name: inventory
         workingDir: /inventory
         command:
-        - /bin/ash
+        - /bin/bash
         - -c
-        - "echo '[openstack]' >/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/inventory/hosts"
+        - "echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts"
         volumeMounts:
         - name: inventory
-          mountPath: /inventory
+          mountPath: /runner/inventory
+      - image: "{POD_IMAGE}"
+        name: clone
+        workingDir: /runner
+        command:
+        - /bin/bash
+        - -c
+        - "chmod 755 /runner/project; git clone {cluster_type.spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type.spec.gitVersion}; ls -al"
+        volumeMounts:
+        - name: playbooks
+          mountPath: /runner/project
       containers:
       - name: run
         image: "{POD_IMAGE}"
         command:
         - /bin/bash
         - -c
-        - "ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -vvv"
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type.spec.playbook}"
@@ -145,7 +136,7 @@ spec:
         - name: cloudcreds
           mountPath: /openstack
         - name: ssh
-          mountPath: /runner/ssh
+          mountPath: /home/runner/.ssh
       volumes:
       - name: playbooks
         emptyDir: {{}}

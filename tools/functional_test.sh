@@ -18,6 +18,9 @@ until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crd
 kubectl get crds
 
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test
+kubectl get clustertype quick-test -o yaml
+
 kubectl create -f $SCRIPT_DIR/test_quick.yaml
 
 until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 5; done

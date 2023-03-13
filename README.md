@@ -12,6 +12,8 @@ The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
 
 ```sh
 helm repo add azimuth-caas-operator https://stackhpc.github.io/azimuth-caas-operator
+# check for the latest versions
+helm search repo azimuth-caas-operator --devel
 # Use the most recent published chart for the main branch
 helm upgrade \
   azimuth-caas-operator \

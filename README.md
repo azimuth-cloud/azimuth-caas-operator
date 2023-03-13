@@ -12,15 +12,18 @@ The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
 
 ```sh
 helm repo add azimuth-caas-operator https://stackhpc.github.io/azimuth-caas-operator
+
 # check for the latest versions
+helm repo update
 helm search repo azimuth-caas-operator --devel
-# Use the most recent published chart for the main branch
+
+# Use the most recent chart
 helm upgrade \
   azimuth-caas-operator \
   azimuth-caas-operator/azimuth-caas-operator \
   -n azimuth-caas-operator \
   -i \
-  --version ">=0.1.0-dev.0.main.0,<0.1.0-dev.0.main.99999999999"
+  --version ">=0.1.0"
 ```
 
 Once the operator is up and running you will then need to create

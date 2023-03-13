@@ -6,6 +6,73 @@ K8s operator to create clusters using K8s CRDs
 
 This is still very much work in progress!!
 
+## Installation of Operator
+
+The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
+
+```sh
+helm repo add azimuth-caas-operator https://stackhpc.github.io/azimuth-caas-operator
+
+# check for the latest versions
+helm repo update
+helm search repo azimuth-caas-operator --devel
+
+# Use the most recent chart
+helm upgrade \
+  azimuth-caas-operator \
+  azimuth-caas-operator/azimuth-caas-operator \
+  -n azimuth-caas-operator \
+  -i \
+  --version ">=0.1.0"
+```
+
+Once the operator is up and running you will then need to create
+CRDs to configure the appropriate Cluster templates.
+For testing you can create a cluster and run ansible jobs,
+without actually creating any openstack infrastructure,
+try this:
+
+```sh
+# check crds have been created by the operator
+kubectl get crds
+
+# add the test cluster type
+kubectl apply -f tools/test_cluster_type.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test
+kubectl get clustertype quick-test -o yaml
+```
+
+To try this manually without using the Azimuth UI,
+you can create a test cluster of the above by running:
+
+```sh
+# create shared deploy ssh key
+ssh-keygen -f id_rsa -P ""
+kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub -n azimuth-caas-operator
+
+# add reqired cluster specific app cred
+# this secret will be deleted when the cluster is deleted
+echo "foo" >clouds.yaml
+kubectl create secret generic openstack --from-file=clouds.yaml
+
+# create the cluster
+kubectl apply -f tools/test_quick.yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test --timeout=2m
+kubectl get cluster -o yaml
+kubectl get job
+kubectl get pod
+```
+
+To delete the cluster, you can simple delete the Cluster CRD
+we just created:
+
+```sh
+kubectl delete -f tools/test_quick.yaml
+```
+
+Note the above is very similar to what is run in the
+functional test scripts.
+
 ## Run unit tests
 
 We tox, and uses python3.9:
@@ -13,7 +80,7 @@ We tox, and uses python3.9:
     pip install tox
     tox
 
-## Test opertor locally
+## Test opertor locally using tox
 
 You can test it with tox too:
 

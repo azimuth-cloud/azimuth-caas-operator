@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: azimuth-ara
+  labels:
+    app: ara
+spec:
+  type: ClusterIP
+  selector:
+    app: ara
+  ports:
+    - name: port8000
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+    - name: port3000
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

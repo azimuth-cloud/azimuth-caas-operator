@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Tox unit tests and linting
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -11,7 +11,7 @@ This is still very much work in progress!!
 The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
 
 ```sh
-helm repo add kube-perftest https://stackhpc.github.io/azimuth-caas-operator
+helm repo add azimuth-caas-operator https://stackhpc.github.io/azimuth-caas-operator
 # Use the most recent published chart for the main branch
 helm upgrade \
   azimuth-caas-operator \

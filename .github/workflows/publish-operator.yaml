@@ -6,10 +6,6 @@ on:
     # every push to a branch that changes the operator and every tag
     branches: ['**']
     tags: ['**']
-    paths:
-      - .github/workflows/publish-operator.yaml
-      - "chart/**"
-      - "python/**"
 jobs:
   build_push_operator_image:
     name: Build and push operator image

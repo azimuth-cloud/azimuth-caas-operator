@@ -27,14 +27,14 @@ without actually creating any openstack infrastructure,
 try this:
 
 ```sh
-kubctl apply -f tools/test_cluster_type.yaml
+kubectl apply -f tools/test_cluster_type.yaml
 ```
 
 To try this manually without using the Azimuth UI,
 you can create a test cluster of the above by running:
 
 ```sh
-kubctl apply -f tools/test_quick.yaml
+kubectl apply -f tools/test_quick.yaml
 ```
 
 ## Run unit tests

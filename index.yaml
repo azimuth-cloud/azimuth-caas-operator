@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   azimuth-caas-operator:
   - apiVersion: v2
+    appVersion: 14fc8e1
+    created: "2023-03-13T13:41:20.123165475Z"
+    description: Helm chart for deploying the azimuth-caas operator.
+    digest: 82f553cef6cb7959d0b2a08b85d84480e918a05df3a740302f617302bb2378bc
+    name: azimuth-caas-operator
+    type: application
+    urls:
+    - azimuth-caas-operator-0.1.0-dev.0.add-helm.106.tgz
+    version: 0.1.0-dev.0.add-helm.106
+  - apiVersion: v2
     appVersion: fc6eb8f
-    created: "2023-03-13T13:38:20.809110533Z"
+    created: "2023-03-13T13:41:20.122778446Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 238d9ffd6218d8fed83dc9464116fefd85878ce97a3538332d9c863fe5204bf4
     name: azimuth-caas-operator
@@ -13,7 +23,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.105
   - apiVersion: v2
     appVersion: bfe6d54
-    created: "2023-03-13T13:38:20.808709996Z"
+    created: "2023-03-13T13:41:20.122314811Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 44b4afa4d48c5cb0a8251c1d85f09beaec7574bba83234874d16130f1e0a0804
     name: azimuth-caas-operator
@@ -21,4 +31,4 @@ entries:
     urls:
     - azimuth-caas-operator-0.1.0-dev.0.add-helm.104.tgz
     version: 0.1.0-dev.0.add-helm.104
-generated: "2023-03-13T13:38:20.80811204Z"
+generated: "2023-03-13T13:41:20.121384041Z"

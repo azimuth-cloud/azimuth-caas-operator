@@ -31,8 +31,8 @@ try this:
 
 ```sh
 kubectl apply -f tools/test_cluster_type.yaml
-kubectl wait --for=jsonpath='{.status.phase}'=Ready clustertype quick-test
-kubectl get clustertype -o yaml
+kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test
+kubectl get clustertype quick-test -o yaml
 ```
 
 To try this manually without using the Azimuth UI,

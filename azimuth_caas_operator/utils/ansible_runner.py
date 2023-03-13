@@ -257,7 +257,9 @@ async def start_job(client, cluster, namespace, remove=False):
         namespace=namespace,
     )
 
-    cluster_deploy_ssh_public_key = base64.b64decode(ssh_secret.data.get("id_rsa.pub"))
+    cluster_deploy_ssh_public_key = base64.b64decode(
+        ssh_secret.data.get("id_rsa.pub")
+    ).decode("utf-8")
     # generate config
     configmap_data = get_env_configmap(
         cluster,

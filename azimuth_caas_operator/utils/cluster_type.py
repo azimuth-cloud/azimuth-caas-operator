@@ -10,4 +10,5 @@ async def get_cluster_type_info(client, cluster):
         "clustertype"
     )
     cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
-    return cluster_type_crd.ClusterType(**cluster_type_raw)
+    cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
+    return cluster_type.spec, cluster_type.version

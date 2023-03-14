@@ -15,7 +15,7 @@ class TestAnsibleRunner(base.TestCase):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
-        job = ansible_runner.get_job(cluster, cluster_type)
+        job = ansible_runner.get_job(cluster, cluster_type.spec)
 
         expected = """\
 apiVersion: batch/v1
@@ -108,7 +108,7 @@ spec:
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
-        config = ansible_runner.get_env_configmap(cluster, cluster_type, "fakekey")
+        config = ansible_runner.get_env_configmap(cluster, cluster_type.spec, "fakekey")
         expected = """\
 {
   "apiVersion": "v1",
@@ -126,7 +126,7 @@ spec:
   },
   "data": {
     "envvars": "---\\nANSIBLE_CALLBACK_PLUGINS: /home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback\\nARA_API_CLIENT: http\\nARA_API_SERVER: http://azimuth-ara.azimuth-caas-operator:8000\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
-    "extravars": "---\\ncluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: test1\\nfoo: bar\\n"
+    "extravars": "---\\ncluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: type1\\nfoo: bar\\n"
   }
 }"""  # noqa
         self.assertEqual(expected, json.dumps(config, indent=2))

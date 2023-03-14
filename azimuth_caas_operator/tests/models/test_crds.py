@@ -291,6 +291,45 @@ class TestModels(base.TestCase):
                       "Deleting"
                     ],
                     "type": "string"
+                  },
+                  "clusterTypeSpec": {
+                    "description": "Base model for use within CRD definitions.",
+                    "type": "object",
+                    "properties": {
+                      "uiMetaUrl": {
+                        "minLength": 1,
+                        "maxLength": 65536,
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "gitUrl": {
+                        "minLength": 1,
+                        "maxLength": 65536,
+                        "format": "uri",
+                        "type": "string"
+                      },
+                      "gitVersion": {
+                        "type": "string"
+                      },
+                      "playbook": {
+                        "type": "string"
+                      },
+                      "extraVars": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "uiMetaUrl",
+                      "gitUrl",
+                      "gitVersion",
+                      "playbook"
+                    ]
+                  },
+                  "clusterTypeVersion": {
+                    "type": "string"
                   }
                 }
               }

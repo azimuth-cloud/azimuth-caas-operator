@@ -1,6 +1,10 @@
+import typing
+
 import kube_custom_resource as crd
 from kube_custom_resource import schema
 import pydantic
+
+from azimuth_caas_operator.models.v1alpha1.cluster_type import ClusterTypeSpec
 
 
 class ClusterPhase(str, schema.Enum):
@@ -13,6 +17,8 @@ class ClusterPhase(str, schema.Enum):
 
 class ClusterStatus(schema.BaseModel):
     phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
+    clusterTypeSpec: typing.Optional[ClusterTypeSpec]
+    clusterTypeVersion: typing.Optional[str]
 
 
 class ClusterSpec(schema.BaseModel):

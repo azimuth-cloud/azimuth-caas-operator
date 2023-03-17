@@ -140,7 +140,11 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=False)
     # TODO(johngarbutt): not always needed on a retry
     await cluster_utils.update_cluster(
-        K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.CREATING
+        K8S_CLIENT,
+        name,
+        namespace,
+        cluster_crd.ClusterPhase.CREATING,
+        extra_vars=cluster.spec.extraVars,
     )
     LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
     raise RuntimeError(f"wait for create job to complete for {name} in {namespace}")
@@ -159,7 +163,9 @@ async def cluster_changed(body, name, namespace, labels, **kwargs):
     is_extra_var_update = cluster.spec.extraVars != cluster.status.appliedExtraVars
     if is_extra_var_update:
         # TODO(johngarbutt) this will always trigger for the moment, needs fixing
-        LOG.info(f"Extra vars have changed for: {name} in {namespace}")
+        LOG.info(f"Detected extra vars have changed for: {name} in {namespace}")
+    elif not is_upgrade:
+        LOG.info(f"No changes for: {name} in {namespace}")
 
     # TODO(johngarbutt): we need to do something!
 

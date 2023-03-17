@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import yaml
 
 from azimuth_caas_operator.models import registry
@@ -33,7 +34,9 @@ def get_env_configmap(
 
     # TODO(johngarbutt): consul address must come from config!
     envvars = dict(
-        CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
+        CONSUL_HTTP_ADDR=os.environ.get(
+            "CONSUL_HTTP_ADDR", "zenith-consul-server.zenith:8500"
+        ),
         OS_CLOUD="openstack",
         OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
         # TODO(johngarbutt) make this set via config?

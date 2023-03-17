@@ -1,6 +1,11 @@
+import datetime
+import typing
+
 import kube_custom_resource as crd
 from kube_custom_resource import schema
 import pydantic
+
+from azimuth_caas_operator.models.v1alpha1.cluster_type import ClusterTypeSpec
 
 
 class ClusterPhase(str, schema.Enum):
@@ -13,10 +18,21 @@ class ClusterPhase(str, schema.Enum):
 
 class ClusterStatus(schema.BaseModel):
     phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
+    clusterTypeSpec: typing.Optional[ClusterTypeSpec]
+    # used to detect upgrade requests
+    clusterTypeVersion: typing.Optional[str]
+    # used to detect extra var changes
+    appliedExtraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
+        None, description="The timestamp at which the resource was updated."
+    )
 
 
 class ClusterSpec(schema.BaseModel):
     clusterTypeName: str
+    # when not specified, we pick the current version,
+    # unset this to trigger an upgarde to the latest version
+    clusterTypeVersion: typing.Optional[str]
     cloudCredentialsSecretName: str
     # as described by the cluster type ui-meta
     extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])

@@ -94,7 +94,7 @@ def get_fake_dict():
     return dict(
         apiVersion="fake",
         kind="ClusterType",
-        metadata=dict(name="test1"),
+        metadata=dict(name="type1"),
         spec=dict(
             uiMetaUrl="https://url1",
             gitUrl="https://github.com/test.git",

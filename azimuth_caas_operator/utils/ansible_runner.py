@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import yaml
 
 from azimuth_caas_operator.models import registry
@@ -16,14 +17,14 @@ POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
-    cluster_type: cluster_type_crd.ClusterType,
+    cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
     remove=False,
 ):
-    extraVars = dict(cluster_type.spec.extraVars, **cluster.spec.extraVars)
+    extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.metadata.uid
-    extraVars["cluster_type"] = cluster_type.metadata.name
+    extraVars["cluster_type"] = cluster.spec.clusterTypeName
     extraVars["cluster_deploy_ssh_public_key"] = cluster_deploy_ssh_public_key
     extraVars["cluster_ssh_private_key_file"] = "/home/runner/.ssh/id_rsa"
 
@@ -31,17 +32,23 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
 
-    # TODO(johngarbutt): consul address must come from config!
+    # TODO(johngarbutt): probably should use more standard config
     envvars = dict(
-        CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500",
-        OS_CLOUD="openstack",
-        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
-        # TODO(johngarbutt) make this set via config?
+        # Consul is used to store terraform state
+        CONSUL_HTTP_ADDR=os.environ.get(
+            "CONSUL_HTTP_ADDR", "zenith-consul-server.zenith:8500"
+        ),
+        # Configure ARA to help debug ansible executions
         ANSIBLE_CALLBACK_PLUGINS=(
             "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
         ),
         ARA_API_CLIENT="http",
-        ARA_API_SERVER="http://azimuth-ara.azimuth-caas-operator:8000",
+        ARA_API_SERVER=os.environ.get(
+            "ARA_API_SERVER", "http://azimuth-ara.azimuth-caas-operator:8000"
+        ),
+        # This tells tools to use the app cred k8s secret we mount
+        OS_CLOUD="openstack",
+        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
     )
     envvars = "---\n" + yaml.dump(envvars)
 
@@ -67,7 +74,7 @@ data:
 
 def get_job(
     cluster: cluster_crd.Cluster,
-    cluster_type: cluster_type_crd.ClusterType,
+    cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     remove=False,
 ):
     cluster_uid = cluster.metadata.uid
@@ -111,7 +118,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "chmod 755 /runner/project; git clone {cluster_type.spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type.spec.gitVersion}; ls -al"
+        - "chmod 755 /runner/project; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
@@ -124,7 +131,7 @@ spec:
         - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -vvv"
         env:
         - name: RUNNER_PLAYBOOK
-          value: "{cluster_type.spec.playbook}"
+          value: "{cluster_type_spec.playbook}"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
@@ -240,7 +247,10 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
 
 
 async def start_job(client, cluster, namespace, remove=False):
-    cluster_type = await cluster_type_utils.get_cluster_type_info(client, cluster)
+    (
+        cluster_type_spec,
+        cluster_type_version,
+    ) = await cluster_type_utils.get_cluster_type_info(client, cluster)
 
     # ensure deploy secret, copy across for now
     # TODO(johngarbutt): generate?
@@ -263,7 +273,7 @@ async def start_job(client, cluster, namespace, remove=False):
     # generate config
     configmap_data = get_env_configmap(
         cluster,
-        cluster_type,
+        cluster_type_spec,
         cluster_deploy_ssh_public_key,
         remove=remove,
     )
@@ -273,7 +283,7 @@ async def start_job(client, cluster, namespace, remove=False):
     )
 
     # create the job
-    job_data = get_job(cluster, cluster_type, remove=remove)
+    job_data = get_job(cluster, cluster_type_spec, remove=remove)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)
 

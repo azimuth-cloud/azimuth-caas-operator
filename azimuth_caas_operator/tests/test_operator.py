@@ -136,7 +136,11 @@ label: "todo"
             operator.K8S_CLIENT, cluster, "ns", remove=False
         )
         mock_update.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.CREATING,
+            extra_vars={"foo": "bar"},
         )
 
     @mock.patch.object(cluster_utils, "create_scheduled_delete_job")
@@ -232,7 +236,11 @@ label: "todo"
             operator.K8S_CLIENT, cluster, "ns", remove=False
         )
         mock_update.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.CREATING,
+            extra_vars={"foo": "bar"},
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")

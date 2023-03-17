@@ -18,7 +18,10 @@ class ClusterPhase(str, schema.Enum):
 class ClusterStatus(schema.BaseModel):
     phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
     clusterTypeSpec: typing.Optional[ClusterTypeSpec]
+    # used to detect upgrade requests
     clusterTypeVersion: typing.Optional[str]
+    # used to detect extra var changes
+    appliedExtraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
 
 
 class ClusterSpec(schema.BaseModel):

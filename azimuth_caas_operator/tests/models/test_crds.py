@@ -333,6 +333,12 @@ class TestModels(base.TestCase):
                   },
                   "clusterTypeVersion": {
                     "type": "string"
+                  },
+                  "appliedExtraVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 }
               }

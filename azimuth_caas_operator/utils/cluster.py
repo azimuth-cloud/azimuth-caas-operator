@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import yaml
 
@@ -6,6 +7,7 @@ from azimuth_caas_operator.models import registry
 
 # TODO(johngarbutt) move to config!
 POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+LOG = logging.getLogger(__name__)
 
 
 async def update_cluster(client, name, namespace, phase, extra_vars=None):
@@ -23,9 +25,18 @@ async def update_cluster(client, name, namespace, phase, extra_vars=None):
     )
 
 
-async def create_scheduled_delete_job(client, name, namespace, uid):
+async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):
     now = datetime.datetime.now(datetime.timezone.utc)
-    delete_time = now + datetime.timedelta(minutes=1)
+    hours_int = 24
+    try:
+        hours_int = int(lifetime_hours)
+    except ValueError:
+        LOG.error(f"invalid lifetime {lifetime_hours}")
+    if hours_int > 24:
+        hours_int = 24
+        LOG.error(f"lifetime of {hours_int} too big, cap at 24 hours")
+
+    delete_time = now + datetime.timedelta(hours=hours_int)
     cron_schedule = (
         f"{delete_time.minute} {delete_time.hour} "
         f"{delete_time.day} {delete_time.month} *"

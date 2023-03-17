@@ -112,10 +112,12 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY
         )
 
-        # TODO(johngarbutt) hack to autodelete
-        # await cluster_utils.create_scheduled_delete_job(
-        #    K8S_CLIENT, name, namespace, cluster.metadata.uid
-        # )
+        lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
+        if lifetime_hours:
+            # TODO(johngarbutt) hack to autodelete
+            await cluster_utils.create_scheduled_delete_job(
+                K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
+            )
 
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return

@@ -73,6 +73,16 @@ kubectl delete -f tools/test_quick.yaml
 Note the above is very similar to what is run in the
 functional test scripts.
 
+## Config
+
+*This is a WIP, and not yet in the helm chart.*
+
+You can set the following environment variables,
+if the default does not work for your setup:
+
+* `CONSUL_HTTP_ADDR=zenith-consul-server.zenith:8500`
+* `ARA_API_SERVER=http://azimuth-ara.azimuth-caas-operator:8000`
+
 ## Run unit tests
 
 We tox, and uses python3.9:

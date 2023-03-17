@@ -32,19 +32,23 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
     extraVars = "---\n" + yaml.dump(extraVars)
 
-    # TODO(johngarbutt): consul address must come from config!
+    # TODO(johngarbutt): probably should use more standard config
     envvars = dict(
+        # Consul is used to store terraform state
         CONSUL_HTTP_ADDR=os.environ.get(
             "CONSUL_HTTP_ADDR", "zenith-consul-server.zenith:8500"
         ),
-        OS_CLOUD="openstack",
-        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
-        # TODO(johngarbutt) make this set via config?
+        # Configure ARA to help debug ansible executions
         ANSIBLE_CALLBACK_PLUGINS=(
             "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
         ),
         ARA_API_CLIENT="http",
-        ARA_API_SERVER="http://azimuth-ara.azimuth-caas-operator:8000",
+        ARA_API_SERVER=os.environ.get(
+            "ARA_API_SERVER", "http://azimuth-ara.azimuth-caas-operator:8000"
+        ),
+        # This tells tools to use the app cred k8s secret we mount
+        OS_CLOUD="openstack",
+        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
     )
     envvars = "---\n" + yaml.dump(envvars)
 

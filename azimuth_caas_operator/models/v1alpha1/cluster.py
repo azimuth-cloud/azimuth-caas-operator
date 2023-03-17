@@ -23,6 +23,9 @@ class ClusterStatus(schema.BaseModel):
 
 class ClusterSpec(schema.BaseModel):
     clusterTypeName: str
+    # when not specified, we pick the current version,
+    # unset this to trigger an upgarde to the latest version
+    clusterTypeVersion: typing.Optional[str]
     cloudCredentialsSecretName: str
     # as described by the cluster type ui-meta
     extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])

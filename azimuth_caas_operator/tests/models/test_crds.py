@@ -262,6 +262,9 @@ class TestModels(base.TestCase):
                   "clusterTypeName": {
                     "type": "string"
                   },
+                  "clusterTypeVersion": {
+                    "type": "string"
+                  },
                   "cloudCredentialsSecretName": {
                     "type": "string"
                   },

@@ -10,3 +10,5 @@ spec:
   gitUrl: "https://github.com/ansible/ansible-runner"
   gitVersion: "devel"
   playbook: "demo/project/test.yml"
+  extraVars:
+    foo: "bar"

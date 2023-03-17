@@ -10,8 +10,8 @@ POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
 
 async def update_cluster(client, name, namespace, phase, extra_vars=None):
     now = datetime.datetime.utcnow()
-    now_string = now.strftime("%Y-%M-%dT%H:%M:%S")
-    status_updates = dict(phase=phase)
+    now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    status_updates = dict(phase=phase, updatedTimestamp=now_string)
     if extra_vars:
         status_updates["appliedExtraVars"] = extra_vars
 

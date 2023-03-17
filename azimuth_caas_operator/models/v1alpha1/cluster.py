@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 import kube_custom_resource as crd
@@ -22,6 +23,9 @@ class ClusterStatus(schema.BaseModel):
     clusterTypeVersion: typing.Optional[str]
     # used to detect extra var changes
     appliedExtraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
+        None, description="The timestamp at which the resource was updated."
+    )
 
 
 class ClusterSpec(schema.BaseModel):

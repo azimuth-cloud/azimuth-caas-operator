@@ -9,10 +9,12 @@ POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
 
 
 async def update_cluster(client, name, namespace, phase):
+    now = datetime.datetime.utcnow()
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(
         name,
-        dict(status=dict(phase=phase)),
+        # TODO(johng): is this time format correct?
+        dict(status=dict(phase=phase, updatedTimestamp=now)),
         namespace=namespace,
     )
 

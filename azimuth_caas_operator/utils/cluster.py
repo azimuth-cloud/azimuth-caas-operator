@@ -4,9 +4,9 @@ import logging
 import yaml
 
 from azimuth_caas_operator.models import registry
+from azimuth_caas_operator.utils import image as image_utils
 
-# TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+
 LOG = logging.getLogger(__name__)
 
 
@@ -41,6 +41,7 @@ async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hou
         f"{delete_time.minute} {delete_time.hour} "
         f"{delete_time.day} {delete_time.month} *"
     )
+    image = image_utils.get_ansible_runner_image()
     configmap_yaml = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -76,7 +77,7 @@ spec:
         spec:
           containers:
           - name: delete
-            image: "{POD_IMAGE}"
+            image: "{image}"
             command: ["/bin/sh"]
             args:
             - "-c"

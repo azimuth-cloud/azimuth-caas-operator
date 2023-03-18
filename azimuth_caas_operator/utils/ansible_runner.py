@@ -7,12 +7,9 @@ from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
+from azimuth_caas_operator.utils import image as image_utils
 
 LOG = logging.getLogger(__name__)
-
-# TODO(johngarbutt) move to config!
-POD_TAG = "347d4ea"
-POD_IMAGE = f"ghcr.io/stackhpc/azimuth-caas-operator-ar:{POD_TAG}"
 
 
 def get_env_configmap(
@@ -80,6 +77,7 @@ def get_job(
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
     action = "remove" if remove else "create"
+    image = image_utils.get_ansible_runner_image()
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -102,7 +100,7 @@ spec:
         fsGroup: 1000
       restartPolicy: Never
       initContainers:
-      - image: "{POD_IMAGE}"
+      - image: "{image}"
         name: inventory
         workingDir: /inventory
         command:
@@ -112,7 +110,7 @@ spec:
         volumeMounts:
         - name: inventory
           mountPath: /runner/inventory
-      - image: "{POD_IMAGE}"
+      - image: "{image}"
         name: clone
         workingDir: /runner
         command:
@@ -124,7 +122,7 @@ spec:
           mountPath: /runner/project
       containers:
       - name: run
-        image: "{POD_IMAGE}"
+        image: "{image}"
         command:
         - /bin/bash
         - -c

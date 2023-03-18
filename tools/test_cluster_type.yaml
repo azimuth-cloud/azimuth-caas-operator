@@ -4,9 +4,7 @@ kind: ClusterType
 metadata:
   name: "quick-test"
 spec:
-  # TODO - fix up this url to something more useful?
-  # uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-sample-appliance/ff97632f6d53b801d4149d1c031c1d17e50986ca/ui-meta/sample-appliance.yml"
-  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/caas-workstation/953c9b1098f4ebffc40e8dd5eb984affcc4d3fc4/ui-meta/workstation.yml"
+  uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-caas-operator/d977b04df85d7492ba726daf249709731130e6cf/tools/ui_meta_quick_test.yaml"
   gitUrl: "https://github.com/ansible/ansible-runner"
   gitVersion: "devel"
   playbook: "demo/project/test.yml"

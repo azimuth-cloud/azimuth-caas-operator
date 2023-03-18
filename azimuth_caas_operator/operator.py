@@ -108,16 +108,16 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     # TODO(johngarbutt): share more code with delete!
     create_jobs = await ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
     if ansible_runner.is_any_successful_jobs(create_jobs):
-        await cluster_utils.update_cluster(
-            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY
-        )
-
         lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
         if lifetime_hours:
             # TODO(johngarbutt) hack to autodelete
             await cluster_utils.create_scheduled_delete_job(
                 K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
             )
+
+        await cluster_utils.update_cluster(
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY
+        )
 
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return

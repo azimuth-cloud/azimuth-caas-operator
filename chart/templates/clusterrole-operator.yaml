@@ -22,6 +22,9 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["*"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["*"]
   - apiGroups: [""]
     resources:
       - configmaps

@@ -33,3 +33,6 @@ rules:
       - pods/log
       - secrets
     verbs: ["*"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["ClusterRoleBinding"]
+    verbs: ["get", "list", "create", "update", "patch"]

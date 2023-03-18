@@ -100,3 +100,28 @@ spec:
     job_data = yaml.safe_load(job_yaml)
     job_resource = await client.api("batch/v1").resource("CronJob")
     await job_resource.create(job_data, namespace=namespace)
+
+    # ensure above cron job can delete the cluster
+    role_binding_yaml = f"""apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: azimuth-caas-operator-edit-{namespace}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: azimuth-caas-operator:edit
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {namespace}
+"""
+    role_binding_data = yaml.safe_load(role_binding_yaml)
+    role_binding_resource = await client.api("rbac.authorization.k8s.io/v1").resource(
+        "ClusterRoleBinding"
+    )
+    # TODO(johngarbutt): really just need to ensure its present
+    await role_binding_resource.create_or_patch(
+        f"azimuth-caas-operator-edit-{namespace}",
+        role_binding_data,
+        namespace=namespace,
+    )

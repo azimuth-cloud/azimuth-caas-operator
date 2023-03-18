@@ -124,7 +124,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     if len(create_jobs) != 0:
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
             # TODO(johngarbutt): update cluster with the last event name from job log
-            raise RuntimeError(
+            raise kopf.TemporaryError(
                 f"wait for create job to complete for {name} in {namespace}"
             )
         else:
@@ -149,7 +149,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         extra_vars=cluster.spec.extraVars,
     )
     LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
-    raise RuntimeError(f"wait for create job to complete for {name} in {namespace}")
+    raise kopf.TemporaryError(
+        f"wait for create job to complete for {name} in {namespace}"
+    )
 
 
 @kopf.on.update(registry.API_GROUP, "cluster")
@@ -196,7 +198,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             return
         if completed_state is None:
             # TODO(johngarbutt): update cluster with current tasks from job log?
-            raise RuntimeError(
+            raise kopf.TemporaryError(
                 f"wait for delete job to complete for {name} in {namespace}"
             )
             # TODO(johngarbutt): check for multiple pending delete jobs?
@@ -231,7 +233,9 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
     )
     LOG.info(f"Success creating a delete job for {name} in {namespace}")
-    raise RuntimeError(f"wait for delete job to complete for {name} in {namespace}")
+    raise kopf.TemporaryError(
+        f"wait for delete job to complete for {name} in {namespace}"
+    )
 
 
 async def _get_pod_names_for_job(job_name, namespace):

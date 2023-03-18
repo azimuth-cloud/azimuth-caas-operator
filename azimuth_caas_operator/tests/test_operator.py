@@ -2,6 +2,8 @@ import json
 import unittest
 from unittest import mock
 
+import kopf
+
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator import operator
@@ -124,7 +126,7 @@ label: "todo"
         mock_get_jobs.return_value = []
         fake_body = cluster_crd.get_fake_dict()
 
-        with self.assertRaises(RuntimeError) as ctx:
+        with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
@@ -180,7 +182,7 @@ label: "todo"
         mock_all_error.return_value = False
         fake_body = cluster_crd.get_fake_dict()
 
-        with self.assertRaises(RuntimeError) as ctx:
+        with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
         mock_update.assert_not_awaited()
@@ -225,7 +227,7 @@ label: "todo"
         mock_all_error.return_value = True
         fake_body = cluster_crd.get_fake_dict()
 
-        with self.assertRaises(RuntimeError) as ctx:
+        with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
@@ -254,7 +256,7 @@ label: "todo"
         mock_get_jobs.return_value = []
         fake_body = cluster_crd.get_fake_dict()
 
-        with self.assertRaises(RuntimeError) as ctx:
+        with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_delete(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(

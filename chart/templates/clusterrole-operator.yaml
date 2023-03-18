@@ -34,5 +34,5 @@ rules:
       - secrets
     verbs: ["*"]
   - apiGroups: ["rbac.authorization.k8s.io"]
-    resources: ["ClusterRoleBinding"]
+    resources: ["clusterrolebindings"]
     verbs: ["get", "list", "create", "update", "patch"]

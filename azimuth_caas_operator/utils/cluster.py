@@ -1,11 +1,13 @@
 import datetime
+import logging
 
 import yaml
 
 from azimuth_caas_operator.models import registry
+from azimuth_caas_operator.utils import image as image_utils
 
-# TODO(johngarbutt) move to config!
-POD_IMAGE = "ghcr.io/stackhpc/azimuth-caas-operator-ar:f12550b"
+
+LOG = logging.getLogger(__name__)
 
 
 async def update_cluster(client, name, namespace, phase, extra_vars=None):
@@ -23,13 +25,23 @@ async def update_cluster(client, name, namespace, phase, extra_vars=None):
     )
 
 
-async def create_scheduled_delete_job(client, name, namespace, uid):
+async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):
     now = datetime.datetime.now(datetime.timezone.utc)
-    delete_time = now + datetime.timedelta(minutes=1)
+    hours_int = 24
+    try:
+        hours_int = int(lifetime_hours)
+    except ValueError:
+        LOG.error(f"invalid lifetime {lifetime_hours}")
+    if hours_int > 24 * 30:
+        hours_int = 24
+        LOG.error(f"lifetime of {hours_int} too big, cap at 30 days.")
+
+    delete_time = now + datetime.timedelta(hours=hours_int)
     cron_schedule = (
         f"{delete_time.minute} {delete_time.hour} "
         f"{delete_time.day} {delete_time.month} *"
     )
+    image = image_utils.get_ansible_runner_image()
     configmap_yaml = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -65,7 +77,7 @@ spec:
         spec:
           containers:
           - name: delete
-            image: "{POD_IMAGE}"
+            image: "{image}"
             command: ["/bin/sh"]
             args:
             - "-c"
@@ -88,3 +100,28 @@ spec:
     job_data = yaml.safe_load(job_yaml)
     job_resource = await client.api("batch/v1").resource("CronJob")
     await job_resource.create(job_data, namespace=namespace)
+
+    # ensure above cron job can delete the cluster
+    role_binding_yaml = f"""apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: azimuth-caas-operator-edit-{namespace}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: azimuth-caas-operator:edit
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {namespace}
+"""
+    role_binding_data = yaml.safe_load(role_binding_yaml)
+    role_binding_resource = await client.api("rbac.authorization.k8s.io/v1").resource(
+        "ClusterRoleBinding"
+    )
+    # TODO(johngarbutt): really just need to ensure its present
+    await role_binding_resource.create_or_patch(
+        f"azimuth-caas-operator-edit-{namespace}",
+        role_binding_data,
+        namespace=namespace,
+    )

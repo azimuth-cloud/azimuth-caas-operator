@@ -82,6 +82,7 @@ if the default does not work for your setup:
 
 * `CONSUL_HTTP_ADDR=zenith-consul-server.zenith:8500`
 * `ARA_API_SERVER=http://azimuth-ara.azimuth-caas-operator:8000`
+* `ANSIBLE_RUNNER_IMAGE=ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0`
 
 ## Run unit tests
 

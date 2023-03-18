@@ -22,6 +22,9 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["*"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["*"]
   - apiGroups: [""]
     resources:
       - configmaps
@@ -30,3 +33,6 @@ rules:
       - pods/log
       - secrets
     verbs: ["*"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterrolebindings"]
+    verbs: ["get", "list", "create", "update", "patch"]

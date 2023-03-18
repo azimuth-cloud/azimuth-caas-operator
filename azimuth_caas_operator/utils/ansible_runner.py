@@ -126,7 +126,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -vvv"
+        - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"

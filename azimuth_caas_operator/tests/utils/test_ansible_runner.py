@@ -40,7 +40,7 @@ spec:
         - /bin/bash
         - -c
         - chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml;
-          ansible-runner run /runner -vvv
+          ansible-runner run /runner -j
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml

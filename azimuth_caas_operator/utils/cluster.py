@@ -32,9 +32,9 @@ async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hou
         hours_int = int(lifetime_hours)
     except ValueError:
         LOG.error(f"invalid lifetime {lifetime_hours}")
-    if hours_int > 24:
+    if hours_int > 24 * 30:
         hours_int = 24
-        LOG.error(f"lifetime of {hours_int} too big, cap at 24 hours")
+        LOG.error(f"lifetime of {hours_int} too big, cap at 30 days.")
 
     delete_time = now + datetime.timedelta(hours=hours_int)
     cron_schedule = (

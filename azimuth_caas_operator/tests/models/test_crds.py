@@ -265,9 +265,10 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "extraVars": {
+                    "x-kubernetes-preserve-unknown-fields": true,
                     "type": "object",
                     "additionalProperties": {
-                      "type": "string"
+                      "x-kubernetes-preserve-unknown-fields": true
                     }
                   }
                 },
@@ -332,9 +333,10 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "appliedExtraVars": {
+                    "x-kubernetes-preserve-unknown-fields": true,
                     "type": "object",
                     "additionalProperties": {
-                      "type": "string"
+                      "x-kubernetes-preserve-unknown-fields": true
                     }
                   },
                   "updatedTimestamp": {

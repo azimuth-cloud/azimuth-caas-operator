@@ -142,7 +142,7 @@ label: "todo"
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.CREATING,
-            extra_vars={"foo": "bar"},
+            extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
 
     @mock.patch.object(cluster_utils, "create_scheduled_delete_job")
@@ -242,7 +242,7 @@ label: "todo"
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.CREATING,
-            extra_vars={"foo": "bar"},
+            extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")

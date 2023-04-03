@@ -65,9 +65,10 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "extraVars": {
+                    "x-kubernetes-preserve-unknown-fields": true,
                     "type": "object",
                     "additionalProperties": {
-                      "type": "string"
+                      "x-kubernetes-preserve-unknown-fields": true
                     }
                   }
                 },
@@ -92,6 +93,7 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "uiMeta": {
+                    "description": "Base model for use within CRD definitions.",
                     "type": "object",
                     "properties": {
                       "name": {
@@ -112,6 +114,7 @@ class TestModels(base.TestCase):
                       "parameters": {
                         "type": "array",
                         "items": {
+                          "description": "Base model for use within CRD definitions.",
                           "type": "object",
                           "properties": {
                             "name": {
@@ -127,9 +130,10 @@ class TestModels(base.TestCase):
                               "type": "string"
                             },
                             "options": {
+                              "x-kubernetes-preserve-unknown-fields": true,
                               "type": "object",
                               "additionalProperties": {
-                                "type": "string"
+                                "x-kubernetes-preserve-unknown-fields": true
                               }
                             },
                             "immutable": {
@@ -139,24 +143,22 @@ class TestModels(base.TestCase):
                               "type": "boolean"
                             },
                             "default": {
-                              "type": "string"
+                              "x-kubernetes-preserve-unknown-fields": true
                             }
                           },
                           "required": [
                             "name",
                             "label",
-                            "description",
                             "kind",
-                            "options",
                             "immutable",
-                            "required",
-                            "default"
+                            "required"
                           ]
                         }
                       },
                       "services": {
                         "type": "array",
                         "items": {
+                          "description": "Base model for use within CRD definitions.",
                           "type": "object",
                           "properties": {
                             "name": {
@@ -174,9 +176,7 @@ class TestModels(base.TestCase):
                           },
                           "required": [
                             "name",
-                            "label",
-                            "iconUrl",
-                            "when"
+                            "label"
                           ]
                         }
                       },
@@ -187,12 +187,8 @@ class TestModels(base.TestCase):
                     "required": [
                       "name",
                       "label",
-                      "description",
-                      "logo",
-                      "requiresSshKey",
                       "parameters",
-                      "services",
-                      "usageTemplate"
+                      "services"
                     ]
                   }
                 }
@@ -318,9 +314,10 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "extraVars": {
+                        "x-kubernetes-preserve-unknown-fields": true,
                         "type": "object",
                         "additionalProperties": {
-                          "type": "string"
+                          "x-kubernetes-preserve-unknown-fields": true
                         }
                       }
                     },

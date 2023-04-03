@@ -1,4 +1,3 @@
-import dataclasses
 import typing
 
 import kube_custom_resource as crd

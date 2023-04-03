@@ -23,13 +23,15 @@ class ClusterParameter:
     #: The kind of the parameter
     kind: str
     #: A dictionary of kind-specific options for the parameter
-    options: typing.Mapping[str, str]
+    options: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     #: Indicates if the option is immutable, i.e. cannot be updated
     immutable: bool
     #: Indicates if the parameter is required
     required: bool
     #: A default value for the parameter
-    default: typing.Optional[str]  # TODO(johngarbutt): k8s said no if this was any!
+    default: typing.Optional[
+        schema.Any
+    ]  # TODO(johngarbutt): k8s said no if this was any!
 
 
 @dataclasses.dataclass
@@ -78,7 +80,7 @@ class ClusterTypeSpec(schema.BaseModel):
     # Playbook is contained in the above git repo
     playbook: str
     # Option to add cloud specific details, like the image
-    extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
 
 
 class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
@@ -102,6 +104,9 @@ def get_fake_dict():
             playbook="sample.yaml",
             extraVars=dict(
                 cluster_image="testimage1",
+                random_bool=True,
+                random_int=8,
+                random_dict=dict(random_str="foo"),
             ),
         ),
     )

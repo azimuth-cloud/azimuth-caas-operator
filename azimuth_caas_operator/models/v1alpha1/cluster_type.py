@@ -12,8 +12,7 @@ class ClusterTypePhase(str, schema.Enum):
     FAILED = "Failed"
 
 
-@dataclasses.dataclass
-class ClusterParameter:
+class ClusterParameter(schema.BaseModel):
     #: The name of the parameter
     name: str
     #: A human-readable label for the parameter
@@ -31,11 +30,10 @@ class ClusterParameter:
     #: A default value for the parameter
     default: typing.Optional[
         schema.Any
-    ]  # TODO(johngarbutt): k8s said no if this was any!
+    ]  # TODO(johngarbutt): k8s said no if this was any before?!
 
 
-@dataclasses.dataclass
-class ClusterServiceSpec:
+class ClusterServiceSpec(schema.BaseModel):
     #: The name of the service
     name: str
     #: A human-readable label for the service
@@ -46,8 +44,7 @@ class ClusterServiceSpec:
     when: typing.Optional[str]
 
 
-@dataclasses.dataclass
-class ClusterUiMeta:
+class ClusterUiMeta(schema.BaseModel):
     #: The name of the cluster type
     name: str
     #: A human-readable label for the cluster type

@@ -97,13 +97,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_pod_names.assert_awaited_once_with("job", "ns")
         mock_get_lines.assert_not_awaited()
 
-    @mock.patch.object(operator, "update_cluster_type")
-    @mock.patch.object(operator, "_fetch_text_from_url")
-    async def test_cluster_type_create(self, mock_fetch, mock_update):
-        mock_fetch.return_value = """\
-name: "todo"
-label: "todo"
-"""
+    @mock.patch.object(operator, "_update_cluster_type")
+    @mock.patch.object(operator, "_fetch_ui_meta_from_url")
+    async def test_cluster_type_create_success(self, mock_fetch, mock_update):
+        fake_meta = None
+        mock_fetch.return_value = fake_meta
+
         # TODO(johngarbutt): probably need to actually fetch the ui meta!
         await operator.cluster_type_create(
             cluster_type_crd.get_fake_dict(), "type1", "ns", {}
@@ -113,7 +112,9 @@ label: "todo"
             operator.K8S_CLIENT,
             "type1",
             "ns",
-            mock.ANY,  # TODO(johngarbutt) finish this test!
+            cluster_type_crd.ClusterTypeStatus(
+                phase=cluster_type_crd.ClusterTypePhase.AVAILABLE, uiMeta=fake_meta
+            ),
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -272,4 +273,85 @@ label: "todo"
         )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.DELETING
+        )
+
+    @mock.patch.object(operator, "_fetch_text_from_url")
+    async def test_fetch_ui_meta_from_url_success(self, mock_fetch):
+        mock_fetch.return_value = """
+name: "quicktest"
+label: "Quick Test"
+description: Very quick test
+logo: https://logo1
+
+requires_ssh_key: false
+
+parameters:
+  - name: appliance_lifetime_hrs
+    label: "Select appliance lifetime (hrs)"
+    description: The appliance will be deleted after this time
+    immutable: true
+    kind: choice
+    default: 12
+    options:
+      choices:
+        - 1
+        - 8
+        - 12
+
+  - name: cluster_volume_size
+    label: "Data volume size (GB)"
+    description: |-
+      The size of the data volume for the workstation.  
+      The data volume will be available at `/data`.
+    kind: integer
+    default: 10
+    options:
+      min: 10
+    immutable: true
+
+usage_template: |
+    available using the [Monitoring service]({{ monitoring.url }}).
+
+services:
+  - name: webconsole
+    label: Web console
+    icon_url: https://dyltqmyl993wv.cloudfront.net/assets/stacks/guacamole/img/guacamole-stack-220x234.png
+"""  # noqa
+
+        result = await operator._fetch_ui_meta_from_url("url")
+        self.assertEqual(
+            cluster_type_crd.ClusterUiMeta(
+                name="quicktest",
+                label="Quick Test",
+                description="Very quick test",
+                logo="https://logo1",
+                requiresSshKey=False,
+                parameters=[
+                    cluster_type_crd.ClusterParameter(
+                        name="appliance_lifetime_hrs",
+                        label="Select appliance lifetime (hrs)",
+                        description="The appliance will be deleted after this time",
+                        immutable=True,
+                        kind="choice",
+                        default=12,
+                        options=dict(choices=[1, 8, 12]),
+                        required=True,
+                    ),
+                    cluster_type_crd.ClusterParameter(
+                        name="cluster_volume_size",
+                        label="Data volume size (GB)",
+                        description="",
+                        immutable=True,
+                        kind="integer",
+                        default=10,
+                        options=dict(min=10),
+                        required=True,
+                    ),
+                ],
+                usageTemplate=(
+                    "available using the [Monitoring service]({{ monitoring.url }})."
+                ),
+                services=[],
+            ),
+            result,
         )

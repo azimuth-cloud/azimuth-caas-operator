@@ -23,9 +23,9 @@ class ClusterParameter(schema.BaseModel):
     #: A dictionary of kind-specific options for the parameter
     options: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     #: Indicates if the option is immutable, i.e. cannot be updated
-    immutable: bool
+    immutable: typing.Optional[bool]
     #: Indicates if the parameter is required
-    required: bool
+    required: typing.Optional[bool]
     #: A default value for the parameter
     default: typing.Optional[
         schema.Any
@@ -55,9 +55,9 @@ class ClusterUiMeta(schema.BaseModel):
     #: Indicates whether the cluster requires a user SSH key
     requiresSshKey: typing.Optional[bool]
     #: The parameters for the cluster type
-    parameters: typing.Sequence[ClusterParameter]
+    parameters: typing.Optional[typing.Sequence[ClusterParameter]]
     #: The services for the cluster type
-    services: typing.Sequence[ClusterServiceSpec]
+    services: typing.Optional[typing.Sequence[ClusterServiceSpec]]
     #: Template for the usage of the clusters deployed using this type
     #: Can use Jinja2 syntax and should produce valid Markdown
     #: Receives the cluster parameters, as defined in `parameters`, as template args

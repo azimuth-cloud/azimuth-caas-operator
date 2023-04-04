@@ -149,9 +149,7 @@ class TestModels(base.TestCase):
                           "required": [
                             "name",
                             "label",
-                            "kind",
-                            "immutable",
-                            "required"
+                            "kind"
                           ]
                         }
                       },
@@ -186,9 +184,7 @@ class TestModels(base.TestCase):
                     },
                     "required": [
                       "name",
-                      "label",
-                      "parameters",
-                      "services"
+                      "label"
                     ]
                   }
                 }

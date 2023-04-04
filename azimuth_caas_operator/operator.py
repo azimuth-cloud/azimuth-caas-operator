@@ -33,7 +33,7 @@ async def cleanup(**kwargs):
     LOG.info("Cleanup complete.")
 
 
-async def update_cluster_type(client, name, namespace, status):
+async def _update_cluster_type(client, name, namespace, status):
     cluster_type_resource = await client.api(registry.API_VERSION).resource(
         "clustertype"
     )
@@ -50,15 +50,10 @@ async def _fetch_text_from_url(url):
             return await response.text()
 
 
-@kopf.on.create(registry.API_GROUP, "clustertypes")
-async def cluster_type_create(body, name, namespace, labels, **kwargs):
-    cluster_type = cluster_type_crd.ClusterType(**body)
-    LOG.debug(f"seen cluster_type event {cluster_type.spec.gitUrl}")
-    print(cluster_type.spec.uiMetaUrl)
-    raw_yaml_str = await _fetch_text_from_url(cluster_type.spec.uiMetaUrl)
+async def _fetch_ui_meta_from_url(url):
+    raw_yaml_str = await _fetch_text_from_url(url)
     ui_meta = yaml.safe_load(raw_yaml_str)
     # check its a dict at the top level?
-    print(ui_meta)
     ui_meta.setdefault("requiresSshKey", False)
     ui_meta.setdefault("description", "")
     ui_meta.setdefault("logo", "")
@@ -91,13 +86,18 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
         services.append(cluster_type_crd.ClusterServiceSpec(**raw))
     ui_meta["services"] = services
 
-    ui_meta_obj = cluster_type_crd.ClusterUiMeta(**ui_meta)
-    cluster_type.status.uiMeta = ui_meta_obj
+    return cluster_type_crd.ClusterUiMeta(**ui_meta)
+
+
+@kopf.on.create(registry.API_GROUP, "clustertypes")
+async def cluster_type_create(body, name, namespace, labels, **kwargs):
+    cluster_type = cluster_type_crd.ClusterType(**body)
+    LOG.debug(f"seen cluster_type event {cluster_type.spec.gitUrl}")
+    ui_meta_obj = await _fetch_ui_meta_from_url(cluster_type.spec.uiMetaUrl)
     cluster_type.status = cluster_type_crd.ClusterTypeStatus(
         phase=cluster_type_crd.ClusterTypePhase.AVAILABLE, uiMeta=ui_meta_obj
     )
-    print(cluster_type.status)
-    await update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
+    await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
 @kopf.on.create(registry.API_GROUP, "cluster", backoff=20)

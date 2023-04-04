@@ -24,12 +24,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: "CONSUL_HTTP_ADDR"
-            # TODO - we a variable for this
-            value: "http://consul-server.{{ .Release.Namespace }}:8500"
+            value: "{{ .Values.consulUrl }}"
           - name: "ARA_API_SERVER"
-            value: "http://azimuth-ara.{{ .Release.Namespace }}:8000"
+            value: "{{ .Values.araUrl }}"
           - name: "ANSIBLE_RUNNER_IMAGE"
-            value: "ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0"
+            value: "{{ .Values.ansibleRunnerImage }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

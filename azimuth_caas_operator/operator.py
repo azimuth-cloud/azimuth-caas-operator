@@ -64,16 +64,6 @@ async def _fetch_ui_meta_from_url(url):
     for raw in raw_parameters:
         raw.setdefault("immutable", True)  # is this correct?
         raw.setdefault("required", True)
-        raw.setdefault("default", "")
-        if raw.get("default") is None:
-            raw["default"] = ""
-        raw_options = raw.get("options", {})
-        options = {}
-        for key, value in raw_options.items():
-            if value is list:
-                value = json.dumps(value)
-            options[key] = str(value)
-        raw["options"] = options
         cluster_param = cluster_type_crd.ClusterParameter(**raw)
         params.append(cluster_param)
     ui_meta["parameters"] = params
@@ -81,7 +71,6 @@ async def _fetch_ui_meta_from_url(url):
     raw_services = ui_meta.get("services", [])
     services = []
     for raw in raw_services:
-        raw.setdefault("when", "")
         raw["iconUrl"] = raw.get("icon_url", "")
         services.append(cluster_type_crd.ClusterServiceSpec(**raw))
     ui_meta["services"] = services

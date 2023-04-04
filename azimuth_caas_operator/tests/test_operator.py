@@ -300,22 +300,18 @@ parameters:
 
   - name: cluster_volume_size
     label: "Data volume size (GB)"
-    description: |-
-      The size of the data volume for the workstation.  
-      The data volume will be available at `/data`.
+    description: The data volume will be available at `/data`.
     kind: integer
     default: 10
-    options:
-      min: 10
     immutable: true
 
-usage_template: |
+usage_template: 
     available using the [Monitoring service]({{ monitoring.url }}).
 
 services:
   - name: webconsole
     label: Web console
-    icon_url: https://dyltqmyl993wv.cloudfront.net/assets/stacks/guacamole/img/guacamole-stack-220x234.png
+    icon_url: https://icon2
 """  # noqa
 
         result = await operator._fetch_ui_meta_from_url("url")
@@ -340,18 +336,24 @@ services:
                     cluster_type_crd.ClusterParameter(
                         name="cluster_volume_size",
                         label="Data volume size (GB)",
-                        description="",
+                        description="The data volume will be available at `/data`.",
                         immutable=True,
                         kind="integer",
                         default=10,
-                        options=dict(min=10),
                         required=True,
                     ),
                 ],
                 usageTemplate=(
                     "available using the [Monitoring service]({{ monitoring.url }})."
                 ),
-                services=[],
+                services=[
+                    cluster_type_crd.ClusterServiceSpec(
+                        name="webconsole",
+                        label="Web console",
+                        # note the change from icon_url
+                        iconUrl="https://icon2",
+                    )
+                ],
             ),
             result,
         )

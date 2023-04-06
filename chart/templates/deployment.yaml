@@ -28,7 +28,7 @@ spec:
           - name: "ARA_API_SERVER"
             value: "{{ .Values.araUrl }}"
           - name: "ANSIBLE_RUNNER_IMAGE"
-            value: "{{ .Values.ansibleRunnerImage }}"
+            value: "{{ .Values.ansibleRunnerImage }}:{{ .Values.ansibleRunnerImageTag | default .Chart.AppVersion }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

@@ -8,3 +8,7 @@ spec:
   cloudCredentialsSecretName: openstack
   extraVars:
     foo: "baz"
+    test_int: 6
+    test_dict:
+      something_else: false
+    test_bool2: true

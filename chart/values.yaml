@@ -29,3 +29,10 @@ resources: {}
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+# caas settings set via environment variables
+consulUrl: "http://consul-server.azimuth:8500"
+# TODO: pick up .Release.Namespace by default?
+araUrl: "http://azimuth-ara.azimuth:8000"
+ansibleRunnerImage: "ghcr.io/stackhpc/azimuth-caas-operator-ar"
+ansibleRunnerImageTag: "" # Defaults to appVersion

@@ -126,7 +126,7 @@ spec:
   },
   "data": {
     "envvars": "---\\nANSIBLE_CALLBACK_PLUGINS: /home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback\\nARA_API_CLIENT: http\\nARA_API_SERVER: http://azimuth-ara.azimuth-caas-operator:8000\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
-    "extravars": "---\\ncluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: type1\\nfoo: bar\\n"
+    "extravars": "---\\ncluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: type1\\nfoo: bar\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
   }
 }"""  # noqa
         self.assertEqual(expected, json.dumps(config, indent=2))
@@ -176,3 +176,68 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
             ),
             list_iter.kwargs,
         )
+
+    @mock.patch(
+        "azimuth_caas_operator.utils.k8s.get_pod_resource", new_callable=mock.AsyncMock
+    )
+    async def test_get_pod_names_for_job(self, mock_pod):
+        mock_iter = async_utils.AsyncIterList(
+            [
+                dict(metadata=dict(name="pod1")),
+                dict(metadata=dict(name="pod2")),
+            ]
+        )
+        mock_pod.return_value = mock_iter
+
+        names = await ansible_runner._get_pod_names_for_job("client", "job1", "default")
+
+        self.assertEqual(["pod1", "pod2"], names)
+        self.assertEqual(
+            {"labels": {"job-name": "job1"}, "namespace": "default"}, mock_iter.kwargs
+        )
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_event(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1"]
+        fake_event = dict(event_data=dict(task="stuff"))
+        mock_get_lines.return_value = ["foo", "bar", json.dumps(fake_event)]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertEqual([fake_event], event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_no_event_on_bad_json(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1"]
+        mock_get_lines.return_value = ["foo", "bar"]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertEqual([], event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_no_event_multi_pod(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1", "pod2"]
+        mock_get_lines.return_value = ["foo", "bar"]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertIsNone(event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_not_awaited()

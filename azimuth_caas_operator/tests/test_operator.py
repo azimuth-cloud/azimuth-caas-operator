@@ -1,4 +1,3 @@
-import json
 import unittest
 from unittest import mock
 
@@ -7,7 +6,6 @@ import kopf
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator import operator
-from azimuth_caas_operator.tests import async_utils
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
 
@@ -31,79 +29,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         await operator.cleanup()
         mock_client.aclose.assert_awaited_once_with()
 
-    @mock.patch(
-        "azimuth_caas_operator.utils.k8s.get_pod_resource", new_callable=mock.AsyncMock
-    )
-    async def test_get_pod_names_for_job(self, mock_pod):
-        mock_iter = async_utils.AsyncIterList(
-            [
-                dict(metadata=dict(name="pod1")),
-                dict(metadata=dict(name="pod2")),
-            ]
-        )
-        mock_pod.return_value = mock_iter
+    @mock.patch.object(operator, "_update_cluster_type")
+    @mock.patch.object(operator, "_fetch_ui_meta_from_url")
+    async def test_cluster_type_create_success(self, mock_fetch, mock_update):
+        fake_meta = None
+        mock_fetch.return_value = fake_meta
 
-        names = await operator._get_pod_names_for_job("job1", "default")
-
-        self.assertEqual(["pod1", "pod2"], names)
-        self.assertEqual(
-            {"labels": {"job-name": "job1"}, "namespace": "default"}, mock_iter.kwargs
-        )
-
-    @mock.patch.object(operator, "LOG")
-    @mock.patch.object(operator, "_get_pod_log_lines")
-    @mock.patch.object(operator, "_get_pod_names_for_job")
-    async def test_get_ansible_runner_event_returns_event(
-        self, mock_pod_names, mock_get_lines, mock_log
-    ):
-        mock_pod_names.return_value = ["pod1"]
-        fake_event = dict(event_data=dict(task="stuff"))
-        mock_get_lines.return_value = ["foo", "bar", json.dumps(fake_event)]
-
-        event = await operator.get_ansible_runner_event("job", "ns")
-
-        self.assertEqual(fake_event["event_data"], event)
-        mock_pod_names.assert_awaited_once_with("job", "ns")
-        mock_get_lines.assert_awaited_once_with("pod1", "ns")
-        mock_log.info.assert_called_once_with("For job: job in: ns seen task: stuff")
-
-    @mock.patch.object(operator, "LOG")
-    @mock.patch.object(operator, "_get_pod_log_lines")
-    @mock.patch.object(operator, "_get_pod_names_for_job")
-    async def test_get_ansible_runner_event_returns_no_event_on_bad_json(
-        self, mock_pod_names, mock_get_lines, mock_log
-    ):
-        mock_pod_names.return_value = ["pod1"]
-        mock_get_lines.return_value = ["foo", "bar"]
-
-        event = await operator.get_ansible_runner_event("job", "ns")
-
-        self.assertIsNone(event)
-        mock_pod_names.assert_awaited_once_with("job", "ns")
-        mock_get_lines.assert_awaited_once_with("pod1", "ns")
-
-    @mock.patch.object(operator, "LOG")
-    @mock.patch.object(operator, "_get_pod_log_lines")
-    @mock.patch.object(operator, "_get_pod_names_for_job")
-    async def test_get_ansible_runner_event_returns_no_event_multi_pod(
-        self, mock_pod_names, mock_get_lines, mock_log
-    ):
-        mock_pod_names.return_value = ["pod1", "pod2"]
-        mock_get_lines.return_value = ["foo", "bar"]
-
-        event = await operator.get_ansible_runner_event("job", "ns")
-
-        self.assertIsNone(event)
-        mock_pod_names.assert_awaited_once_with("job", "ns")
-        mock_get_lines.assert_not_awaited()
-
-    @mock.patch.object(operator, "update_cluster_type")
-    @mock.patch.object(operator, "_fetch_text_from_url")
-    async def test_cluster_type_create(self, mock_fetch, mock_update):
-        mock_fetch.return_value = """\
-name: "todo"
-label: "todo"
-"""
         # TODO(johngarbutt): probably need to actually fetch the ui meta!
         await operator.cluster_type_create(
             cluster_type_crd.get_fake_dict(), "type1", "ns", {}
@@ -113,7 +44,9 @@ label: "todo"
             operator.K8S_CLIENT,
             "type1",
             "ns",
-            mock.ANY,  # TODO(johngarbutt) finish this test!
+            cluster_type_crd.ClusterTypeStatus(
+                phase=cluster_type_crd.ClusterTypePhase.AVAILABLE, uiMeta=fake_meta
+            ),
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -142,9 +75,10 @@ label: "todo"
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.CREATING,
-            extra_vars={"foo": "bar"},
+            extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
 
+    @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
     @mock.patch.object(cluster_utils, "create_scheduled_delete_job")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "is_any_successful_jobs")
@@ -155,20 +89,24 @@ label: "todo"
         mock_success,
         mock_update,
         mock_auto,
+        mock_outputs,
     ):
         mock_get_jobs.return_value = ["fakejob"]
         mock_success.return_value = True
         fake_body = cluster_crd.get_fake_dict()
+        mock_outputs.return_value = {"asdf": 42}
 
         await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
         mock_update.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.READY
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.READY,
+            outputs={"asdf": 42},
         )
-        # mock_auto.assert_awaited_once_with(
-        #    operator.K8S_CLIENT, "cluster1", "ns", "fakeuid1"
-        # )
         mock_auto.assert_not_awaited()
+        mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")
@@ -242,7 +180,7 @@ label: "todo"
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.CREATING,
-            extra_vars={"foo": "bar"},
+            extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -272,4 +210,87 @@ label: "todo"
         )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.DELETING
+        )
+
+    @mock.patch.object(operator, "_fetch_text_from_url")
+    async def test_fetch_ui_meta_from_url_success(self, mock_fetch):
+        mock_fetch.return_value = """
+name: "quicktest"
+label: "Quick Test"
+description: Very quick test
+logo: https://logo1
+
+requires_ssh_key: false
+
+parameters:
+  - name: appliance_lifetime_hrs
+    label: "Select appliance lifetime (hrs)"
+    description: The appliance will be deleted after this time
+    immutable: true
+    kind: choice
+    default: 12
+    options:
+      choices:
+        - 1
+        - 8
+        - 12
+
+  - name: cluster_volume_size
+    label: "Data volume size (GB)"
+    description: The data volume will be available at `/data`.
+    kind: integer
+    default: 10
+    immutable: true
+
+usage_template: 
+    available using the [Monitoring service]({{ monitoring.url }}).
+
+services:
+  - name: webconsole
+    label: Web console
+    icon_url: https://icon2
+"""  # noqa
+
+        result = await operator._fetch_ui_meta_from_url("url")
+        self.assertEqual(
+            cluster_type_crd.ClusterUiMeta(
+                name="quicktest",
+                label="Quick Test",
+                description="Very quick test",
+                logo="https://logo1",
+                requiresSshKey=False,
+                parameters=[
+                    cluster_type_crd.ClusterParameter(
+                        name="appliance_lifetime_hrs",
+                        label="Select appliance lifetime (hrs)",
+                        description="The appliance will be deleted after this time",
+                        immutable=True,
+                        kind="choice",
+                        default=12,
+                        options=dict(choices=[1, 8, 12]),
+                        required=True,
+                    ),
+                    cluster_type_crd.ClusterParameter(
+                        name="cluster_volume_size",
+                        label="Data volume size (GB)",
+                        description="The data volume will be available at `/data`.",
+                        immutable=True,
+                        kind="integer",
+                        default=10,
+                        required=True,
+                    ),
+                ],
+                usageTemplate=(
+                    "available using the [Monitoring service]({{ monitoring.url }})."
+                ),
+                services=[
+                    cluster_type_crd.ClusterServiceSpec(
+                        name="webconsole",
+                        label="Web console",
+                        # note the change from icon_url
+                        iconUrl="https://icon2",
+                    )
+                ],
+            ),
+            result,
         )

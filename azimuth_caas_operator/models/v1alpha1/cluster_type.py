@@ -1,4 +1,3 @@
-import dataclasses
 import typing
 
 import kube_custom_resource as crd
@@ -12,8 +11,7 @@ class ClusterTypePhase(str, schema.Enum):
     FAILED = "Failed"
 
 
-@dataclasses.dataclass
-class ClusterParameter:
+class ClusterParameter(schema.BaseModel):
     #: The name of the parameter
     name: str
     #: A human-readable label for the parameter
@@ -23,17 +21,18 @@ class ClusterParameter:
     #: The kind of the parameter
     kind: str
     #: A dictionary of kind-specific options for the parameter
-    options: typing.Mapping[str, str]
+    options: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     #: Indicates if the option is immutable, i.e. cannot be updated
-    immutable: bool
+    immutable: typing.Optional[bool]
     #: Indicates if the parameter is required
-    required: bool
+    required: typing.Optional[bool]
     #: A default value for the parameter
-    default: typing.Optional[str]  # TODO(johngarbutt): k8s said no if this was any!
+    default: typing.Optional[
+        schema.Any
+    ]  # TODO(johngarbutt): k8s said no if this was any before?!
 
 
-@dataclasses.dataclass
-class ClusterServiceSpec:
+class ClusterServiceSpec(schema.BaseModel):
     #: The name of the service
     name: str
     #: A human-readable label for the service
@@ -44,8 +43,7 @@ class ClusterServiceSpec:
     when: typing.Optional[str]
 
 
-@dataclasses.dataclass
-class ClusterUiMeta:
+class ClusterUiMeta(schema.BaseModel):
     #: The name of the cluster type
     name: str
     #: A human-readable label for the cluster type
@@ -57,9 +55,9 @@ class ClusterUiMeta:
     #: Indicates whether the cluster requires a user SSH key
     requiresSshKey: typing.Optional[bool]
     #: The parameters for the cluster type
-    parameters: typing.Sequence[ClusterParameter]
+    parameters: typing.Optional[typing.Sequence[ClusterParameter]]
     #: The services for the cluster type
-    services: typing.Sequence[ClusterServiceSpec]
+    services: typing.Optional[typing.Sequence[ClusterServiceSpec]]
     #: Template for the usage of the clusters deployed using this type
     #: Can use Jinja2 syntax and should produce valid Markdown
     #: Receives the cluster parameters, as defined in `parameters`, as template args
@@ -78,7 +76,7 @@ class ClusterTypeSpec(schema.BaseModel):
     # Playbook is contained in the above git repo
     playbook: str
     # Option to add cloud specific details, like the image
-    extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
 
 
 class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
@@ -102,6 +100,9 @@ def get_fake_dict():
             playbook="sample.yaml",
             extraVars=dict(
                 cluster_image="testimage1",
+                random_bool=True,
+                random_int=8,
+                random_dict=dict(random_str="foo"),
             ),
         ),
     )

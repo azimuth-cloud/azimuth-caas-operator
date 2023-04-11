@@ -22,9 +22,14 @@ class ClusterStatus(schema.BaseModel):
     # used to detect upgrade requests
     clusterTypeVersion: typing.Optional[str]
     # used to detect extra var changes
-    appliedExtraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    appliedExtraVars: schema.Dict[str, schema.Any] = pydantic.Field(
+        default_factory=dict
+    )
     updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
         None, description="The timestamp at which the resource was updated."
+    )
+    outputs: typing.Optional[schema.Dict[str, schema.Any]] = pydantic.Field(
+        default_factory=dict
     )
 
 
@@ -35,7 +40,7 @@ class ClusterSpec(schema.BaseModel):
     clusterTypeVersion: typing.Optional[str]
     cloudCredentialsSecretName: str
     # as described by the cluster type ui-meta
-    extraVars: dict[str, str] = pydantic.Field(default_factory=dict[str, str])
+    extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
 
 
 class Cluster(crd.CustomResource, scope=crd.Scope.NAMESPACED):
@@ -55,6 +60,6 @@ def get_fake_dict():
         spec=dict(
             clusterTypeName="type1",
             cloudCredentialsSecretName="cloudsyaml",
-            extraVars=dict(foo="bar"),
+            extraVars=dict(foo="bar", very_random_int=42, nested=dict(baz="bob")),
         ),
     )

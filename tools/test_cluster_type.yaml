@@ -10,3 +10,7 @@ spec:
   playbook: "demo/project/test.yml"
   extraVars:
     foo: "bar"
+    test_int: 5
+    test_dict:
+      something: false
+    test_bool: true

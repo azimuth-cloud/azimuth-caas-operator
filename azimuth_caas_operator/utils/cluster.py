@@ -10,12 +10,15 @@ from azimuth_caas_operator.utils import image as image_utils
 LOG = logging.getLogger(__name__)
 
 
-async def update_cluster(client, name, namespace, phase, extra_vars=None):
+async def update_cluster(client, name, namespace, phase, extra_vars=None, outputs=None):
     now = datetime.datetime.utcnow()
     now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     status_updates = dict(phase=phase, updatedTimestamp=now_string)
     if extra_vars:
         status_updates["appliedExtraVars"] = extra_vars
+    if outputs is not None:
+        # empty dict is a valid possible output we should record
+        status_updates["outputs"] = outputs
 
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(

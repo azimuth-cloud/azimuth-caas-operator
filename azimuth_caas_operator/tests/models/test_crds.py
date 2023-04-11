@@ -339,6 +339,13 @@ class TestModels(base.TestCase):
                     "description": "The timestamp at which the resource was updated.",
                     "type": "string",
                     "format": "date-time"
+                  },
+                  "outputs": {
+                    "x-kubernetes-preserve-unknown-fields": true,
+                    "type": "object",
+                    "additionalProperties": {
+                      "x-kubernetes-preserve-unknown-fields": true
+                    }
                   }
                 }
               }

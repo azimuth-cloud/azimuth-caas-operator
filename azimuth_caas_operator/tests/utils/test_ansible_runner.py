@@ -176,3 +176,68 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
             ),
             list_iter.kwargs,
         )
+
+    @mock.patch(
+        "azimuth_caas_operator.utils.k8s.get_pod_resource", new_callable=mock.AsyncMock
+    )
+    async def test_get_pod_names_for_job(self, mock_pod):
+        mock_iter = async_utils.AsyncIterList(
+            [
+                dict(metadata=dict(name="pod1")),
+                dict(metadata=dict(name="pod2")),
+            ]
+        )
+        mock_pod.return_value = mock_iter
+
+        names = await ansible_runner._get_pod_names_for_job("client", "job1", "default")
+
+        self.assertEqual(["pod1", "pod2"], names)
+        self.assertEqual(
+            {"labels": {"job-name": "job1"}, "namespace": "default"}, mock_iter.kwargs
+        )
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_event(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1"]
+        fake_event = dict(event_data=dict(task="stuff"))
+        mock_get_lines.return_value = ["foo", "bar", json.dumps(fake_event)]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertEqual([fake_event], event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_no_event_on_bad_json(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1"]
+        mock_get_lines.return_value = ["foo", "bar"]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertEqual([], event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")
+
+    @mock.patch.object(ansible_runner, "LOG")
+    @mock.patch.object(ansible_runner, "_get_pod_log_lines")
+    @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
+    async def test_get_ansible_runner_event_returns_no_event_multi_pod(
+        self, mock_pod_names, mock_get_lines, mock_log
+    ):
+        mock_pod_names.return_value = ["pod1", "pod2"]
+        mock_get_lines.return_value = ["foo", "bar"]
+
+        event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
+
+        self.assertIsNone(event)
+        mock_pod_names.assert_awaited_once_with("client", "job", "ns")
+        mock_get_lines.assert_not_awaited()

@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import os
 import yaml
@@ -8,6 +9,7 @@ from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 from azimuth_caas_operator.utils import image as image_utils
+from azimuth_caas_operator.utils import k8s
 
 LOG = logging.getLogger(__name__)
 
@@ -208,6 +210,79 @@ def is_any_successful_jobs(job_list):
         if state:
             return True
     return False
+
+
+async def get_outputs_from_create_job(client, name, namespace):
+    create_jobs = await get_jobs_for_cluster(client, name, namespace)
+    completed_job = None
+    for job in create_jobs:
+        state = get_job_completed_state(job)
+        if state:
+            completed_job = job
+            # TODO(johngarbutt): check for two jobs?
+            break
+    if completed_job:
+        return await _get_job_outputs(client, completed_job)
+
+
+async def _get_job_outputs(client, job):
+    # first get the tail of the logs
+    events = await _get_ansible_runner_events(
+        client, job.metadata.name, job.metadata.namespace
+    )
+    events.reverse()
+    debug_result = None
+    for event_details in events:
+        # look for the last debug action
+        # that has an outputs key in its result object
+        if event_details["event"] == "runner_on_ok":
+            event_data = event_details["event_data"]
+            task_action = event_data["task_action"]
+            if task_action == "debug":
+                debug_result = event_data.get("res", {})
+                return debug_result.get("outputs", {})
+
+
+async def _get_pod_names_for_job(client, job_name, namespace):
+    pod_resource = await k8s.get_pod_resource(client)
+    return [
+        pod["metadata"]["name"]
+        async for pod in pod_resource.list(
+            labels={"job-name": job_name}, namespace=namespace
+        )
+    ]
+
+
+async def _get_pod_log_lines(client, pod_name, namespace):
+    log_resource = await client.api("v1").resource("pods/log")
+    # last 5 is a bit random, but does the trick?
+    log_string = await log_resource.fetch(
+        pod_name, namespace=namespace, params=dict(tail=-5)
+    )
+    # remove trailing space
+    log_string = log_string.strip()
+    # return a list of log lines
+    return log_string.split("\n")
+
+
+async def _get_ansible_runner_events(client, job_name, namespace):
+    pod_names = await _get_pod_names_for_job(client, job_name, namespace)
+    if len(pod_names) == 0 or len(pod_names) > 1:
+        # TODO(johngarbutt) only works because our jobs don't retry,
+        # and we don't yet check the pod is running or finished
+        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
+        return
+    pod_name = pod_names[0]
+
+    log_lines = await _get_pod_log_lines(client, pod_name, namespace)
+    json_events = []
+    for line in log_lines:
+        try:
+            json_log = json.loads(line)
+            json_events.append(json_log)
+        except json.decoder.JSONDecodeError:
+            LOG.debug("failed to decode log, most likely not ansible json output.")
+    return json_events
 
 
 def are_all_jobs_in_error_state(job_list):

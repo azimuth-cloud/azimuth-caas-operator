@@ -1,4 +1,3 @@
-import json
 import logging
 
 import aiohttp
@@ -104,8 +103,11 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
             )
 
+        outputs = await ansible_runner.get_outputs_from_create_job(
+            K8S_CLIENT, name, namespace
+        )
         await cluster_utils.update_cluster(
-            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY, outputs=outputs
         )
 
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
@@ -225,46 +227,3 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     raise kopf.TemporaryError(
         f"wait for delete job to complete for {name} in {namespace}"
     )
-
-
-async def _get_pod_names_for_job(job_name, namespace):
-    pod_resource = await k8s.get_pod_resource(K8S_CLIENT)
-    return [
-        pod["metadata"]["name"]
-        async for pod in pod_resource.list(
-            labels={"job-name": job_name}, namespace=namespace
-        )
-    ]
-
-
-async def _get_pod_log_lines(pod_name, namespace):
-    log_resource = await K8S_CLIENT.api("v1").resource("pods/log")
-    # TODO(johngarbutt): we should pass tail param here?
-    log_string = await log_resource.fetch(pod_name, namespace=namespace)
-    # remove trailing space
-    log_string = log_string.strip()
-    # return a list of log lines
-    return log_string.split("\n")
-
-
-async def get_ansible_runner_event(job_name, namespace):
-    pod_names = await _get_pod_names_for_job(job_name, namespace)
-    if len(pod_names) == 0 or len(pod_names) > 1:
-        # TODO(johngarbutt) only works because our jobs don't retry,
-        # and we don't yet check the pod is running or finished
-        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
-        return
-    pod_name = pod_names[0]
-
-    log_lines = await _get_pod_log_lines(pod_name, namespace)
-    last_log_line = log_lines[-1]
-
-    try:
-        last_log_event = json.loads(last_log_line)
-        event_data = last_log_event.get("event_data", {})
-        task = event_data.get("task")
-        if task:
-            LOG.info(f"For job: {job_name} in: {namespace} seen task: {task}")
-        return event_data
-    except json.decoder.JSONDecodeError:
-        LOG.debug("failed to decode log, most likely not ansible json output.")

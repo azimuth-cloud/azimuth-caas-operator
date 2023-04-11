@@ -88,7 +88,7 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
     await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
-@kopf.on.create(registry.API_GROUP, "cluster", backoff=20)
+@kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_create(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster create for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
@@ -116,7 +116,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
             # TODO(johngarbutt): update cluster with the last event name from job log
             raise kopf.TemporaryError(
-                f"wait for create job to complete for {name} in {namespace}"
+                f"wait for create job to complete for {name} in {namespace}", delay=20
             )
         else:
             if len(create_jobs) >= 2:
@@ -165,7 +165,7 @@ async def cluster_changed(body, name, namespace, labels, **kwargs):
     # TODO(johngarbutt): we need to do something!
 
 
-@kopf.on.delete(registry.API_GROUP, "cluster", backoff=20)
+@kopf.on.delete(registry.API_GROUP, "cluster")
 async def cluster_delete(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster delete for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
@@ -190,7 +190,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         if completed_state is None:
             # TODO(johngarbutt): update cluster with current tasks from job log?
             raise kopf.TemporaryError(
-                f"wait for delete job to complete for {name} in {namespace}"
+                f"wait for delete job to complete for {name} in {namespace}", delay=20
             )
             # TODO(johngarbutt): check for multiple pending delete jobs?
         LOG.debug("This job failed, keep looking at other jobs.")

@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 import kube_custom_resource as crd
@@ -67,6 +68,10 @@ class ClusterUiMeta(schema.BaseModel):
 class ClusterTypeStatus(schema.BaseModel):
     phase: ClusterTypePhase = pydantic.Field(ClusterTypePhase.PENDING)
     uiMeta: typing.Optional[ClusterUiMeta]
+    uiMetaUrl: typing.Optional[pydantic.AnyHttpUrl]
+    updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
+        None, description="The timestamp at which the resource was updated."
+    )
 
 
 class ClusterTypeSpec(schema.BaseModel):

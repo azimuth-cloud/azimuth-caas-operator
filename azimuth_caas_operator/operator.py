@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import aiohttp
@@ -33,6 +34,10 @@ async def cleanup(**kwargs):
 
 
 async def _update_cluster_type(client, name, namespace, status):
+    now = datetime.datetime.utcnow()
+    now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    status.updatedTimestamp = now_string
+
     cluster_type_resource = await client.api(registry.API_VERSION).resource(
         "clustertype"
     )
@@ -86,6 +91,23 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
         phase=cluster_type_crd.ClusterTypePhase.AVAILABLE, uiMeta=ui_meta_obj
     )
     await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
+
+
+@kopf.on.update(registry.API_GROUP, "clustertypes")
+@kopf.on.resume(registry.API_GROUP, "clustertypes")
+async def cluster_type_updated(body, name, namespace, labels, **kwargs):
+    cluster_type = cluster_type_crd.ClusterType(**body)
+    if cluster_type.spec.uiMetaUrl == cluster_type.status.uiMetaUrl:
+        LOG.info("No update of uimeta needed.")
+    else:
+        LOG.info("Updating UI Meta.")
+        ui_meta_obj = await _fetch_ui_meta_from_url(cluster_type.spec.uiMetaUrl)
+        cluster_type.status = cluster_type_crd.ClusterTypeStatus(
+            phase=cluster_type_crd.ClusterTypePhase.AVAILABLE,
+            uiMeta=ui_meta_obj,
+            uiMetaUrl=cluster_type.spec.uiMetaUrl,
+        )
+        await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
 @kopf.on.create(registry.API_GROUP, "cluster")

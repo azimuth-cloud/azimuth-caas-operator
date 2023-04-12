@@ -186,6 +186,17 @@ class TestModels(base.TestCase):
                       "name",
                       "label"
                     ]
+                  },
+                  "uiMetaUrl": {
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "updatedTimestamp": {
+                    "description": "The timestamp at which the resource was updated.",
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               }

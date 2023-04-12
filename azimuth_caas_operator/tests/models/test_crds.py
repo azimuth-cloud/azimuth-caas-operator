@@ -293,6 +293,7 @@ class TestModels(base.TestCase):
                     "enum": [
                       "Creating",
                       "Configuring",
+                      "Upgrading",
                       "Ready",
                       "Failed",
                       "Deleting"
@@ -357,6 +358,9 @@ class TestModels(base.TestCase):
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
                     }
+                  },
+                  "error": {
+                    "type": "string"
                   }
                 }
               }

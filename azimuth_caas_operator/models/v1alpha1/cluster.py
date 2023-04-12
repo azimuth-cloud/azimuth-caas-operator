@@ -11,6 +11,7 @@ from azimuth_caas_operator.models.v1alpha1.cluster_type import ClusterTypeSpec
 class ClusterPhase(str, schema.Enum):
     CREATING = "Creating"
     CONFIG = "Configuring"
+    UPGRADE = "Upgrading"
     READY = "Ready"
     FAILED = "Failed"
     DELETING = "Deleting"
@@ -31,6 +32,7 @@ class ClusterStatus(schema.BaseModel):
     outputs: typing.Optional[schema.Dict[str, schema.Any]] = pydantic.Field(
         default_factory=dict
     )
+    error: typing.Optional[str]
 
 
 class ClusterSpec(schema.BaseModel):

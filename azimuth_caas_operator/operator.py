@@ -176,11 +176,30 @@ async def cluster_changed(body, name, namespace, labels, **kwargs):
     is_upgrade = cluster.spec.clusterTypeVersion != cluster.status.clusterTypeVersion
     if is_upgrade:
         LOG.info(f"Upgrade requested for: {name} in {namespace}!")
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            # cluster_crd.ClusterPhase.UPGRADE,
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not implemented upgrade yet!",
+        )
+        LOG.error("Not implemented upgrade yet!")
 
     is_extra_var_update = cluster.spec.extraVars != cluster.status.appliedExtraVars
     if is_extra_var_update:
         # TODO(johngarbutt) this will always trigger for the moment, needs fixing
         LOG.info(f"Detected extra vars have changed for: {name} in {namespace}")
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            # cluster_crd.ClusterPhase.CONFIG,
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not implemented re-configure yet!",
+        )
+        LOG.error("Not implemented re-configure yet!")
+
     elif not is_upgrade:
         LOG.info(f"No changes for: {name} in {namespace}")
 

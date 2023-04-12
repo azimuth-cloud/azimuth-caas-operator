@@ -25,7 +25,7 @@ parameters:
     kind: cloud.size
     label: Workstation Size
     description: The size of the workstation.
-    immutable: true
+    immutable: false
     options:
       min_ram: 4096
       min_disk: 10

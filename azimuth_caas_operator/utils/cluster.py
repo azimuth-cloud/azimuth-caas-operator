@@ -33,7 +33,8 @@ async def update_cluster(
 
 
 async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):
-    if lifetime_hours.lower() == "forever":
+    if "ever" in str(lifetime_hours).lower():
+        # skip for never or forever
         LOG.info("Skipping scheduled delete.")
         return
 

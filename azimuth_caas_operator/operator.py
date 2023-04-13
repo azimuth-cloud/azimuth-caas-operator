@@ -214,7 +214,7 @@ async def cluster_changed(body, name, namespace, labels, **kwargs):
     elif not is_upgrade:
         LOG.info(f"No changes for: {name} in {namespace}")
 
-    # TODO(johngarbutt): we need to do something!
+    # TODO(johngarbutt): we need to do something!!
 
 
 @kopf.on.delete(registry.API_GROUP, "cluster")

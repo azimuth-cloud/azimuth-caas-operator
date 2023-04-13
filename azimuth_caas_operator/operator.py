@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 import aiohttp
@@ -33,6 +34,10 @@ async def cleanup(**kwargs):
 
 
 async def _update_cluster_type(client, name, namespace, status):
+    now = datetime.datetime.utcnow()
+    now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    status.updatedTimestamp = now_string
+
     cluster_type_resource = await client.api(registry.API_VERSION).resource(
         "clustertype"
     )
@@ -88,6 +93,23 @@ async def cluster_type_create(body, name, namespace, labels, **kwargs):
     await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
+@kopf.on.update(registry.API_GROUP, "clustertypes")
+@kopf.on.resume(registry.API_GROUP, "clustertypes")
+async def cluster_type_updated(body, name, namespace, labels, **kwargs):
+    cluster_type = cluster_type_crd.ClusterType(**body)
+    if cluster_type.spec.uiMetaUrl == cluster_type.status.uiMetaUrl:
+        LOG.info("No update of uimeta needed.")
+    else:
+        LOG.info("Updating UI Meta.")
+        ui_meta_obj = await _fetch_ui_meta_from_url(cluster_type.spec.uiMetaUrl)
+        cluster_type.status = cluster_type_crd.ClusterTypeStatus(
+            phase=cluster_type_crd.ClusterTypePhase.AVAILABLE,
+            uiMeta=ui_meta_obj,
+            uiMetaUrl=cluster_type.spec.uiMetaUrl,
+        )
+        await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
+
+
 @kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_create(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster create for {name} in {namespace}")
@@ -96,28 +118,29 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     # TODO(johngarbutt): share more code with delete!
     create_jobs = await ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
     if ansible_runner.is_any_successful_jobs(create_jobs):
-        lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
-        if lifetime_hours:
-            # TODO(johngarbutt) hack to autodelete
-            await cluster_utils.create_scheduled_delete_job(
-                K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
-            )
-
         outputs = await ansible_runner.get_outputs_from_create_job(
             K8S_CLIENT, name, namespace
         )
         await cluster_utils.update_cluster(
             K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY, outputs=outputs
         )
-
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return
+
     if len(create_jobs) != 0:
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
             # TODO(johngarbutt): update cluster with the last event name from job log
+            # but for now we just bump the updated_at time
+            await cluster_utils.update_cluster(
+                K8S_CLIENT,
+                name,
+                namespace,
+                cluster_crd.ClusterPhase.CREATING,
+            )
             raise kopf.TemporaryError(
                 f"wait for create job to complete for {name} in {namespace}", delay=20
             )
+
         else:
             if len(create_jobs) >= 2:
                 msg = f"Too many failed creates for {name} in {namespace}"
@@ -131,7 +154,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             )
 
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=False)
-    # TODO(johngarbutt): not always needed on a retry
     await cluster_utils.update_cluster(
         K8S_CLIENT,
         name,
@@ -140,6 +162,14 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         extra_vars=cluster.spec.extraVars,
     )
     LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
+
+    lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
+    if lifetime_hours:
+        await cluster_utils.create_scheduled_delete_job(
+            K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
+        )
+
+    # Trigger a retry in 60 seconds to check on the job
     raise kopf.TemporaryError(
         f"wait for create job to complete for {name} in {namespace}"
     )
@@ -151,14 +181,36 @@ async def cluster_changed(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster update for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
 
+    # TODO(johngarbutt) check create has finished OK?
+    # Make sure we are not in the error state?
+
     is_upgrade = cluster.spec.clusterTypeVersion != cluster.status.clusterTypeVersion
     if is_upgrade:
         LOG.info(f"Upgrade requested for: {name} in {namespace}!")
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            # cluster_crd.ClusterPhase.UPGRADE,
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not implemented upgrade yet!",
+        )
+        LOG.error("Not implemented upgrade yet!")
 
     is_extra_var_update = cluster.spec.extraVars != cluster.status.appliedExtraVars
     if is_extra_var_update:
         # TODO(johngarbutt) this will always trigger for the moment, needs fixing
         LOG.info(f"Detected extra vars have changed for: {name} in {namespace}")
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            # cluster_crd.ClusterPhase.CONFIG,
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not implemented re-configure yet!",
+        )
+        LOG.error("Not implemented re-configure yet!")
+
     elif not is_upgrade:
         LOG.info(f"No changes for: {name} in {namespace}")
 

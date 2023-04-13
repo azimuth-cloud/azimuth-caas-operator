@@ -123,9 +123,11 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
-        mock_update.assert_not_awaited()
         self.assertEqual(
             "wait for create job to complete for cluster1 in ns", str(ctx.exception)
+        )
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")

@@ -10,7 +10,9 @@ from azimuth_caas_operator.utils import image as image_utils
 LOG = logging.getLogger(__name__)
 
 
-async def update_cluster(client, name, namespace, phase, extra_vars=None, outputs=None):
+async def update_cluster(
+    client, name, namespace, phase, extra_vars=None, outputs=None, error=None
+):
     now = datetime.datetime.utcnow()
     now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     status_updates = dict(phase=phase, updatedTimestamp=now_string)
@@ -19,6 +21,8 @@ async def update_cluster(client, name, namespace, phase, extra_vars=None, output
     if outputs is not None:
         # empty dict is a valid possible output we should record
         status_updates["outputs"] = outputs
+    if error is not None:
+        status_updates["error"] = error
 
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(
@@ -29,15 +33,21 @@ async def update_cluster(client, name, namespace, phase, extra_vars=None, output
 
 
 async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):
+    if "ever" in str(lifetime_hours).lower():
+        # skip for never or forever
+        LOG.info("Skipping scheduled delete.")
+        return
+
     now = datetime.datetime.now(datetime.timezone.utc)
-    hours_int = 24
+    hours_int = 0
     try:
         hours_int = int(lifetime_hours)
     except ValueError:
-        LOG.error(f"invalid lifetime {lifetime_hours}")
-    if hours_int > 24 * 30:
-        hours_int = 24
-        LOG.error(f"lifetime of {hours_int} too big, cap at 30 days.")
+        LOG.error(f"Invalid lifetime_hours requested: {lifetime_hours}")
+
+    if hours_int <= 0 or hours_int > 24 * 30:
+        hours_int = 24 * 30
+        LOG.error(f"Invalid lifetime_hours of {hours_int} moved to 30 days.")
 
     delete_time = now + datetime.timedelta(hours=hours_int)
     cron_schedule = (
@@ -128,3 +138,4 @@ subjects:
         role_binding_data,
         namespace=namespace,
     )
+    LOG.info(f"Scheduled cluster auto delete for cluster: {name} in: {namespace}")

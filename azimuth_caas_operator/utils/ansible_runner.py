@@ -91,7 +91,7 @@ def get_job(
         ansible_runner_command += (
             " && openstack"
             # TODO(johngarbutt): very tight coupling with code in azimuth here :(
-            f" application credential delete azimuth-caas-{name}"
+            f" application credential delete azimuth-caas-{name} || true"
         )
 
     # TODO(johngarbutt): need get secret keyname from somewhere

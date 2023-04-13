@@ -80,6 +80,20 @@ def get_job(
     name = cluster.metadata.name
     action = "remove" if remove else "create"
     image = image_utils.get_ansible_runner_image()
+
+    ansible_runner_command = (
+        "chmod 755 /runner/project; "
+        "ansible-galaxy install -r /runner/project/roles/requirements.yml; "
+        "ansible-runner run /runner -j"
+    )
+    if remove:
+        # on success, delete the app cred
+        ansible_runner_command += (
+            " && openstack"
+            # TODO(johngarbutt): very tight coupling with code in azimuth here :(
+            f" application credential delete azimuth-caas-{name}"
+        )
+
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -128,10 +142,14 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml; ansible-runner run /runner -j"
+        - "{ansible_runner_command}"
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"
+        - name: OS_CLOUD
+          value: "openstack"
+        - name: OS_CLIENT_CONFIG_FILE
+          value: "/openstack/clouds.yaml"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project

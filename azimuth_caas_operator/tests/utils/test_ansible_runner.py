@@ -11,19 +11,19 @@ from azimuth_caas_operator.utils import ansible_runner
 
 
 class TestAnsibleRunner(base.TestCase):
-    def test_get_job(self):
+    def test_get_job_remove(self):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
-        job = ansible_runner.get_job(cluster, cluster_type.spec)
+        job = ansible_runner.get_job(cluster, cluster_type.spec, remove=True)
 
         expected = """\
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test1-create-
+  generateName: test1-remove-
   labels:
-    azimuth-caas-action: create
+    azimuth-caas-action: remove
     azimuth-caas-cluster: test1
   ownerReferences:
   - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
@@ -40,10 +40,15 @@ spec:
         - /bin/bash
         - -c
         - chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml;
-          ansible-runner run /runner -j
+          ansible-runner run /runner -j && openstack application credential delete
+          azimuth-caas-test1
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
+        - name: OS_CLOUD
+          value: openstack
+        - name: OS_CLIENT_CONFIG_FILE
+          value: /openstack/clouds.yaml
         image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
         name: run
         volumeMounts:
@@ -92,7 +97,7 @@ spec:
       - emptyDir: {}
         name: inventory
       - configMap:
-          name: test1-create
+          name: test1-remove
         name: env
       - name: cloudcreds
         secret:

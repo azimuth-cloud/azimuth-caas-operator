@@ -291,52 +291,53 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     # Check for any pending jobs
     # and fail if we are still running a create job
     await ansible_runner.ensure_create_jobs_finished(K8S_CLIENT, name, namespace)
-    delete_jobs_status = await ansible_runner.get_delete_jobs_status(
+    delete_job = await ansible_runner.get_delete_job_for_cluster(
         K8S_CLIENT, name, namespace
     )
+    if delete_job:
+        is_job_success = ansible_runner.get_job_completed_state(delete_job)
 
-    # If we find a completed delete job, we are done.
-    # If we find a running job, trigger a retry in the hope its complete soon
-    for completed_state in delete_jobs_status:
-        if completed_state is True:
-            # TODO(johngarbutt): how to delete app cred in openstack?
+        # raise exception to retry if the job is still running
+        if is_job_success is None:
+            await cluster_utils.update_cluster(
+                K8S_CLIENT,
+                name,
+                namespace,
+                cluster_crd.ClusterPhase.DELETING,
+            )
+            msg = f"Waiting for delete job to complete for {name} in {namespace}"
+            LOG.info(msg)
+            raise kopf.TemporaryError(msg, delay=20)
+
+        # if the delete job finished
+        if is_job_success:
             await ansible_runner.delete_secret(
                 K8S_CLIENT, cluster.spec.cloudCredentialsSecretName, namespace
             )
             LOG.info(f"Delete job complete for {name} in {namespace}")
+            # let kopf remove finalizer and complete the cluster delete
             return
-        if completed_state is None:
-            # TODO(johngarbutt): update cluster with current tasks from job log?
-            raise kopf.TemporaryError(
-                f"wait for delete job to complete for {name} in {namespace}", delay=20
+
+        else:
+            await cluster_utils.update_cluster(
+                K8S_CLIENT,
+                name,
+                namespace,
+                cluster_crd.ClusterPhase.FAILED,
+                # TODO(johngarbutt): how does a user retry the delete, eek!
+                error=(
+                    "Failed to delete the platform. Please contact Azimuth operators."
+                ),
             )
-            # TODO(johngarbutt): check for multiple pending delete jobs?
-        LOG.debug("This job failed, keep looking at other jobs.")
+            LOG.error(f"Delete job failed for {name} in {namespace}")
+            LOG.error(
+                f"Delete job failed for {name} in {namespace}. "
+                "Please fix the problem, "
+                "then delete all failed jobs to trigger a new delete job."
+            )
+            raise RuntimeError(f"Failed to delete {name}")
 
-    # Don't create a new delete job if we hit max retries
-    if len(delete_jobs_status) >= 2:
-        await cluster_utils.update_cluster(
-            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED
-        )
-        LOG.error(
-            f"Tried to delete {name} in {namespace} three times, but they all failed. "
-            "Please fix the problem, "
-            "then delete all failed jobs to trigger a new delete job."
-        )
-        raise RuntimeError(f"failed to delete {name}")
-
-    # OK, so there are no running delete job,
-    # and if there are any completed jobs they failed,
-    # but equally we have not yet hit the max retry count.
-    # As such we should create a new delete job
-    if len(delete_jobs_status) == 0:
-        LOG.info(f"No delete jobs so lets create one for {name} in {namespace}")
-    else:
-        LOG.warning(
-            f"Previous delete jobs have failed, "
-            "create a new one for {name} in {namespace}"
-        )
-
+    # delete job not yet created, lets create one
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)
     await cluster_utils.update_cluster(
         K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING

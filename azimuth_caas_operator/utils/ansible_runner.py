@@ -217,6 +217,10 @@ async def get_update_job_for_cluster(client, cluster_name, namespace):
     return await get_job_for_cluster(client, cluster_name, namespace, update=True)
 
 
+async def get_delete_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, remove=True)
+
+
 async def get_job_for_cluster(
     client, cluster_name, namespace, remove=False, update=False
 ):

@@ -21,8 +21,11 @@ async def update_cluster(
     if outputs is not None:
         # empty dict is a valid possible output we should record
         status_updates["outputs"] = outputs
+
     if error is not None:
         status_updates["error"] = error
+    else:
+        status_updates["error"] = None
 
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(

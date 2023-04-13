@@ -196,7 +196,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
 
 
 @kopf.on.update(registry.API_GROUP, "cluster")
-@kopf.on.resume(registry.API_GROUP, "cluster")
 async def cluster_update(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster update for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
@@ -233,6 +232,7 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
             outputs = await ansible_runner.get_outputs_from_create_job(
                 K8S_CLIENT, name, namespace
             )
+            await ansible_runner.unlabel_job(K8S_CLIENT, update_job)
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,
@@ -240,7 +240,7 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
                 cluster_crd.ClusterPhase.READY,
                 outputs=outputs,
             )
-            LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
+            LOG.info(f"Successful update of cluster: {name} in: {namespace}")
             return
 
         else:
@@ -263,16 +263,24 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
         LOG.info(f"Skip update, no meaningful changes for: {name} in {namespace}")
         return
 
-    # TODO(johngarbutt): we need to do something!!
+    # TODO(johngarbutt): should we check if we are about to be auto-deleted?
+
+    # There is no running create job, so lets create one
+    await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, update=True)
     await cluster_utils.update_cluster(
         K8S_CLIENT,
         name,
         namespace,
-        # cluster_crd.ClusterPhase.CONFIG,
-        cluster_crd.ClusterPhase.FAILED,
-        error="Not implemented re-configure yet!",
+        cluster_crd.ClusterPhase.CONFIG,
+        extra_vars=cluster.spec.extraVars,
     )
-    LOG.error("Not implemented re-configure yet!")
+
+    LOG.info(f"Cluster update started for cluster: {name} in: {namespace}")
+
+    # Trigger a retry in 60 seconds to check on the job we just created
+    raise kopf.TemporaryError(
+        f"Need to wait for update job to complete for {name} in {namespace}", delay=30
+    )
 
 
 @kopf.on.delete(registry.API_GROUP, "cluster")

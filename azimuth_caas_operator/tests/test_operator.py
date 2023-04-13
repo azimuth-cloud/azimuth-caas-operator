@@ -156,6 +156,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
 
+    @mock.patch.object(ansible_runner, "unlabel_job")
     @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -168,6 +169,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed,
         mock_update,
         mock_outputs,
+        mock_unlabel,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
@@ -188,6 +190,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
+        mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
     @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -221,32 +224,40 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
 
-    @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
+    @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(cluster_utils, "update_cluster")
-    @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
     @mock.patch.object(ansible_runner, "is_create_job_finished")
     async def test_cluster_update_creates_update_job_and_raise(
         self,
         mock_create_job,
         mock_update_job,
-        mock_completed,
         mock_update,
-        mock_outputs,
+        mock_start,
     ):
+        mock_create_job.return_value = True
         mock_update_job.return_value = None
 
         fake_body = cluster_crd.get_fake_dict()
+        fake_cluster = cluster_crd.Cluster(**fake_body)
 
-        await operator.cluster_update(fake_body, "cluster1", "ns", {})
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await operator.cluster_update(fake_body, "cluster1", "ns", {})
 
-        # TODO(johngarbutt) actually need to create the job next!
+        self.assertEqual(
+            "Need to wait for update job to complete for cluster1 in ns",
+            str(ctx.exception),
+        )
+
+        mock_start.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster, "ns", update=True
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
             "ns",
-            cluster_crd.ClusterPhase.FAILED,
-            error="Not implemented re-configure yet!",
+            cluster_crd.ClusterPhase.CONFIG,
+            extra_vars=fake_cluster.spec.extraVars,
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 

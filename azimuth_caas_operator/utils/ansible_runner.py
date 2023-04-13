@@ -19,6 +19,7 @@ def get_env_configmap(
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
     remove=False,
+    update=False,
 ):
     extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
@@ -51,7 +52,13 @@ def get_env_configmap(
     )
     envvars = "---\n" + yaml.dump(envvars)
 
-    action = "remove" if remove else "create"
+    # TODO(johngarbutt) this logic is scattered in a few places!
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+
     template = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -75,10 +82,17 @@ def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     remove=False,
+    update=False,
 ):
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
-    action = "remove" if remove else "create"
+
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+
     image = image_utils.get_ansible_runner_image()
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
@@ -360,7 +374,16 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
     return [get_job_completed_state(job) for job in delete_jobs]
 
 
-async def start_job(client, cluster, namespace, remove=False):
+async def unlabel_job(client, job):
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.patch(
+        job.metadata.name,
+        dict(metadata=dict(labels={"azimuth-caas-action": "complete-update"})),
+        namespace=job.metadata.namespace,
+    )
+
+
+async def start_job(client, cluster, namespace, remove=False, update=False):
     (
         cluster_type_spec,
         cluster_type_version,
@@ -390,6 +413,7 @@ async def start_job(client, cluster, namespace, remove=False):
         cluster_type_spec,
         cluster_deploy_ssh_public_key,
         remove=remove,
+        update=update,
     )
     configmap_resource = await client.api("v1").resource("ConfigMap")
     await configmap_resource.create_or_patch(
@@ -397,7 +421,7 @@ async def start_job(client, cluster, namespace, remove=False):
     )
 
     # create the job
-    job_data = get_job(cluster, cluster_type_spec, remove=remove)
+    job_data = get_job(cluster, cluster_type_spec, remove=remove, update=update)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)
 

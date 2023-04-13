@@ -118,28 +118,29 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     # TODO(johngarbutt): share more code with delete!
     create_jobs = await ansible_runner.get_jobs_for_cluster(K8S_CLIENT, name, namespace)
     if ansible_runner.is_any_successful_jobs(create_jobs):
-        lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
-        if lifetime_hours:
-            # TODO(johngarbutt) hack to autodelete
-            await cluster_utils.create_scheduled_delete_job(
-                K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
-            )
-
         outputs = await ansible_runner.get_outputs_from_create_job(
             K8S_CLIENT, name, namespace
         )
         await cluster_utils.update_cluster(
             K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.READY, outputs=outputs
         )
-
         LOG.info(f"Successful creation of cluster: {name} in: {namespace}")
         return
+
     if len(create_jobs) != 0:
         if not ansible_runner.are_all_jobs_in_error_state(create_jobs):
             # TODO(johngarbutt): update cluster with the last event name from job log
+            # but for now we just bump the updated_at time
+            await cluster_utils.update_cluster(
+                K8S_CLIENT,
+                name,
+                namespace,
+                cluster_crd.ClusterPhase.CREATING,
+            )
             raise kopf.TemporaryError(
                 f"wait for create job to complete for {name} in {namespace}", delay=20
             )
+
         else:
             if len(create_jobs) >= 2:
                 msg = f"Too many failed creates for {name} in {namespace}"
@@ -153,7 +154,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             )
 
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=False)
-    # TODO(johngarbutt): not always needed on a retry
     await cluster_utils.update_cluster(
         K8S_CLIENT,
         name,
@@ -162,6 +162,14 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         extra_vars=cluster.spec.extraVars,
     )
     LOG.info(f"Create cluster started for cluster: {name} in: {namespace}")
+
+    lifetime_hours = cluster.spec.extraVars.get("appliance_lifetime_hrs")
+    if lifetime_hours:
+        await cluster_utils.create_scheduled_delete_job(
+            K8S_CLIENT, name, namespace, cluster.metadata.uid, lifetime_hours
+        )
+
+    # Trigger a retry in 60 seconds to check on the job
     raise kopf.TemporaryError(
         f"wait for create job to complete for {name} in {namespace}"
     )
@@ -172,6 +180,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
 async def cluster_changed(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster update for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
+
+    # TODO(johngarbutt) check create has finished OK?
+    # Make sure we are not in the error state?
 
     is_upgrade = cluster.spec.clusterTypeVersion != cluster.status.clusterTypeVersion
     if is_upgrade:

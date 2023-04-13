@@ -20,7 +20,7 @@ parameters:
         - 12
         - 24
         - 48
-        - "never"
+        - "forever"
 
   - name: cluster_flavor
     kind: cloud.size

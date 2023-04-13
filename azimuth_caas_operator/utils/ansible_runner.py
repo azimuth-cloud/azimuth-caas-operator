@@ -169,6 +169,47 @@ async def get_job_resource(client):
     return await client.api("batch/v1").resource("jobs")
 
 
+async def is_create_job_finished(client, cluster_name, namespace):
+    is_create_job_success = None
+    create_job = await get_create_job_for_cluster(client, cluster_name, namespace)
+    if create_job:
+        is_create_job_success = get_job_completed_state(create_job)
+    return is_create_job_success is not None
+
+
+async def get_create_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, remove=False)
+
+
+async def get_update_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, update=True)
+
+
+async def get_job_for_cluster(
+    client, cluster_name, namespace, remove=False, update=False
+):
+    job_resource = await get_job_resource(client)
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+    jobs = [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": action,
+            },
+            namespace=namespace,
+        )
+    ]
+    if len(jobs) == 1:
+        return jobs[0]
+    if len(jobs) > 1:
+        raise Exception("too many jobs found!")
+
+
 async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
     job_resource = await get_job_resource(client)
     action = "remove" if remove else "create"

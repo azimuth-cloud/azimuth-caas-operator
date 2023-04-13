@@ -51,12 +51,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
-    @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_creates_job_and_raise(
         self, mock_get_jobs, mock_start, mock_update
     ):
         # testing the zero jobs case
-        mock_get_jobs.return_value = []
+        mock_get_jobs.return_value = None
         fake_body = cluster_crd.get_fake_dict()
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
@@ -78,23 +78,21 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
 
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
-    @mock.patch.object(cluster_utils, "create_scheduled_delete_job")
     @mock.patch.object(cluster_utils, "update_cluster")
-    @mock.patch.object(ansible_runner, "is_any_successful_jobs")
-    @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_spots_successful_job(
         self,
         mock_get_jobs,
-        mock_success,
         mock_update,
-        mock_auto,
         mock_outputs,
+        mock_success,
     ):
-        mock_get_jobs.return_value = ["fakejob"]
-        mock_success.return_value = True
+        mock_get_jobs.return_value = "fakejob"
         fake_body = cluster_crd.get_fake_dict()
         mock_outputs.return_value = {"asdf": 42}
+        mock_success.return_value = True
 
         await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
@@ -105,84 +103,194 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             cluster_crd.ClusterPhase.READY,
             outputs={"asdf": 42},
         )
-        mock_auto.assert_not_awaited()
         mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_success.assert_called_once_with("fakejob")
 
-    @mock.patch.object(cluster_utils, "update_cluster")
-    @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")
-    @mock.patch.object(ansible_runner, "is_any_successful_jobs")
-    @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
-    async def test_cluster_create_waits_for_job_to_complete(
-        self, mock_get_jobs, mock_success, mock_all_error, mock_update
+    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    async def test_cluster_update_waits_for_create_job_to_complete(
+        self, mock_create_job
     ):
-        mock_get_jobs.return_value = ["fakejob"]
-        mock_success.return_value = False
-        mock_all_error.return_value = False
+        mock_create_job.return_value = False
         fake_body = cluster_crd.get_fake_dict()
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
-            await operator.cluster_create(fake_body, "cluster1", "ns", {})
+            await operator.cluster_update(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
-            "wait for create job to complete for cluster1 in ns", str(ctx.exception)
+            "Can't process update until create completed for cluster1 in ns",
+            str(ctx.exception),
         )
-        mock_update.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
-        )
+        mock_create_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
     @mock.patch.object(cluster_utils, "update_cluster")
-    @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")
-    @mock.patch.object(ansible_runner, "is_any_successful_jobs")
-    @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
-    async def test_cluster_create_raise_on_too_many_jobs(
-        self, mock_get_jobs, mock_success, mock_all_error, mock_update
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
+    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    async def test_cluster_update_waits_for_update_job_to_complete(
+        self,
+        mock_create_job,
+        mock_update_job,
+        mock_completed,
+        mock_update,
     ):
-        # TODO(johngarbutt): should generate a working fake job list!
-        mock_get_jobs.return_value = ["fakejob", "fakejob2", "fakejob3"]
-        mock_success.return_value = False
-        mock_all_error.return_value = True
-        fake_body = cluster_crd.get_fake_dict()
+        mock_create_job.return_value = True
+        mock_update_job.return_value = "update-job"
+        mock_completed.return_value = None
 
-        with self.assertRaises(RuntimeError) as ctx:
-            await operator.cluster_create(fake_body, "cluster1", "ns", {})
-
-        self.assertEqual(
-            "Too many failed creates for cluster1 in ns", str(ctx.exception)
-        )
-        mock_update.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.FAILED
-        )
-
-    @mock.patch.object(ansible_runner, "start_job")
-    @mock.patch.object(cluster_utils, "update_cluster")
-    @mock.patch.object(ansible_runner, "are_all_jobs_in_error_state")
-    @mock.patch.object(ansible_runner, "is_any_successful_jobs")
-    @mock.patch.object(ansible_runner, "get_jobs_for_cluster")
-    async def test_cluster_create_raise_on_retry(
-        self, mock_get_jobs, mock_success, mock_all_error, mock_update, mock_start
-    ):
-        # TODO(johngarbutt): should generate a working fake job list!
-        mock_get_jobs.return_value = ["fakejob"]
-        mock_success.return_value = False
-        mock_all_error.return_value = True
         fake_body = cluster_crd.get_fake_dict()
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
-            await operator.cluster_create(fake_body, "cluster1", "ns", {})
+            await operator.cluster_update(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
-            "wait for create job to complete for cluster1 in ns", str(ctx.exception)
-        )
-        cluster = cluster_crd.Cluster(**fake_body)
-        mock_start.assert_awaited_once_with(
-            operator.K8S_CLIENT, cluster, "ns", remove=False
+            "Waiting for update job to complete for cluster1 in ns",
+            str(ctx.exception),
         )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
             "ns",
-            cluster_crd.ClusterPhase.CREATING,
-            extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
+            cluster_crd.ClusterPhase.CONFIG,
+        )
+        mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_completed.assert_called_once_with("update-job")
+
+    @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
+    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    async def test_cluster_update_spots_job_success(
+        self,
+        mock_create_job,
+        mock_update_job,
+        mock_completed,
+        mock_update,
+        mock_outputs,
+    ):
+        mock_create_job.return_value = True
+        mock_update_job.return_value = "update-job"
+        mock_completed.return_value = True
+        mock_outputs.return_value = {"asdf": 42}
+
+        fake_body = cluster_crd.get_fake_dict()
+
+        await operator.cluster_update(fake_body, "cluster1", "ns", {})
+
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.READY,
+            outputs={"asdf": 42},
+        )
+        mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_completed.assert_called_once_with("update-job")
+
+    @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
+    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    async def test_cluster_update_spots_job_failure(
+        self,
+        mock_create_job,
+        mock_update_job,
+        mock_completed,
+        mock_update,
+        mock_outputs,
+    ):
+        mock_create_job.return_value = True
+        mock_update_job.return_value = "update-job"
+        mock_completed.return_value = False
+        mock_outputs.return_value = {"asdf": 42}
+
+        fake_body = cluster_crd.get_fake_dict()
+
+        await operator.cluster_update(fake_body, "cluster1", "ns", {})
+
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.FAILED,
+            error="Failed to update the platform. To retry please click patch.",
+        )
+        mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_completed.assert_called_once_with("update-job")
+
+    @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
+    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    async def test_cluster_update_creates_update_job_and_raise(
+        self,
+        mock_create_job,
+        mock_update_job,
+        mock_completed,
+        mock_update,
+        mock_outputs,
+    ):
+        mock_update_job.return_value = None
+
+        fake_body = cluster_crd.get_fake_dict()
+
+        await operator.cluster_update(fake_body, "cluster1", "ns", {})
+
+        # TODO(johngarbutt) actually need to create the job next!
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not implemented re-configure yet!",
+        )
+        mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
+    async def test_cluster_create_raise_on_failed_jobs(
+        self, mock_get_jobs, mock_success, mock_update
+    ):
+        # TODO(johngarbutt): should generate a working fake job list!
+        mock_get_jobs.return_value = "fakejob"
+        mock_success.return_value = False
+        fake_body = cluster_crd.get_fake_dict()
+
+        await operator.cluster_create(fake_body, "cluster1", "ns", {})
+
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.FAILED,
+            error=mock.ANY,
+        )
+        mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_success.assert_called_once_with("fakejob")
+
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
+    async def test_cluster_create_waits_for_job_to_complete(
+        self, mock_get_jobs, mock_success, mock_update
+    ):
+        mock_get_jobs.return_value = "fakejob"
+        mock_success.return_value = None
+        fake_body = cluster_crd.get_fake_dict()
+
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await operator.cluster_create(fake_body, "cluster1", "ns", {})
+
+        self.assertEqual(
+            "Waiting for create job to complete for cluster1 in ns", str(ctx.exception)
+        )
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
         )
 
     @mock.patch.object(cluster_utils, "update_cluster")

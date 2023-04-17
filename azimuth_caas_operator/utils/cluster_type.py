@@ -8,7 +8,9 @@ LOG = logging.getLogger(__name__)
 
 
 async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
-    if cluster.spec.clusterTypeVersion == cluster.status.clusterTypeVersion:
+    if cluster.status and (
+        cluster.spec.clusterTypeVersion == cluster.status.clusterTypeVersion
+    ):
         # We have the correct version cached, so lets return the cache
         return cluster.status.clusterTypeSpec, cluster.status.clusterTypeVersion
 
@@ -24,7 +26,7 @@ async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
     cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
     cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
 
-    cluster_version = cluster_type.metadata.resourceVersion
+    cluster_version = cluster_type_raw.metadata.resourceVersion
     if cluster_version != cluster.spec.clusterTypeVersion:
         # TODO(johngarbutt): move the cluster to the error state?
         LOG.error(

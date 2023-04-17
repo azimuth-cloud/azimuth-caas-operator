@@ -344,5 +344,5 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     )
     LOG.info(f"Success creating a delete job for {name} in {namespace}")
     raise kopf.TemporaryError(
-        f"wait for delete job to complete for {name} in {namespace}"
+        f"wait for delete job to complete for {name} in {namespace}", delay=30
     )

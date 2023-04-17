@@ -5,6 +5,7 @@ metadata:
   name: "quick-test"
 spec:
   clusterTypeName: "quick-test"
+  clusterTypeVersion: "REPLACE_ME_VERSION"
   cloudCredentialsSecretName: openstack
   extraVars:
     foo: "baz"

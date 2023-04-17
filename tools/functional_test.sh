@@ -21,6 +21,9 @@ kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
 until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do echo "wait for status to appear"; sleep 5; done
 kubectl get clustertype quick-test -o yaml
 
+# find the correct version a sub it into the test
+cluster_version=$(kubectl get clustertype quick-test -ojsonpath='{.metadata.resourceVersion}')
+sed -i "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick.yaml
 kubectl create -f $SCRIPT_DIR/test_quick.yaml
 
 until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 5; done

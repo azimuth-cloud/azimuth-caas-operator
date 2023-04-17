@@ -195,7 +195,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     )
 
 
-@kopf.on.update(registry.API_GROUP, "cluster")
+@kopf.on.update(registry.API_GROUP, "cluster", field="spec")
 async def cluster_update(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster update for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)

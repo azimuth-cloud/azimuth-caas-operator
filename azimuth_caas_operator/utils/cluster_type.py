@@ -8,11 +8,14 @@ LOG = logging.getLogger(__name__)
 
 
 async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
-    if cluster.spec.clusterTypeVersion and (
-        cluster.spec.clusterTypeVersion == cluster.status.clusterTypeVersion
-    ):
+    if cluster.spec.clusterTypeVersion == cluster.status.clusterTypeVersion:
         # We have the correct version cached, so lets return the cache
         return cluster.status.clusterTypeSpec, cluster.status.clusterTypeVersion
+
+    # NOTE(johngarbutt): this is required, so it shouldn't ever happen
+    if not cluster.spec.clusterTypeVersion:
+        LOG.error("User has not specified a cluster version!")
+        raise RuntimeError("User must specify a cluster type version!")
 
     cluster_type_name = cluster.spec.clusterTypeName
     cluster_type_resource = await client.api(registry.API_VERSION).resource(
@@ -21,15 +24,14 @@ async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
     cluster_type_raw = await cluster_type_resource.fetch(cluster_type_name)
     cluster_type = cluster_type_crd.ClusterType(**cluster_type_raw)
 
-    # TODO(johng): should we fail if we can't find the requested version?
-    cluster_version = cluster_type.metadata.resource_version
-    if cluster.spec.clusterTypeVersion and (
-        cluster_version != cluster.spec.clusterTypeVersion
-    ):
-        LOG.warning(
+    cluster_version = cluster_type.metadata.resourceVersion
+    if cluster_version != cluster.spec.clusterTypeVersion:
+        # TODO(johngarbutt): move the cluster to the error state?
+        LOG.error(
             "Requested f{cluster.spec.clusterTypeVersion} "
             "but we found f{cluster_version}"
         )
+        raise RuntimeError("User must specify the current cluster version!")
 
     await _cache_client_type(client, cluster, cluster_type_raw.spec, cluster_version)
     return cluster_type.spec, cluster_version
@@ -44,7 +46,6 @@ async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version
                 clusterTypeVersion=cluster_version,
                 clusterTypeSpec=cluster_type_spec,
             ),
-            spec=dict(clusterTypeVersion=cluster_version),
         ),
         namespace=cluster.metadata.namespace,
     )

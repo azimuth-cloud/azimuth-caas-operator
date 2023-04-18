@@ -19,6 +19,7 @@ def get_env_configmap(
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
     remove=False,
+    update=False,
 ):
     extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
@@ -51,7 +52,13 @@ def get_env_configmap(
     )
     envvars = "---\n" + yaml.dump(envvars)
 
-    action = "remove" if remove else "create"
+    # TODO(johngarbutt) this logic is scattered in a few places!
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+
     template = f"""apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -75,10 +82,17 @@ def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     remove=False,
+    update=False,
 ):
     cluster_uid = cluster.metadata.uid
     name = cluster.metadata.name
-    action = "remove" if remove else "create"
+
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+
     image = image_utils.get_ansible_runner_image()
 
     ansible_runner_command = (
@@ -185,6 +199,51 @@ spec:
 async def get_job_resource(client):
     # TODO(johngarbutt): how to test this?
     return await client.api("batch/v1").resource("jobs")
+
+
+async def is_create_job_finished(client, cluster_name, namespace):
+    is_create_job_success = None
+    create_job = await get_create_job_for_cluster(client, cluster_name, namespace)
+    if create_job:
+        is_create_job_success = get_job_completed_state(create_job)
+    return is_create_job_success is not None
+
+
+async def get_create_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, remove=False)
+
+
+async def get_update_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, update=True)
+
+
+async def get_delete_job_for_cluster(client, cluster_name, namespace):
+    return await get_job_for_cluster(client, cluster_name, namespace, remove=True)
+
+
+async def get_job_for_cluster(
+    client, cluster_name, namespace, remove=False, update=False
+):
+    job_resource = await get_job_resource(client)
+    action = "create"
+    if remove:
+        action = "remove"
+    elif update:
+        action = "update"
+    jobs = [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": action,
+            },
+            namespace=namespace,
+        )
+    ]
+    if len(jobs) == 1:
+        return jobs[0]
+    if len(jobs) > 1:
+        raise Exception("too many jobs found!")
 
 
 async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
@@ -337,7 +396,16 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
     return [get_job_completed_state(job) for job in delete_jobs]
 
 
-async def start_job(client, cluster, namespace, remove=False):
+async def unlabel_job(client, job):
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.patch(
+        job.metadata.name,
+        dict(metadata=dict(labels={"azimuth-caas-action": "complete-update"})),
+        namespace=job.metadata.namespace,
+    )
+
+
+async def start_job(client, cluster, namespace, remove=False, update=False):
     (
         cluster_type_spec,
         cluster_type_version,
@@ -367,6 +435,7 @@ async def start_job(client, cluster, namespace, remove=False):
         cluster_type_spec,
         cluster_deploy_ssh_public_key,
         remove=remove,
+        update=update,
     )
     configmap_resource = await client.api("v1").resource("ConfigMap")
     await configmap_resource.create_or_patch(
@@ -374,7 +443,7 @@ async def start_job(client, cluster, namespace, remove=False):
     )
 
     # create the job
-    job_data = get_job(cluster, cluster_type_spec, remove=remove)
+    job_data = get_job(cluster, cluster_type_spec, remove=remove, update=update)
     job_resource = await client.api("batch/v1").resource("jobs")
     await job_resource.create(job_data, namespace=namespace)
 

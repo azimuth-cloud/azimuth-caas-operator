@@ -18,11 +18,14 @@ async def update_cluster(
     status_updates = dict(phase=phase, updatedTimestamp=now_string)
     if extra_vars:
         status_updates["appliedExtraVars"] = extra_vars
-    if outputs is not None:
+    if outputs:
         # empty dict is a valid possible output we should record
         status_updates["outputs"] = outputs
+
     if error is not None:
         status_updates["error"] = error
+    else:
+        status_updates["error"] = None
 
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
     await cluster_resource.patch(
@@ -30,6 +33,7 @@ async def update_cluster(
         dict(status=status_updates),
         namespace=namespace,
     )
+    LOG.debug(f"patched {name} in {namespace} with: {status_updates}")
 
 
 async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):

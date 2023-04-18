@@ -36,12 +36,10 @@ class ClusterStatus(schema.BaseModel):
 
 
 class ClusterSpec(schema.BaseModel):
-    clusterTypeName: str
-    # when not specified, we pick the current version,
-    # unset this to trigger an upgarde to the latest version
-    clusterTypeVersion: typing.Optional[str]
-    cloudCredentialsSecretName: str
-    # as described by the cluster type ui-meta
+    clusterTypeName: str = pydantic.Field(min_length=1)
+    clusterTypeVersion: str = pydantic.Field(min_length=1)
+    cloudCredentialsSecretName: str = pydantic.Field(min_length=1)
+    # partially described by the cluster type ui-meta
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
 
 
@@ -61,6 +59,7 @@ def get_fake_dict():
         metadata=dict(name="test1", uid="fakeuid1"),
         spec=dict(
             clusterTypeName="type1",
+            clusterTypeVersion="1234",
             cloudCredentialsSecretName="cloudsyaml",
             extraVars=dict(foo="bar", very_random_int=42, nested=dict(baz="bob")),
         ),

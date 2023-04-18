@@ -7,12 +7,14 @@ from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_c
 LOG = logging.getLogger(__name__)
 
 
-async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
+async def get_cluster_type_info(
+    client, cluster: cluster_crd.Cluster
+) -> cluster_type_crd.ClusterTypeSpec:
     if cluster.status and (
         cluster.spec.clusterTypeVersion == cluster.status.clusterTypeVersion
     ):
         # We have the correct version cached, so lets return the cache
-        return cluster.status.clusterTypeSpec, cluster.status.clusterTypeVersion
+        return cluster.status.clusterTypeSpec
 
     # NOTE(johngarbutt): this is required, so it shouldn't ever happen
     if not cluster.spec.clusterTypeVersion:
@@ -36,7 +38,7 @@ async def get_cluster_type_info(client, cluster: cluster_crd.Cluster):
         raise RuntimeError("User must specify the current cluster version!")
 
     await _cache_client_type(client, cluster, cluster_type_raw.spec, cluster_version)
-    return cluster_type.spec, cluster_version
+    return cluster_type.spec
 
 
 async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version):

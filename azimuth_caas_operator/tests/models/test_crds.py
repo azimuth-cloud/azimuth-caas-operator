@@ -70,6 +70,12 @@ class TestModels(base.TestCase):
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
                     }
+                  },
+                  "sshSharedSecretName": {
+                    "type": "string"
+                  },
+                  "sshSharedSecretNamespace": {
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -332,6 +338,12 @@ class TestModels(base.TestCase):
                         "additionalProperties": {
                           "x-kubernetes-preserve-unknown-fields": true
                         }
+                      },
+                      "sshSharedSecretName": {
+                        "type": "string"
+                      },
+                      "sshSharedSecretNamespace": {
+                        "type": "string"
                       }
                     },
                     "required": [

@@ -105,7 +105,8 @@ spec:
       - name: ssh
         secret:
           defaultMode: 256
-          secretName: azimuth-sshkey
+          optional: true
+          secretName: ssh-type1
 """  # noqa
         self.assertEqual(expected, yaml.dump(job))
 

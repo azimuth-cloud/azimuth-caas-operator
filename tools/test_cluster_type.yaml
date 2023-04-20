@@ -8,6 +8,8 @@ spec:
   gitUrl: "https://github.com/ansible/ansible-runner"
   gitVersion: "devel"
   playbook: "demo/project/test.yml"
+  sshSharedSecretName: "azimuth-sshkey"
+  sshSharedSecretNamespace: "azimuth-caas"
   extraVars:
     foo: "bar"
     test_int: 5

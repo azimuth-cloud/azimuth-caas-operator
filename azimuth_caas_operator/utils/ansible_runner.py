@@ -188,8 +188,9 @@ spec:
           secretName: "{cluster.spec.cloudCredentialsSecretName}"
       - name: ssh
         secret:
-          secretName: "azimuth-sshkey"
+          secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
+          optional: true
   backoffLimit: 0
   # timeout after 20 mins
   activeDeadlineSeconds: 1200"""  # noqa
@@ -405,30 +406,41 @@ async def unlabel_job(client, job):
     )
 
 
-async def start_job(client, cluster, namespace, remove=False, update=False):
-    (
-        cluster_type_spec,
-        cluster_type_version,
-    ) = await cluster_type_utils.get_cluster_type_info(client, cluster)
+async def start_job(
+    client, cluster: cluster_crd.Cluster, namespace, remove=False, update=False
+):
+    cluster_type_spec = await cluster_type_utils.get_cluster_type_info(client, cluster)
 
-    # ensure deploy secret, copy across for now
-    # TODO(johngarbutt): generate?
-    sshkey_secret_name = "azimuth-sshkey"
-    # TODO(johngarbutt): this namesapce should in config!
-    copy_from_namespace = "azimuth-caas-operator"
-    secrets_resource = await client.api("v1").resource("secrets")
-    ssh_secret = await secrets_resource.fetch(
-        sshkey_secret_name, namespace=copy_from_namespace
-    )
-    await secrets_resource.create_or_patch(
-        sshkey_secret_name,
-        {"metadata": {"name": sshkey_secret_name}, "data": ssh_secret.data},
-        namespace=namespace,
-    )
+    # TODO(johngarbutt): generate a deploy ssh key per cluster?
+    cluster_deploy_ssh_public_key = ""
 
-    cluster_deploy_ssh_public_key = (
-        base64.b64decode(ssh_secret.data.get("id_rsa.pub")).decode("utf-8").strip()
-    )
+    # if required, copy in the specified secret
+    if cluster_type_spec.sshSharedSecretName:
+        copy_from_namespace = cluster_type_spec.sshSharedSecretNamespace
+        if not copy_from_namespace:
+            copy_from_namespace = "azimuth"
+        secrets_resource = await client.api("v1").resource("secrets")
+        ssh_secret = await secrets_resource.fetch(
+            cluster_type_spec.sshSharedSecretName, namespace=copy_from_namespace
+        )
+
+        # make sure we have secret copied across
+        secret_name = f"ssh-{cluster.spec.clusterTypeName}"
+        await secrets_resource.create_or_patch(
+            secret_name,
+            {
+                "metadata": {"name": secret_name},
+                "data": ssh_secret.data,
+            },
+            namespace=namespace,
+        )
+
+        public_key_raw = ssh_secret.data.get("id_rsa.pub")
+        if public_key_raw:
+            cluster_deploy_ssh_public_key = (
+                base64.b64decode(public_key_raw).decode("utf-8").strip()
+            )
+
     # generate config
     configmap_data = get_env_configmap(
         cluster,

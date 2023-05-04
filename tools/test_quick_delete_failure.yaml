@@ -2,7 +2,7 @@
 apiVersion: caas.azimuth.stackhpc.com/v1alpha1
 kind: Cluster
 metadata:
-  name: "quick-test-failure"
+  name: "quick-test-fail-delete"
 spec:
   clusterTypeName: "quick-test"
   clusterTypeVersion: "REPLACE_ME_VERSION"

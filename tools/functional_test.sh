@@ -47,9 +47,9 @@ kubectl get pods -o yaml
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 
 # look at the other cluster, test for a delete error
-until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test-fail-delete; do echo "wait for created"; sleep 2; done
 kubectl delete -f $SCRIPT_DIR/test_quick_delete_failure.yaml --wait=false
-until kubectl wait --for=jsonpath='{.status.phase}'=Error cluster quick-test; do echo "wait for delete error"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Error cluster quick-test-fail-delete; do echo "wait for delete error"; sleep 2; done
 
 kubectl get cluster
 kill %1

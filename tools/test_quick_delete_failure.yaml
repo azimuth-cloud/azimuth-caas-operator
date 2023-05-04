@@ -1,0 +1,16 @@
+---
+apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+kind: Cluster
+metadata:
+  name: "quick-test"
+spec:
+  clusterTypeName: "quick-test"
+  clusterTypeVersion: "REPLACE_ME_VERSION"
+  cloudCredentialsSecretName: openstack
+  extraVars:
+    error_on_delete: true
+    foo: "baz"
+    test_int: 6
+    test_dict:
+      something_else: false
+    test_bool2: true

@@ -18,22 +18,24 @@ until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crd
 kubectl get crds
 
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
-until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do echo "wait for status to appear"; sleep 5; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do echo "wait for status to appear"; sleep 2; done
 kubectl get clustertype quick-test -o yaml
 
 # find the correct version a sub it into the test
 cluster_version=$(kubectl get clustertype quick-test -ojsonpath='{.metadata.resourceVersion}')
 sed -i "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick.yaml
+sed -i "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick_delete_failure.yaml
 kubectl create -f $SCRIPT_DIR/test_quick.yaml
+kubectl create -f $SCRIPT_DIR/test_quick_delete_failure.yaml
 
-until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 5; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 2; done
 
 kubectl get cluster
 kubectl get clustertype
 kubectl get jobs
 kubectl get pods
 
-until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 5; kubectl describe pods; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 2; kubectl describe pods; done
 
 kubectl get cluster
 kubectl get clustertype
@@ -43,7 +45,11 @@ kubectl get jobs -o yaml
 kubectl get pods -o yaml
 
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
-sleep 10
+
+# look at the other cluster, test for a delete error
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 2; done
+kubectl delete -f $SCRIPT_DIR/test_quick_delete_failure.yaml --wait=false
+until kubectl wait --for=jsonpath='{.status.phase}'=Error cluster quick-test; do echo "wait for delete error"; sleep 2; done
 
 kubectl get cluster
 kill %1

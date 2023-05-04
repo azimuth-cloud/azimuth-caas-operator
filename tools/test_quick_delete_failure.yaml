@@ -5,8 +5,7 @@ metadata:
   name: "quick-test-fail-delete"
 spec:
   clusterTypeName: "quick-test"
-  clusterTypeVersion: "REPLACE_ME_VERSION"
-  cloudCredentialsSecretName: openstack
+  clusterTypeVersion: "713"
   extraVars:
     error_on_delete: true
     foo: "baz"

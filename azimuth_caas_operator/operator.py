@@ -1,5 +1,6 @@
 import datetime
 import logging
+import time
 
 import aiohttp
 import kopf
@@ -24,6 +25,8 @@ async def startup(**kwargs):
     for resource in registry.get_crd_resources():
         await K8S_CLIENT.apply_object(resource, force=True)
     LOG.info("All CRDs updated.")
+    # if we don't wait, sometimes kopf doesn't see these
+    time.sleep(1)
 
 
 @kopf.on.cleanup()

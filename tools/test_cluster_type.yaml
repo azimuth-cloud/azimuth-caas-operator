@@ -5,7 +5,7 @@ metadata:
   name: "quick-test"
 spec:
   uiMetaUrl: "https://raw.githubusercontent.com/stackhpc/azimuth-caas-operator/31592b8b5a8852cbf0cd12a41628063ac8e82ae3/tools/ui_meta_quick_test.yaml"
-  gitUrl: "https://github.com/ansible/ansible-runner"
+  gitUrl: "https://github.com/JohnGarbutt/ansible-runner"
   gitVersion: "devel"
   playbook: "demo/project/test.yml"
   sshSharedSecretName: "azimuth-sshkey"

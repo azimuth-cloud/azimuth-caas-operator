@@ -103,9 +103,9 @@ def get_job(
     if remove:
         # on success, delete the app cred
         ansible_runner_command += (
-            " && openstack"
+            "; rc=$?; openstack"
             # TODO(johngarbutt): very tight coupling with code in azimuth here :(
-            f" application credential delete azimuth-caas-{name} || true"
+            f" application credential delete azimuth-caas-{name}; exit $rc"
         )
 
     # TODO(johngarbutt): need get secret keyname from somewhere

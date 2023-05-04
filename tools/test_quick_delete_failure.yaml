@@ -6,6 +6,7 @@ metadata:
 spec:
   clusterTypeName: "quick-test"
   clusterTypeVersion: "713"
+  cloudCredentialsSecretName: openstack2
   extraVars:
     error_on_delete: true
     foo: "baz"

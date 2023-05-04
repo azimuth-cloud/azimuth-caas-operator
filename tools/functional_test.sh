@@ -19,6 +19,7 @@ kubectl get crds
 
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
 until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do echo "wait for status to appear"; sleep 2; done
+kubectl create secret generic openstack2 --from-file=clouds.yaml || true
 kubectl get clustertype quick-test -o yaml
 
 # find the correct version a sub it into the tests

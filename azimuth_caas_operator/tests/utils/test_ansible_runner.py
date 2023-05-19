@@ -40,8 +40,8 @@ spec:
         - /bin/bash
         - -c
         - chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml;
-          ansible-runner run /runner -j; rc=$?; openstack application credential delete
-          azimuth-caas-test1; exit $rc
+          ansible-runner run /runner -j; rc=$?; if [ $rc == 0 ]; then openstack application
+          credential delete azimuth-caas-test1; fi; exit $rc
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml

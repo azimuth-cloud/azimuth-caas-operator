@@ -50,9 +50,16 @@ kubectl delete -f $SCRIPT_DIR/test_quick_delete_failure.yaml --wait=false
 
 # wait for delete we expect to work
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
+# check app cred is deleted
+check_app_cred_deleted = $(openstack application credential show azimuth-caas-quick-test)
+echo $check_app_cred_deleted
 
 # look at the other cluster, test for a delete error
 until kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster quick-test-fail-delete; do echo "wait for delete error"; kubectl get jobs; sleep 2; done
+
+# ensure appcred still exists
+check_app_cred_stays = $(openstack application credential delete azimuth-caas-quick-test-fail-delete)
+echo $check_app_cred_stays
 
 kubectl get cluster
 kill %1

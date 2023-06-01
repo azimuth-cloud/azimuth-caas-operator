@@ -192,6 +192,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
+    @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -204,11 +205,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed,
         mock_update,
         mock_outputs,
+        mock_error,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
         mock_completed.return_value = False
         mock_outputs.return_value = {"asdf": 42}
+        mock_error.return_value = "oops"
 
         fake_body = cluster_crd.get_fake_dict()
 
@@ -219,7 +222,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.FAILED,
-            error="Failed to update the platform. To retry please click patch.",
+            error="Failed to update the platform. To retry please click patch. "
+            "Possible reason for the failure was: oops",
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
@@ -261,16 +265,18 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
+    @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_raise_on_failed_jobs(
-        self, mock_get_jobs, mock_success, mock_update
+        self, mock_get_jobs, mock_success, mock_update, mock_error
     ):
         # TODO(johngarbutt): should generate a working fake job list!
         mock_get_jobs.return_value = "fakejob"
         mock_success.return_value = False
         fake_body = cluster_crd.get_fake_dict()
+        mock_error.return_value = "oops"
 
         await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
@@ -279,10 +285,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "cluster1",
             "ns",
             cluster_crd.ClusterPhase.FAILED,
-            error=mock.ANY,
+            error="Failed to create platform. "
+            "To retry please click patch. "
+            "Possible reason for the failure was: oops",
         )
         mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_success.assert_called_once_with("fakejob")
+        mock_error.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")

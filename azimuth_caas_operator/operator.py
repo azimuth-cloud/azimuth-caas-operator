@@ -160,7 +160,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             error = "Failed to create platform. To retry please click patch."
             reason = await ansible_runner.get_job_error_message(K8S_CLIENT, create_job)
             if reason:
-                error += f" Possible reason for the failure was: \n{reason}"
+                error += f" Possible reason for the failure was: {reason}"
 
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
@@ -248,10 +248,10 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
             return
 
         else:
-            error = "Failed to update platform. To retry please click patch."
+            error = "Failed to update the platform. To retry please click patch."
             reason = await ansible_runner.get_job_error_message(K8S_CLIENT, update_job)
             if reason:
-                error += f" Possible reason for the failure was: \n{reason}"
+                error += f" Possible reason for the failure was: {reason}"
 
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
@@ -331,7 +331,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             error = "Failed to delete platform. Please contact Azimuth operators."
             reason = await ansible_runner.get_job_error_message(K8S_CLIENT, delete_job)
             if reason:
-                error += f" Possible reason for the failure was: \n{reason}"
+                error += f" Possible reason for the failure was: {reason}"
 
             await cluster_utils.update_cluster(
                 K8S_CLIENT,

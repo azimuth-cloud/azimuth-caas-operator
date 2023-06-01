@@ -333,7 +333,7 @@ async def get_job_error_message(client, job):
             result = event_data.get("res", {})
             no_log = result.pop("_ansible_no_log", False)
             if result and not no_log:
-                return json.dumps(result, indent=2)
+                return result.get("msg", json.dumps(result, indent=2))
             return None
 
 

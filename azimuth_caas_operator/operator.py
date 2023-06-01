@@ -157,7 +157,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             return
 
         else:
-            error = "Failed to create platform. " "To retry please click patch."
+            error = "Failed to create platform. To retry please click patch."
             reason = await ansible_runner.get_job_error_message(K8S_CLIENT, create_job)
             if reason:
                 error += f" Possible reason for the failure was: \n{reason}"
@@ -170,7 +170,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 # TODO(johngarbutt): we to better information on the reason!
                 error=error,
             )
-            LOG.error(f"Create job failed for {name} in {namespace}")
+            LOG.error(f"Create job failed for {name} in {namespace} because {reason}")
             return
 
     # There is no running create job, so lets create one
@@ -248,15 +248,20 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
             return
 
         else:
+            error = "Failed to update platform. To retry please click patch."
+            reason = await ansible_runner.get_job_error_message(K8S_CLIENT, update_job)
+            if reason:
+                error += f" Possible reason for the failure was: \n{reason}"
+
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
                 # TODO(johngarbutt): we to better information on the reason!
-                error=("Failed to update the platform. To retry please click patch."),
+                error=error,
             )
-            LOG.error(f"Update job failed for {name} in {namespace}")
+            LOG.error(f"Update job failed for {name} in {namespace} because {reason}")
             return
 
     is_upgrade = cluster.spec.clusterTypeVersion != cluster.status.clusterTypeVersion
@@ -323,23 +328,25 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             return
 
         else:
+            error = "Failed to delete platform. Please contact Azimuth operators."
+            reason = await ansible_runner.get_job_error_message(K8S_CLIENT, delete_job)
+            if reason:
+                error += f" Possible reason for the failure was: \n{reason}"
+
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
-                # TODO(johngarbutt): how does a user retry the delete, eek!
-                error=(
-                    "Failed to delete the platform. Please contact Azimuth operators."
-                ),
+                error=error,
             )
-            LOG.error(f"Delete job failed for {name} in {namespace}")
+            # TODO(johngarbutt): how does a user retry the delete, eek!
             LOG.error(
-                f"Delete job failed for {name} in {namespace}. "
+                f"Delete job failed for {name} in {namespace} because: {reason} "
                 "Please fix the problem, "
                 "then delete all failed jobs to trigger a new delete job."
             )
-            raise RuntimeError(f"Failed to delete {name}")
+            raise RuntimeError(f"Failed to delete {name} in {namespace}")
 
     # delete job not yet created, lets create one
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)

@@ -96,16 +96,15 @@ def get_job(
     image = image_utils.get_ansible_runner_image()
 
     ansible_runner_command = (
-        "chmod 755 /runner/project; "
-        "ansible-galaxy install -r /runner/project/roles/requirements.yml; "
+        "set -e; "
+        # don't fail if there is no requirements.yml
+        "ansible-galaxy install -r /runner/project/roles/requirements.yml || true; "
         "ansible-runner run /runner -j"
     )
     if remove:
-        # on success, delete the app cred
+        # TODO(johngarbutt): very tight coupling with code in azimuth here :(
         ansible_runner_command += (
-            "; rc=$?; openstack"
-            # TODO(johngarbutt): very tight coupling with code in azimuth here :(
-            f" application credential delete azimuth-caas-{name}; exit $rc"
+            f"; openstack application credential delete azimuth-caas-{name} || true"
         )
 
     # TODO(johngarbutt): need get secret keyname from somewhere
@@ -146,7 +145,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "chmod 755 /runner/project; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
+        - "set -e; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project
@@ -376,8 +375,8 @@ def are_all_jobs_in_error_state(job_list):
 async def ensure_create_jobs_finished(client, cluster_name, namespace):
     create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
     if not create_jobs:
-        LOG.error(f"can't find any create jobs for {cluster_name} in {namespace}")
-        raise RuntimeError("waiting for create job to start")
+        LOG.warning(f"can't find any create jobs for {cluster_name} in {namespace}")
+        return
     for job in create_jobs:
         if get_job_completed_state(job) is None:
             raise RuntimeError(f"waiting for create job to finish {job.metadata.name}")

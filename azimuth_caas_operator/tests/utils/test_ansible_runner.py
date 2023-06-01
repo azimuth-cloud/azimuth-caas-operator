@@ -39,9 +39,9 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - chmod 755 /runner/project; ansible-galaxy install -r /runner/project/roles/requirements.yml;
-          ansible-runner run /runner -j; rc=$?; openstack application credential delete
-          azimuth-caas-test1; exit $rc
+        - set -e; ansible-galaxy install -r /runner/project/roles/requirements.yml
+          || true; ansible-runner run /runner -j; openstack application credential
+          delete azimuth-caas-test1 || true
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
@@ -77,9 +77,9 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - chmod 755 /runner/project; git clone https://github.com/test.git /runner/project;
-          git config --global --add safe.directory /runner/project; cd /runner/project;
-          git checkout 12345ab; ls -al
+        - set -e; git clone https://github.com/test.git /runner/project; git config
+          --global --add safe.directory /runner/project; cd /runner/project; git checkout
+          12345ab; ls -al
         image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
         name: clone
         volumeMounts:

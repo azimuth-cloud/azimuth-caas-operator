@@ -97,7 +97,8 @@ def get_job(
 
     ansible_runner_command = (
         "set -e; chmod 755 /runner/project; "
-        "ansible-galaxy install -r /runner/project/roles/requirements.yml; "
+        # don't fail if there is no requirements.yml
+        "ansible-galaxy install -r /runner/project/roles/requirements.yml || true; "
         "ansible-runner run /runner -j"
     )
     if remove:

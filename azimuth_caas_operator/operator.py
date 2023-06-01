@@ -157,17 +157,18 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             return
 
         else:
+            error = "Failed to create platform. " "To retry please click patch."
+            reason = await ansible_runner.get_job_error_message(K8S_CLIENT, create_job)
+            if reason:
+                error += f" Possible reason for the failure was: \n{reason}"
+
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
                 # TODO(johngarbutt): we to better information on the reason!
-                error=(
-                    "Failed to create platform. "
-                    "Please check your cloud has enough free space. "
-                    "To retry please click patch."
-                ),
+                error=error,
             )
             LOG.error(f"Create job failed for {name} in {namespace}")
             return

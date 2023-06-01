@@ -41,7 +41,7 @@ spec:
         - -c
         - set -e; ansible-galaxy install -r /runner/project/roles/requirements.yml
           || true; ansible-runner run /runner -j; openstack application credential
-          delete azimuth-caas-test1
+          delete azimuth-caas-test1 || true
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml

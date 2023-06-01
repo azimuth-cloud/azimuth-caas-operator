@@ -96,16 +96,14 @@ def get_job(
     image = image_utils.get_ansible_runner_image()
 
     ansible_runner_command = (
-        "chmod 755 /runner/project; "
+        "set -e; chmod 755 /runner/project; "
         "ansible-galaxy install -r /runner/project/roles/requirements.yml; "
         "ansible-runner run /runner -j"
     )
     if remove:
-        # on success, delete the app cred
+        # TODO(johngarbutt): very tight coupling with code in azimuth here :(
         ansible_runner_command += (
-            "; rc=$?; if [ $rc == 0 ]; then openstack"
-            # TODO(johngarbutt): very tight coupling with code in azimuth here :(
-            f" application credential delete azimuth-caas-{name}; fi; exit $rc"
+            f"; openstack application credential delete azimuth-caas-{name}"
         )
 
     # TODO(johngarbutt): need get secret keyname from somewhere
@@ -146,7 +144,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "chmod 755 /runner/project; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
+        - "set -e; chmod 755 /runner/project; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project

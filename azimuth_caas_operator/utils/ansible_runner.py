@@ -320,6 +320,23 @@ async def _get_job_outputs(client, job):
                 return debug_result.get("outputs", {})
 
 
+async def get_job_error_message(client, job):
+    events = await _get_ansible_runner_events(
+        client, job.metadata.name, job.metadata.namespace
+    )
+    events.reverse()
+    for event_details in events:
+        # look for the last debug action
+        # that has an outputs key in its result object
+        if event_details["event"] == "runner_on_failed":
+            event_data = event_details.get("event_data", {})
+            result = event_data.get("res", {})
+            no_log = result.pop("_ansible_no_log", False)
+            if result and not no_log:
+                return result.get("msg", json.dumps(result, indent=2))
+            return None
+
+
 async def _get_pod_names_for_job(client, job_name, namespace):
     pod_resource = await k8s.get_pod_resource(client)
     return [

@@ -56,4 +56,5 @@ until kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster quick-test-fa
 # TODO: check app cred still exists
 
 kubectl get cluster
+kubectl get cluster -o yaml
 kill %1

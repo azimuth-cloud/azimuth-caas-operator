@@ -96,7 +96,7 @@ def get_job(
     image = image_utils.get_ansible_runner_image()
 
     ansible_runner_command = (
-        "set -e; chmod 755 /runner/project; "
+        "set -e; "
         # don't fail if there is no requirements.yml
         "ansible-galaxy install -r /runner/project/roles/requirements.yml || true; "
         "ansible-runner run /runner -j"
@@ -145,7 +145,7 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "set -e; chmod 755 /runner/project; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
+        - "set -e; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project

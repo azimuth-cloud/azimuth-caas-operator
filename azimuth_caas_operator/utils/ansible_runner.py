@@ -375,8 +375,8 @@ def are_all_jobs_in_error_state(job_list):
 async def ensure_create_jobs_finished(client, cluster_name, namespace):
     create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
     if not create_jobs:
-        LOG.error(f"can't find any create jobs for {cluster_name} in {namespace}")
-        raise RuntimeError("waiting for create job to start")
+        LOG.warning(f"can't find any create jobs for {cluster_name} in {namespace}")
+        return
     for job in create_jobs:
         if get_job_completed_state(job) is None:
             raise RuntimeError(f"waiting for create job to finish {job.metadata.name}")

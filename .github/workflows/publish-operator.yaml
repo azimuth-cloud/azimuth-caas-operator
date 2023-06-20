@@ -74,6 +74,23 @@ jobs:
           tags: ${{ steps.image-meta.outputs.tags }}
           labels: ${{ steps.image-meta.outputs.labels }}
 
+  mirror_ara_image:
+    name: Mirrors and tags the latest ARA image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Install skopeo
+        run: sudo apt-get -y update && sudo apt-get install -y skopeo
+
+      - name: Mirror ARA image
+        run: |-
+          skopeo copy \
+            --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+            docker://quay.io/recordsansible/ara-api:latest \
+            docker://ghcr.io/stackhpc/ara-api:${GITHUB_SHA::7}
+
   publish_charts:
     name: Publish Helm charts to GitHub pages
     runs-on: ubuntu-latest

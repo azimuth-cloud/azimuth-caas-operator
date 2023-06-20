@@ -3,9 +3,12 @@ replicaCount: 1
 
 # The image to use for the ARA deployment
 image:
-  repository: quay.io/recordsansible/ara-api
+  # This is a mirror of quay.io/recordsansible/ara-api that is mirrored
+  # and tagged for each operator version that is built
+  # This is because the quay.io repo only provides latest tags
+  repository: ghcr.io/stackhpc/ara-api
   pullPolicy: IfNotPresent
-  tag: latest
+  tag: ""  # Defaults to appVersion
 
 imagePullSecrets: []
 

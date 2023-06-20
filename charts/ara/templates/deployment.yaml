@@ -18,7 +18,7 @@ spec:
       containers:
         - name: ara
           securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
-          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+          image: {{ printf "%s:%s" .Values.image.repository (default .Chart.AppVersion .Values.image.tag) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: ARA_ALLOWED_HOSTS

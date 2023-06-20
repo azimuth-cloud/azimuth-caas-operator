@@ -75,7 +75,7 @@ jobs:
           labels: ${{ steps.image-meta.outputs.labels }}
 
   mirror_ara_image:
-    name: Mirrors and tags the latest ARA image
+    name: Mirror and tag the latest ARA image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository

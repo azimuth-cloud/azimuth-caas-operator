@@ -98,6 +98,7 @@ jobs:
     needs:
       - build_push_operator_image
       - build_push_ansible_runner_image
+      - mirror_ara_image
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3

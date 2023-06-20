@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "azimuth-caas-operator.fullname" . }}
+  labels: {{ include "azimuth-caas-operator.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{ include "azimuth-caas-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "azimuth-caas-operator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "azimuth-caas-operator.fullname" . }}
+      securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: operator
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          image: {{ printf "%s:%s" .Values.image.repository (default .Chart.AppVersion .Values.image.tag) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONSUL_HTTP_ADDR
+              value: {{ tpl .Values.config.consulUrl . | quote }}
+            - name: ARA_API_SERVER
+              value: {{ tpl .Values.config.araUrl . | quote }}
+            - name: ANSIBLE_RUNNER_IMAGE
+              value: {{
+                printf
+                  "%s:%s"
+                  .Values.config.ansibleRunnerImage.repository
+                  (default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag)
+              }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}

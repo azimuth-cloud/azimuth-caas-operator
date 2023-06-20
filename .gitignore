@@ -59,3 +59,7 @@ ChangeLog
 
 # Files created by releasenotes build
 releasenotes/build
+
+# Ignore chart dependencies
+charts/*/charts
+Chart.lock

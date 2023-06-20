@@ -1,0 +1,54 @@
+# The number of replicas for the ARA deployment
+replicaCount: 1
+
+# The image to use for the ARA deployment
+image:
+  repository: quay.io/recordsansible/ara-api
+  pullPolicy: IfNotPresent
+  tag: latest
+
+imagePullSecrets: []
+
+# Pod-level security context
+podSecurityContext:
+  runAsNonRoot: true
+  # Because the container user is root, we need to pick a non-root UID
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Container-level security context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: [ALL]
+  readOnlyRootFilesystem: true
+
+# The liveness probe for ARA containers
+livenessProbe:
+  httpGet:
+    path: /api/v1/
+    port: http
+    httpHeaders:
+      - name: Host
+        value: localhost
+# The readiness probe for ARA containers
+readinessProbe:
+  httpGet:
+    path: /api/v1/
+    port: http
+    httpHeaders:
+      - name: Host
+        value: localhost
+
+# Resource requests and limits for the containers
+resources: {}
+
+# Node selector for ARA pods
+nodeSelector: {}
+
+# Affinity rules for ARA pods
+affinity: {}
+
+# Tolerations for ARA pods
+tolerations: []

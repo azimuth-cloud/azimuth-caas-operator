@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ara.fullname" . }}
+  labels: {{ include "ara.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{ include "ara.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "ara.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{ toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: ara
+          securityContext: {{ toYaml .Values.securityContext | nindent 12 }}
+          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: ARA_ALLOWED_HOSTS
+              value: >-
+                [
+                  "127.0.0.1",
+                  "localhost",
+                  "::1",
+                  "{{ include "ara.fullname" . }}.{{ .Release.Namespace }}"
+                ]
+            - name: ARA_IGNORED_FACTS
+              value: '["ansible_env_skip"]'
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /opt/ara
+            - name: tmp
+              mountPath: /tmp
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        # TODO(mkjpryor) Use a proper database for ARA data rather than
+        #                an ephemeral SQLite database
+        #                In terms of this chart, that would mean having the ability
+        #                to inject connection details for a PostgreSQL DB, for example
+        - name: data
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

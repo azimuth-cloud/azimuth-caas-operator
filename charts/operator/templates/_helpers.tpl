@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "azimuth-caas-operator.name" -}}
-{{- default .Chart.Name | lower | trunc 63 | trimSuffix "-" }}
+{{- .Chart.Name | lower | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*

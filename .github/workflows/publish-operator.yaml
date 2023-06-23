@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -20,7 +20,7 @@ jobs:
 
       - name: Calculate metadata for image
         id: image-meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/stackhpc/azimuth-caas-operator
           # Produce the branch name or tag and the SHA as tags
@@ -44,10 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -55,7 +55,7 @@ jobs:
 
       - name: Calculate metadata for image
         id: image-meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ghcr.io/stackhpc/azimuth-caas-operator-ar
           # Produce the branch name or tag and the SHA as tags
@@ -74,6 +74,23 @@ jobs:
           tags: ${{ steps.image-meta.outputs.tags }}
           labels: ${{ steps.image-meta.outputs.labels }}
 
+  mirror_ara_image:
+    name: Mirror and tag the latest ARA image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Install skopeo
+        run: sudo apt-get -y update && sudo apt-get install -y skopeo
+
+      - name: Mirror ARA image
+        run: |-
+          skopeo copy \
+            --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
+            docker://quay.io/recordsansible/ara-api:latest \
+            docker://ghcr.io/stackhpc/ara-api:${GITHUB_SHA::7}
+
   publish_charts:
     name: Publish Helm charts to GitHub pages
     runs-on: ubuntu-latest
@@ -81,9 +98,10 @@ jobs:
     needs:
       - build_push_operator_image
       - build_push_ansible_runner_image
+      - mirror_ara_image
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # This is important for the semver action to work correctly
           # when determining the number of commits since the last tag

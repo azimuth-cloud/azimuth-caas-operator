@@ -135,7 +135,9 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts"
+        - |
+            echo '[openstack]' >/runner/inventory/hosts
+            echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
         volumeMounts:
         - name: inventory
           mountPath: /runner/inventory
@@ -145,7 +147,14 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "set -e; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
+        - |
+            set -e
+            git clone {cluster_type_spec.gitUrl} /runner/project
+            git config --global --add safe.directory /runner/project
+            cd /runner/project
+            git checkout {cluster_type_spec.gitVersion}
+            git submodule update --init --recursive
+            ls -al
         volumeMounts:
         - name: playbooks
           mountPath: /runner/project

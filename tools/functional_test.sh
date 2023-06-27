@@ -3,7 +3,8 @@
 set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
+# set the required environment variable, before starting the operator
+export CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500"
 tox -e kopf &
 sleep 10
 

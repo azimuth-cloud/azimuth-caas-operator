@@ -60,7 +60,7 @@ jobs:
         run: |
           ansible-builder create \
             --file ./execution-environment/execution-environment.yml \
-            --context ./context
+            --context ./ee-context
 
       - name: Calculate metadata for image
         id: image-meta
@@ -73,11 +73,13 @@ jobs:
             type=ref,event=tag
             type=sha,prefix=
 
+      - run: ls -alR ./ee-context
+
       - name: Build and push image
         uses: stackhpc/github-actions/docker-multiarch-build-push@master
         with:
           cache-key: azimuth-caas-operator-ee
-          context: ./context/
+          context: ./ee-context/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.image-meta.outputs.tags }}

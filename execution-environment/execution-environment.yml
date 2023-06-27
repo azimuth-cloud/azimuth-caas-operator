@@ -1,0 +1,43 @@
+---
+# This file is used to generate the bulk of the Dockerfile using ansible-builder
+
+version: 3
+
+images:
+  base_image:
+    name: rockylinux:9-minimal
+
+dependencies:
+  python_interpreter:
+    package_system: python3
+  ansible_core:
+    package_pip: ansible-core==2.15.1
+  ansible_runner:
+    package_pip: ansible-runner==2.3.3
+  python: requirements.txt
+  system: bindep.txt
+
+options:
+  package_manager_path: /usr/bin/microdnf
+
+additional_build_steps:
+  prepend_base:
+    # Give the user with UID 1000 a name
+    - |
+        RUN groupadd --gid 1000 runner && \
+        useradd \
+          --create-home \
+          --home-dir /home/runner \
+          --no-user-group \
+          --gid 1000 \
+          --shell /sbin/nologin \
+          --uid 1000 \
+          runner
+  prepend_builder:
+    - RUN $PYCMD -m pip install -U pip
+    # We don't want these in the final container - only the builder
+    # It is required to build the wheel for netifaces
+    - RUN microdnf install gcc python3-devel -y
+  append_final:
+    # This is required to avoid permissions issues with git checkouts
+    - RUN git config --system --add safe.directory /runner/project

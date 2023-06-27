@@ -49,7 +49,7 @@ spec:
           value: openstack
         - name: OS_CLIENT_CONFIG_FILE
           value: /openstack/clouds.yaml
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:v0.1.0
         name: run
         volumeMounts:
         - mountPath: /runner/project
@@ -68,7 +68,7 @@ spec:
         - -c
         - echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local
           ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:v0.1.0
         name: inventory
         volumeMounts:
         - mountPath: /runner/inventory
@@ -80,7 +80,7 @@ spec:
         - set -e; git clone https://github.com/test.git /runner/project; git config
           --global --add safe.directory /runner/project; cd /runner/project; git checkout
           12345ab; ls -al
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:v0.1.0
         name: clone
         volumeMounts:
         - mountPath: /runner/project

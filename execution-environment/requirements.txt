@@ -1,0 +1,6 @@
+ara
+bcrypt
+openstacksdk
+passlib
+python-openstackclient
+netaddr

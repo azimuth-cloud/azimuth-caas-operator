@@ -53,11 +53,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install ansible-builder
+        run: python -m pip install ansible-builder
+
+      - name: Generate Docker build context from EE spec
+        run: >-
+          ansible-builder create
+            --file ./execution-environment/execution-environment.yml
+            --context ./context
+
       - name: Calculate metadata for image
         id: image-meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/stackhpc/azimuth-caas-operator-ar
+          images: ghcr.io/stackhpc/azimuth-caas-operator-ee
           # Produce the branch name or tag and the SHA as tags
           tags: |
             type=ref,event=branch
@@ -67,8 +76,8 @@ jobs:
       - name: Build and push image
         uses: stackhpc/github-actions/docker-multiarch-build-push@master
         with:
-          cache-key: azimuth-caas-operator-ar
-          context: ./docker/ansible-runner/
+          cache-key: azimuth-caas-operator-ee
+          context: ./context/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.image-meta.outputs.tags }}

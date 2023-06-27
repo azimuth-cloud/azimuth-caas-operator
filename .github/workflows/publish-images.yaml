@@ -74,6 +74,8 @@ jobs:
             type=ref,event=tag
             type=sha,prefix=
 
+      - run: ls -alR ./ee-context
+
       - name: Build and push image
         uses: stackhpc/github-actions/docker-multiarch-build-push@master
         with:

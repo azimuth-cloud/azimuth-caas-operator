@@ -60,7 +60,8 @@ jobs:
         run: |
           ansible-builder create \
             --file ./execution-environment/execution-environment.yml \
-            --context ./ee-context
+            --context ./ee-context \
+            --output-filename Dockerfile
 
       - name: Calculate metadata for image
         id: image-meta

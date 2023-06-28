@@ -7,7 +7,6 @@ Dockerfile
 
 # Exclude anything that isn't required for the build
 .dockerignore
-.git
 .github
 .gitignore
 .stestr.conf

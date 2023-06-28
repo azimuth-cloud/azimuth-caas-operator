@@ -25,13 +25,10 @@ spec:
               value: {{ tpl .Values.config.consulUrl . | quote }}
             - name: ARA_API_SERVER
               value: {{ tpl .Values.config.araUrl . | quote }}
-            - name: ANSIBLE_RUNNER_IMAGE
-              value: {{
-                printf
-                  "%s:%s"
-                  .Values.config.ansibleRunnerImage.repository
-                  (default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag)
-              }}
+            - name: ANSIBLE_RUNNER_IMAGE_REPO
+              value: {{ quote .Values.config.ansibleRunnerImage.repository }}
+            - name: ANSIBLE_RUNNER_IMAGE_TAG
+              value: {{ default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag | quote }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: tmp

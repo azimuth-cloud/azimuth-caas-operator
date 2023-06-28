@@ -1,8 +1,8 @@
-name: Publish operator
+name: Publish artefacts
+
 on:
-  push:
-    branches: ['**']
-    tags: ['**']
+  workflow_call:
+
 jobs:
   build_push_operator_image:
     name: Build and push operator image

@@ -1,0 +1,9 @@
+name: on tag
+
+on:
+  push:
+    tags: ['**']
+
+jobs:
+  publish_artefacts:
+    uses: ./.github/workflows/publish-artefacts.yaml

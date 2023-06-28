@@ -1,0 +1,33 @@
+name: on pull request
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - edited
+      - reopened
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Run the unit tests on every PR, even from external repos
+  unit_tests:
+    uses: ./.github/workflows/tox.yaml
+
+  # When the PR is from a branch of the main repo, publish images and charts
+  publish_artefacts:
+    uses: ./.github/workflows/publish-artefacts.yaml
+    if: github.repository == 'stackhpc/azimuth-caas-operator'
+
+  # The functional tests require the runner image, so we can only run them
+  # once the image has been built, and on PRs from the main repo
+  functional_tests:
+    needs: [publish_artefacts]
+    uses: ./.github/workflows/functional.yaml
+    if: github.repository == 'stackhpc/azimuth-caas-operator'

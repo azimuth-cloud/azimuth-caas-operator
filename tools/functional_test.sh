@@ -5,7 +5,6 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # Export environment variables required for the tests
 export CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500"
-export ANSIBLE_RUNNER_IMAGE_TAG="$GITHUB_REF_NAME"  # By default, use github branch name
 tox -e kopf &
 sleep 10
 

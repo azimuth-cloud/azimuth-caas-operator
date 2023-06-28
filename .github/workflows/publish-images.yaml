@@ -1,4 +1,4 @@
-name: Publish artefacts
+name: Publish images
 
 on:
   workflow_call:
@@ -100,30 +100,3 @@ jobs:
             --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
             docker://quay.io/recordsansible/ara-api:latest \
             docker://ghcr.io/stackhpc/ara-api:${GITHUB_SHA::7}
-
-  publish_charts:
-    name: Publish Helm charts to GitHub pages
-    runs-on: ubuntu-latest
-    # We need the image to have been built (if required) and tagged before publishing charts
-    needs:
-      - build_push_operator_image
-      - build_push_ansible_runner_image
-      - mirror_ara_image
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
-        with:
-          # This is important for the semver action to work correctly
-          # when determining the number of commits since the last tag
-          fetch-depth: 0
-
-      - name: Get SemVer version for current commit
-        id: semver
-        uses: stackhpc/github-actions/semver@master
-
-      - name: Publish Helm charts
-        uses: stackhpc/github-actions/helm-publish@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ steps.semver.outputs.version }}
-          app-version: ${{ steps.semver.outputs.short-sha }}

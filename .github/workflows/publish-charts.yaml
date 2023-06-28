@@ -1,0 +1,27 @@
+name: Publish charts
+
+on:
+  workflow_call:
+
+jobs:
+  publish_charts:
+    name: Publish Helm charts to GitHub pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          # This is important for the semver action to work correctly
+          # when determining the number of commits since the last tag
+          fetch-depth: 0
+
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: stackhpc/github-actions/semver@master
+
+      - name: Publish Helm charts
+        uses: stackhpc/github-actions/helm-publish@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.semver.outputs.version }}
+          app-version: ${{ steps.semver.outputs.short-sha }}

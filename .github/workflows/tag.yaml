@@ -5,5 +5,9 @@ on:
     tags: ['**']
 
 jobs:
-  publish_artefacts:
-    uses: ./.github/workflows/publish-artefacts.yaml
+  publish_images:
+    uses: ./.github/workflows/publish-images.yaml
+
+  publish_charts:
+    needs: [publish_images]
+    uses: ./.github/workflows/publish-charts.yaml

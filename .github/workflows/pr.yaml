@@ -21,13 +21,18 @@ jobs:
     uses: ./.github/workflows/tox.yaml
 
   # When the PR is from a branch of the main repo, publish images and charts
-  publish_artefacts:
-    uses: ./.github/workflows/publish-artefacts.yaml
+  publish_images:
+    uses: ./.github/workflows/publish-images.yaml
+    if: github.repository == 'stackhpc/azimuth-caas-operator'
+
+  publish_charts:
+    needs: [publish_images]
+    uses: ./.github/workflows/publish-charts.yaml
     if: github.repository == 'stackhpc/azimuth-caas-operator'
 
   # The functional tests require the runner image, so we can only run them
   # once the image has been built, and on PRs from the main repo
   functional_tests:
-    needs: [publish_artefacts]
+    needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
     if: github.repository == 'stackhpc/azimuth-caas-operator'

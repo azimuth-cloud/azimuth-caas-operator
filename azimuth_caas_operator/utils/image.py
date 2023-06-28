@@ -10,11 +10,9 @@ def get_ansible_runner_image():
         return os.environ["ANSIBLE_RUNNER_IMAGE"]
     else:
         repo = os.environ.get(
-            "ANSIBLE_RUNNER_IMAGE_REPO",
-            DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO
+            "ANSIBLE_RUNNER_IMAGE_REPO", DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO
         )
         tag = os.environ.get(
-            "ANSIBLE_RUNNER_IMAGE_TAG",
-            DEFAULT_ANSIBLE_RUNNER_IMAGE_TAG
+            "ANSIBLE_RUNNER_IMAGE_TAG", DEFAULT_ANSIBLE_RUNNER_IMAGE_TAG
         )
         return f"{repo}:{tag}"

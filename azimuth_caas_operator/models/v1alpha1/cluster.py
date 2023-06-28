@@ -54,9 +54,9 @@ def get_fake():
 
 def get_fake_dict():
     return dict(
-        apiVersion="fake",
+        apiVersion="caas.azimuth.stackhpc.com/v1alpha1",
         kind="Cluster",
-        metadata=dict(name="test1", uid="fakeuid1"),
+        metadata=dict(name="test1", uid="fakeuid1", namespace="ns1"),
         spec=dict(
             clusterTypeName="type1",
             clusterTypeVersion="1234",

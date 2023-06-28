@@ -4,13 +4,8 @@ import logging
 import os
 import yaml
 
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    NoEncryption,
-    PrivateFormat,
-    PublicFormat
-)
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
 
 from easykube import ApiError
 
@@ -24,27 +19,23 @@ from azimuth_caas_operator.utils import k8s
 LOG = logging.getLogger(__name__)
 
 
-async def create_deploy_key_secret(
-    client,
-    name: str,
-    cluster: cluster_crd.Cluster
-):
+async def create_deploy_key_secret(client, name: str, cluster: cluster_crd.Cluster):
     """
     Creates a new deploy key secret for the specified cluster.
     """
     # Generate an SSH keypair
-    keypair = Ed25519PrivateKey.generate()
-    public_key = (
-        keypair
-            .public_key()
-            .public_bytes(Encoding.OpenSSH, PublicFormat.OpenSSH)
-            .decode()
+    keypair = ed25519.Ed25519PrivateKey.generate()
+    public_key = keypair.public_key()
+    public_key_bytes = public_key.public_bytes(
+        serialization.Encoding.OpenSSH, serialization.PublicFormat.OpenSSH
     )
-    private_key = (
-        keypair
-            .private_bytes(Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption())
-            .decode()
+    public_key_text = public_key_bytes.decode()
+    private_key_bytes = keypair.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.OpenSSH,
+        serialization.NoEncryption(),
     )
+    private_key_text = private_key_bytes.decode()
     return await client.create_object(
         {
             "apiVersion": "v1",
@@ -62,17 +53,14 @@ async def create_deploy_key_secret(
                 ],
             },
             "stringData": {
-                "id_ed25519.pub": public_key,
-                "id_ed25519": private_key,
+                "id_ed25519.pub": public_key_text,
+                "id_ed25519": private_key_text,
             },
         }
     )
 
 
-async def ensure_deploy_key_secret(
-    client,
-    cluster: cluster_crd.Cluster
-):
+async def ensure_deploy_key_secret(client, cluster: cluster_crd.Cluster):
     """
     Ensures that a deploy key secret exists for the given cluster.
     """
@@ -81,15 +69,12 @@ async def ensure_deploy_key_secret(
     secret_resource = await client.api("v1").resource("secrets")
     try:
         secret = await secret_resource.fetch(
-            deploy_key_secret_name,
-            namespace = cluster.metadata.namespace
+            deploy_key_secret_name, namespace=cluster.metadata.namespace
         )
     except ApiError as exc:
         if exc.status_code == 404:
             secret = await create_deploy_key_secret(
-                client,
-                deploy_key_secret_name,
-                cluster
+                client, deploy_key_secret_name, cluster
             )
         else:
             raise
@@ -147,7 +132,7 @@ def get_env_configmap(
         "data": {
             "envvars": yaml.safe_dump(envvars),
             "extravars": yaml.safe_dump(extraVars),
-        }
+        },
     }
 
 
@@ -157,7 +142,6 @@ def get_job(
     remove=False,
     update=False,
 ):
-
     action = "create"
     if remove:
         action = "remove"
@@ -557,10 +541,7 @@ async def start_job(
         )
 
     # ensure that we have generated an SSH key for the cluster
-    cluster_deploy_ssh_public_key = await ensure_deploy_key_secret(
-        client,
-        cluster
-    )
+    cluster_deploy_ssh_public_key = await ensure_deploy_key_secret(client, cluster)
 
     # generate config for the job
     await client.apply_object(
@@ -571,17 +552,12 @@ async def start_job(
             remove=remove,
             update=update,
         ),
-        force = True
+        force=True,
     )
 
     # create the job
     await client.create_object(
-        get_job(
-            cluster,
-            cluster_type_spec,
-            remove=remove,
-            update=update
-        )
+        get_job(cluster, cluster_type_spec, remove=remove, update=update)
     )
 
 

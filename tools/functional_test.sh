@@ -68,4 +68,3 @@ until kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster quick-test-fa
 
 kubectl get cluster
 kubectl get cluster -o yaml
-kill %1

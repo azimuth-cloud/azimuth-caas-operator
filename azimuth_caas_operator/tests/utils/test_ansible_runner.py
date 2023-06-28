@@ -244,6 +244,6 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
 
         event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
 
-        self.assertIsNone(event)
+        self.assertEqual([], event)
         mock_pod_names.assert_awaited_once_with("client", "job", "ns")
         mock_get_lines.assert_not_awaited()

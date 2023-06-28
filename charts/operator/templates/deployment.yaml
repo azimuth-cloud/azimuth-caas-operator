@@ -4,6 +4,10 @@ metadata:
   name: {{ include "azimuth-caas-operator.fullname" . }}
   labels: {{ include "azimuth-caas-operator.labels" . | nindent 4 }}
 spec:
+  # Allow only one replica at once with the recreate strategy in order to avoid races
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels: {{ include "azimuth-caas-operator.selectorLabels" . | nindent 6 }}
   template:

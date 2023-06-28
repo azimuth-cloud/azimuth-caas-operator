@@ -15,6 +15,7 @@ helm upgrade azimuth-caas-operator ./charts/operator \
   --timeout 10m \
   --set image.tag=${GITHUB_SHA::7} \
   --set config.ansibleRunnerImage.tag=${GITHUB_SHA::7} \
+  --set ara.image.tag=${GITHUB_SHA::7} \
   --set config.consulUrl=fakeconsul
 
 # add required secrets, not that they care used for this test

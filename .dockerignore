@@ -4,3 +4,15 @@ Dockerfile
 # Exclude Python caches
 **/__pycache__
 *.egg-info
+
+# Exclude anything that isn't required for the build
+.dockerignore
+.git
+.github
+.gitignore
+.stestr.conf
+charts
+execution-environment
+test-requirements.txt
+tools
+tox.ini

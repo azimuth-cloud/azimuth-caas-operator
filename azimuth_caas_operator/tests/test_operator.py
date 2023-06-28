@@ -192,6 +192,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
+    @mock.patch.object(ansible_runner, "unlabel_job")
     @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(ansible_runner, "get_outputs_from_create_job")
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -206,6 +207,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update,
         mock_outputs,
         mock_error,
+        mock_unlabel,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
@@ -227,6 +229,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
+        mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
     @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(cluster_utils, "update_cluster")

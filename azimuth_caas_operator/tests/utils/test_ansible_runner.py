@@ -12,22 +12,28 @@ from azimuth_caas_operator.utils import ansible_runner
 
 
 class TestAnsibleRunner(base.TestCase):
+    @mock.patch.dict(
+        os.environ,
+        {
+            "ANSIBLE_RUNNER_IMAGE_TAG": "12345ab",
+        },
+        clear=True,
+    )
     def test_get_job_remove(self):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
         job = ansible_runner.get_job(cluster, cluster_type.spec, remove=True)
 
-        expected = yaml.safe_load(
-            """
+        expected = """\
 apiVersion: batch/v1
 kind: Job
 metadata:
   generateName: test1-remove-
-  namespace: ns1
   labels:
     azimuth-caas-action: remove
     azimuth-caas-cluster: test1
+  namespace: ns1
   ownerReferences:
   - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
     kind: Cluster
@@ -42,16 +48,12 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - |
-            set -ex
-            export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
-            if [ -f /runner/project/requirements.yml ]; then
-              ansible-galaxy install -r /runner/project/requirements.yml
-            elif [ -f /runner/project/roles/requirements.yml ]; then
-              ansible-galaxy install -r /runner/project/roles/requirements.yml
-            fi
-            ansible-runner run /runner -j
-            openstack application credential delete az-caas-test1 || true
+        - "set -ex\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
+          \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
+          \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
+          \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\
+          fi\\nansible-runner run /runner -j\\nopenstack application credential delete\\
+          \\ az-caas-test1 || true\\n"
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
@@ -63,58 +65,70 @@ spec:
           value: /runner/project/ansible.cfg
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:latest
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: run
         volumeMounts:
-        - name: runner-data
-          mountPath: /runner/project
+        - mountPath: /runner/project
+          name: runner-data
           subPath: project
-        - name: runner-data
-          mountPath: /runner/inventory
+        - mountPath: /runner/inventory
+          name: runner-data
           subPath: inventory
-        - name: runner-data
-          mountPath: /runner/artifacts
+        - mountPath: /runner/artifacts
+          name: runner-data
           subPath: artifacts
-        - name: ansible-home
-          mountPath: /var/lib/ansible
-        - name: env
-          mountPath: /runner/env
-        - name: cloudcreds
-          mountPath: /var/lib/caas/cloudcreds
-        - name: deploy-key
-          mountPath: /var/lib/caas/ssh
+        - mountPath: /var/lib/ansible
+          name: ansible-home
+        - mountPath: /runner/env
+          name: env
           readOnly: true
-        - name: ssh
-          mountPath: /home/runner/.ssh
+        - mountPath: /var/lib/caas/cloudcreds
+          name: cloudcreds
+          readOnly: true
+        - mountPath: /var/lib/caas/ssh
+          name: deploy-key
+          readOnly: true
+        - mountPath: /home/runner/.ssh
+          name: ssh
+          readOnly: true
       initContainers:
       - command:
         - /bin/bash
         - -c
-        - |
-            echo '[openstack]' >/runner/inventory/hosts
-            echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:latest
+        - 'echo ''[openstack]'' >/runner/inventory/hosts
+
+          echo ''localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3''
+          >>/runner/inventory/hosts
+
+          '
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: inventory
         volumeMounts:
-        - name: runner-data
-          mountPath: /runner/inventory
+        - mountPath: /runner/inventory
+          name: runner-data
           subPath: inventory
         workingDir: /inventory
       - command:
         - /bin/bash
         - -c
-        - |
-            set -ex
-            git clone https://github.com/test.git /runner/project
-            cd /runner/project
-            git checkout 12345ab
-            git submodule update --init --recursive
-            ls -al /runner/project
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:latest
+        - 'set -ex
+
+          git clone https://github.com/test.git /runner/project
+
+          cd /runner/project
+
+          git checkout 12345ab
+
+          git submodule update --init --recursive
+
+          ls -al /runner/project
+
+          '
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: clone
         volumeMounts:
-        - name: runner-data
-          mountPath: /runner/project
+        - mountPath: /runner/project
+          name: runner-data
           subPath: project
         workingDir: /runner
       restartPolicy: Never
@@ -123,28 +137,27 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
       volumes:
-      - name: runner-data
-        emptyDir: {}
-      - name: ansible-home
-        emptyDir: {}
-      - name: env
-        configMap:
+      - emptyDir: {}
+        name: runner-data
+      - emptyDir: {}
+        name: ansible-home
+      - configMap:
           name: test1-remove
+        name: env
       - name: cloudcreds
         secret:
           secretName: cloudsyaml
       - name: deploy-key
         secret:
-          secretName: "test1-deploy-key"
           defaultMode: 256
+          secretName: test1-deploy-key
       - name: ssh
         secret:
-          secretName: "ssh-type1"
           defaultMode: 256
           optional: true
+          secretName: ssh-type1
 """  # noqa
-        )
-        self.assertEqual(expected, job)
+        self.assertEqual(expected, yaml.safe_dump(job))
 
     @mock.patch.dict(
         os.environ,
@@ -159,42 +172,31 @@ spec:
         cluster_type = cluster_type_crd.get_fake()
 
         config = ansible_runner.get_env_configmap(cluster, cluster_type.spec, "fakekey")
-        expected = yaml.safe_load(
-            """
----
+        expected = """\
 apiVersion: v1
+data:
+  envvars: 'ARA_API_CLIENT: http
+
+    ARA_API_SERVER: fakearaurl
+
+    CONSUL_HTTP_ADDR: fakeconsulurl
+
+    '
+  extravars: "cluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image:\\
+    \\ testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /var/lib/caas/ssh/id_ed25519\\n\\
+    cluster_type: type1\\nfoo: bar\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n\\
+    \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
 kind: ConfigMap
 metadata:
   name: test1-create
   namespace: ns1
   ownerReferences:
-    - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-      kind: Cluster
-      name: test1
-      uid: fakeuid1
-data:
-  envvars: |
-    ARA_API_CLIENT: http
-    ARA_API_SERVER: fakearaurl
-    CONSUL_HTTP_ADDR: fakeconsulurl
-  extravars: |
-    cluster_deploy_ssh_public_key: fakekey
-    cluster_id: fakeuid1
-    cluster_image: testimage1
-    cluster_name: test1
-    cluster_ssh_private_key_file: /var/lib/caas/ssh/id_ed25519
-    cluster_type: type1
-    foo: bar
-    nested:
-      baz: bob
-    random_bool: true
-    random_dict:
-      random_str: foo
-    random_int: 8
-    very_random_int: 42
-"""
-        )  # noqa
-        self.assertEqual(expected, config)
+  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+    kind: Cluster
+    name: test1
+    uid: fakeuid1
+"""  # noqa
+        self.assertEqual(expected, yaml.safe_dump(config))
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):

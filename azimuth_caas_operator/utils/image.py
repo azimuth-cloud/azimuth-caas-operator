@@ -2,7 +2,6 @@ import os
 
 
 DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO = "ghcr.io/stackhpc/azimuth-caas-operator-ee"
-DEFAULT_ANSIBLE_RUNNER_IMAGE_TAG = "latest"
 
 
 def get_ansible_runner_image():
@@ -12,7 +11,8 @@ def get_ansible_runner_image():
         repo = os.environ.get(
             "ANSIBLE_RUNNER_IMAGE_REPO", DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO
         )
-        tag = os.environ.get(
-            "ANSIBLE_RUNNER_IMAGE_TAG", DEFAULT_ANSIBLE_RUNNER_IMAGE_TAG
-        )
+        try:
+            tag = os.environ["ANSIBLE_RUNNER_IMAGE_TAG"]
+        except KeyError:
+            raise RuntimeError("ANSIBLE_RUNNER_IMAGE_TAG is not set")
         return f"{repo}:{tag}"

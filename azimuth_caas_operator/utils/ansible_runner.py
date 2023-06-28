@@ -255,13 +255,16 @@ spec:
           mountPath: /var/lib/ansible
         - name: env
           mountPath: /runner/env
+          readOnly: true
         - name: cloudcreds
           mountPath: /var/lib/caas/cloudcreds
+          readOnly: true
         - name: deploy-key
           mountPath: /var/lib/caas/ssh
           readOnly: true
         - name: ssh
           mountPath: /home/runner/.ssh
+          readOnly: true
       volumes:
       - name: runner-data
         emptyDir: {{}}

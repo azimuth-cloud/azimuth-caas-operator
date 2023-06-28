@@ -253,6 +253,7 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
             if reason:
                 error += f" Possible reason for the failure was: {reason}"
 
+            await ansible_runner.unlabel_job(K8S_CLIENT, update_job)
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,

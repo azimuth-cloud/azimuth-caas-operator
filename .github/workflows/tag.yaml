@@ -1,0 +1,13 @@
+name: on tag
+
+on:
+  push:
+    tags: ['**']
+
+jobs:
+  publish_images:
+    uses: ./.github/workflows/publish-images.yaml
+
+  publish_charts:
+    needs: [publish_images]
+    uses: ./.github/workflows/publish-charts.yaml

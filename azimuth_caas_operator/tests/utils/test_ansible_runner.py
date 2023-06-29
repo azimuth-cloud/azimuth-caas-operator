@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 from unittest import mock
 import yaml
@@ -11,6 +12,13 @@ from azimuth_caas_operator.utils import ansible_runner
 
 
 class TestAnsibleRunner(base.TestCase):
+    @mock.patch.dict(
+        os.environ,
+        {
+            "ANSIBLE_RUNNER_IMAGE_TAG": "12345ab",
+        },
+        clear=True,
+    )
     def test_get_job_remove(self):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
@@ -25,6 +33,7 @@ metadata:
   labels:
     azimuth-caas-action: remove
     azimuth-caas-cluster: test1
+  namespace: ns1
   ownerReferences:
   - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
     kind: Cluster
@@ -39,52 +48,88 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - set -e; ansible-galaxy install -r /runner/project/roles/requirements.yml
-          || true; ansible-runner run /runner -j; openstack application credential
-          delete azimuth-caas-test1 || true
+        - "set -ex\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
+          \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
+          \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
+          \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\
+          fi\\nansible-runner run /runner -j\\nopenstack application credential delete\\
+          \\ az-caas-test1 || true\\n"
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
         - name: OS_CLOUD
           value: openstack
         - name: OS_CLIENT_CONFIG_FILE
-          value: /openstack/clouds.yaml
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+          value: /var/lib/caas/cloudcreds/clouds.yaml
+        - name: ANSIBLE_CONFIG
+          value: /runner/project/ansible.cfg
+        - name: ANSIBLE_HOME
+          value: /var/lib/ansible
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: run
         volumeMounts:
         - mountPath: /runner/project
-          name: playbooks
+          name: runner-data
+          subPath: project
         - mountPath: /runner/inventory
-          name: inventory
+          name: runner-data
+          subPath: inventory
+        - mountPath: /runner/artifacts
+          name: runner-data
+          subPath: artifacts
+        - mountPath: /var/lib/ansible
+          name: ansible-home
         - mountPath: /runner/env
           name: env
-        - mountPath: /openstack
+          readOnly: true
+        - mountPath: /var/lib/caas/cloudcreds
           name: cloudcreds
+          readOnly: true
+        - mountPath: /var/lib/caas/ssh
+          name: deploy-key
+          readOnly: true
         - mountPath: /home/runner/.ssh
           name: ssh
+          readOnly: true
       initContainers:
       - command:
         - /bin/bash
         - -c
-        - echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local
-          ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+        - 'echo ''[openstack]'' >/runner/inventory/hosts
+
+          echo ''localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3''
+          >>/runner/inventory/hosts
+
+          '
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: inventory
         volumeMounts:
         - mountPath: /runner/inventory
-          name: inventory
+          name: runner-data
+          subPath: inventory
         workingDir: /inventory
       - command:
         - /bin/bash
         - -c
-        - set -e; git clone https://github.com/test.git /runner/project; git config
-          --global --add safe.directory /runner/project; cd /runner/project; git checkout
-          12345ab; ls -al
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ar:v0.1.0
+        - 'set -ex
+
+          git clone https://github.com/test.git /runner/project
+
+          cd /runner/project
+
+          git checkout 12345ab
+
+          git submodule update --init --recursive
+
+          ls -al /runner/project
+
+          '
+        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
         name: clone
         volumeMounts:
         - mountPath: /runner/project
-          name: playbooks
+          name: runner-data
+          subPath: project
         workingDir: /runner
       restartPolicy: Never
       securityContext:
@@ -93,49 +138,65 @@ spec:
         runAsUser: 1000
       volumes:
       - emptyDir: {}
-        name: playbooks
+        name: runner-data
       - emptyDir: {}
-        name: inventory
+        name: ansible-home
       - configMap:
           name: test1-remove
         name: env
       - name: cloudcreds
         secret:
           secretName: cloudsyaml
+      - name: deploy-key
+        secret:
+          defaultMode: 256
+          secretName: test1-deploy-key
       - name: ssh
         secret:
           defaultMode: 256
           optional: true
           secretName: ssh-type1
 """  # noqa
-        self.assertEqual(expected, yaml.dump(job))
+        self.assertEqual(expected, yaml.safe_dump(job))
 
+    @mock.patch.dict(
+        os.environ,
+        {
+            "CONSUL_HTTP_ADDR": "fakeconsulurl",
+            "ARA_API_SERVER": "fakearaurl",
+        },
+        clear=True,
+    )
     def test_get_job_env_configmap(self):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
         config = ansible_runner.get_env_configmap(cluster, cluster_type.spec, "fakekey")
         expected = """\
-{
-  "apiVersion": "v1",
-  "kind": "ConfigMap",
-  "metadata": {
-    "name": "test1-create",
-    "ownerReferences": [
-      {
-        "apiVersion": "caas.azimuth.stackhpc.com/v1alpha1",
-        "kind": "Cluster",
-        "name": "test1",
-        "uid": "fakeuid1"
-      }
-    ]
-  },
-  "data": {
-    "envvars": "---\\nANSIBLE_CALLBACK_PLUGINS: /home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback\\nARA_API_CLIENT: http\\nARA_API_SERVER: http://azimuth-ara.azimuth-caas-operator:8000\\nCONSUL_HTTP_ADDR: zenith-consul-server.zenith:8500\\nOS_CLIENT_CONFIG_FILE: /openstack/clouds.yaml\\nOS_CLOUD: openstack\\n",
-    "extravars": "---\\ncluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /home/runner/.ssh/id_rsa\\ncluster_type: type1\\nfoo: bar\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
-  }
-}"""  # noqa
-        self.assertEqual(expected, json.dumps(config, indent=2))
+apiVersion: v1
+data:
+  envvars: 'ARA_API_CLIENT: http
+
+    ARA_API_SERVER: fakearaurl
+
+    CONSUL_HTTP_ADDR: fakeconsulurl
+
+    '
+  extravars: "cluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeuid1\\ncluster_image:\\
+    \\ testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file: /var/lib/caas/ssh/id_ed25519\\n\\
+    cluster_type: type1\\nfoo: bar\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n\\
+    \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
+kind: ConfigMap
+metadata:
+  name: test1-create
+  namespace: ns1
+  ownerReferences:
+  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
+    kind: Cluster
+    name: test1
+    uid: fakeuid1
+"""  # noqa
+        self.assertEqual(expected, yaml.safe_dump(config))
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):

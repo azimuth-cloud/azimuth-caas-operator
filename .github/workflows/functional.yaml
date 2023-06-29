@@ -1,15 +1,10 @@
 name: Functional tests
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
-  build:
+  functional_test:
     name: Operator functional tests via tox
     timeout-minutes: 10
     runs-on: ubuntu-latest
@@ -33,7 +28,13 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install tox
 
+    - name: Get short SHA for runner image tag
+      id: short-sha
+      run: echo "short-sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
     - name: Run test
       timeout-minutes: 4
       run: |
         tools/functional_test.sh
+      env:
+        ANSIBLE_RUNNER_IMAGE_TAG: ${{ steps.short-sha.outputs.short-sha }}

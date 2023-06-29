@@ -63,3 +63,9 @@ releasenotes/build
 # Ignore chart dependencies
 charts/*/charts
 Chart.lock
+
+# Ignore the EE context directory
+context
+
+# pyenv files
+.python-version

@@ -6,7 +6,7 @@ config:
   araUrl: "{{ printf \"http://%s-ara.%s:8000\" .Release.Name .Release.Namespace }}"
   # The image for ansible runner
   ansibleRunnerImage:
-    repository: ghcr.io/stackhpc/azimuth-caas-operator-ar
+    repository: ghcr.io/stackhpc/azimuth-caas-operator-ee
     tag: ""  # Defaults to appVersion
 
 # The operator image to use

@@ -4,14 +4,81 @@ import logging
 import os
 import yaml
 
-from azimuth_caas_operator.models import registry
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
+
+from easykube import ApiError
+
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 from azimuth_caas_operator.utils import image as image_utils
 from azimuth_caas_operator.utils import k8s
 
+
 LOG = logging.getLogger(__name__)
+
+
+async def create_deploy_key_secret(client, name: str, cluster: cluster_crd.Cluster):
+    """
+    Creates a new deploy key secret for the specified cluster.
+    """
+    # Generate an SSH keypair
+    keypair = ed25519.Ed25519PrivateKey.generate()
+    public_key = keypair.public_key()
+    public_key_bytes = public_key.public_bytes(
+        serialization.Encoding.OpenSSH, serialization.PublicFormat.OpenSSH
+    )
+    public_key_text = public_key_bytes.decode()
+    private_key_bytes = keypair.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.OpenSSH,
+        serialization.NoEncryption(),
+    )
+    private_key_text = private_key_bytes.decode()
+    return await client.create_object(
+        {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": name,
+                "namespace": cluster.metadata.namespace,
+                "ownerReferences": [
+                    {
+                        "apiVersion": cluster.api_version,
+                        "kind": cluster.kind,
+                        "name": cluster.metadata.name,
+                        "uid": cluster.metadata.uid,
+                    },
+                ],
+            },
+            "stringData": {
+                "id_ed25519.pub": public_key_text,
+                "id_ed25519": private_key_text,
+            },
+        }
+    )
+
+
+async def ensure_deploy_key_secret(client, cluster: cluster_crd.Cluster):
+    """
+    Ensures that a deploy key secret exists for the given cluster.
+    """
+    deploy_key_secret_name = f"{cluster.metadata.name}-deploy-key"
+
+    secret_resource = await client.api("v1").resource("secrets")
+    try:
+        secret = await secret_resource.fetch(
+            deploy_key_secret_name, namespace=cluster.metadata.namespace
+        )
+    except ApiError as exc:
+        if exc.status_code == 404:
+            secret = await create_deploy_key_secret(
+                client, deploy_key_secret_name, cluster
+            )
+        else:
+            raise
+    return base64.b64decode(secret.data["id_ed25519.pub"]).decode()
 
 
 def get_env_configmap(
@@ -26,31 +93,19 @@ def get_env_configmap(
     extraVars["cluster_id"] = cluster.metadata.uid
     extraVars["cluster_type"] = cluster.spec.clusterTypeName
     extraVars["cluster_deploy_ssh_public_key"] = cluster_deploy_ssh_public_key
-    extraVars["cluster_ssh_private_key_file"] = "/home/runner/.ssh/id_rsa"
-
+    # This is the file containing the private key for the deploy key
+    extraVars["cluster_ssh_private_key_file"] = "/var/lib/caas/ssh/id_ed25519"
     if remove:
         extraVars["cluster_state"] = "absent"
-    extraVars = "---\n" + yaml.dump(extraVars)
 
-    # TODO(johngarbutt): probably should use more standard config
-    envvars = dict(
-        # Consul is used to store terraform state
-        CONSUL_HTTP_ADDR=os.environ.get(
-            "CONSUL_HTTP_ADDR", "zenith-consul-server.zenith:8500"
-        ),
-        # Configure ARA to help debug ansible executions
-        ANSIBLE_CALLBACK_PLUGINS=(
-            "/home/runner/.local/lib/python3.10/site-packages/ara/plugins/callback"
-        ),
-        ARA_API_CLIENT="http",
-        ARA_API_SERVER=os.environ.get(
-            "ARA_API_SERVER", "http://azimuth-ara.azimuth-caas-operator:8000"
-        ),
-        # This tells tools to use the app cred k8s secret we mount
-        OS_CLOUD="openstack",
-        OS_CLIENT_CONFIG_FILE="/openstack/clouds.yaml",
-    )
-    envvars = "---\n" + yaml.dump(envvars)
+    envvars = {}
+    try:
+        envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
+    except KeyError:
+        raise RuntimeError("CONSUL_HTTP_ADDR is not set")
+    if "ARA_API_SERVER" in os.environ:
+        envvars["ARA_API_CLIENT"] = "http"
+        envvars["ARA_API_SERVER"] = os.environ["ARA_API_SERVER"]
 
     # TODO(johngarbutt) this logic is scattered in a few places!
     action = "create"
@@ -59,23 +114,26 @@ def get_env_configmap(
     elif update:
         action = "update"
 
-    template = f"""apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {cluster.metadata.name}-{action}
-  ownerReferences:
-    - apiVersion: "{registry.API_VERSION}"
-      kind: Cluster
-      name: "{cluster.metadata.name}"
-      uid: "{cluster.metadata.uid}"
-data:
-  envvars: ""
-  extravars: ""
-"""
-    config_map = yaml.safe_load(template)
-    config_map["data"]["extravars"] = extraVars
-    config_map["data"]["envvars"] = envvars
-    return config_map
+    return {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+            "name": f"{cluster.metadata.name}-{action}",
+            "namespace": cluster.metadata.namespace,
+            "ownerReferences": [
+                {
+                    "apiVersion": cluster.api_version,
+                    "kind": cluster.kind,
+                    "name": cluster.metadata.name,
+                    "uid": cluster.metadata.uid,
+                },
+            ],
+        },
+        "data": {
+            "envvars": yaml.safe_dump(envvars),
+            "extravars": yaml.safe_dump(extraVars),
+        },
+    }
 
 
 def get_job(
@@ -84,9 +142,6 @@ def get_job(
     remove=False,
     update=False,
 ):
-    cluster_uid = cluster.metadata.uid
-    name = cluster.metadata.name
-
     action = "create"
     if remove:
         action = "remove"
@@ -95,31 +150,20 @@ def get_job(
 
     image = image_utils.get_ansible_runner_image()
 
-    ansible_runner_command = (
-        "set -e; "
-        # don't fail if there is no requirements.yml
-        "ansible-galaxy install -r /runner/project/roles/requirements.yml || true; "
-        "ansible-runner run /runner -j"
-    )
-    if remove:
-        # TODO(johngarbutt): very tight coupling with code in azimuth here :(
-        ansible_runner_command += (
-            f"; openstack application credential delete azimuth-caas-{name} || true"
-        )
-
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: "{name}-{action}-"
+  generateName: "{cluster.metadata.name}-{action}-"
+  namespace: {cluster.metadata.namespace}
   labels:
-      azimuth-caas-cluster: "{name}"
+      azimuth-caas-cluster: "{cluster.metadata.name}"
       azimuth-caas-action: "{action}"
   ownerReferences:
-    - apiVersion: "{registry.API_VERSION}"
-      kind: Cluster
-      name: "{name}"
-      uid: "{cluster_uid}"
+    - apiVersion: {cluster.api_version}
+      kind: {cluster.kind}
+      name: {cluster.metadata.name}
+      uid: "{cluster.metadata.uid}"
 spec:
   template:
     spec:
@@ -135,56 +179,107 @@ spec:
         command:
         - /bin/bash
         - -c
-        - "echo '[openstack]' >/runner/inventory/hosts; echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts"
+        - |
+            echo '[openstack]' >/runner/inventory/hosts
+            echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
         volumeMounts:
-        - name: inventory
+        - name: runner-data
           mountPath: /runner/inventory
+          subPath: inventory
       - image: "{image}"
         name: clone
         workingDir: /runner
         command:
         - /bin/bash
         - -c
-        - "set -e; git clone {cluster_type_spec.gitUrl} /runner/project; git config --global --add safe.directory /runner/project; cd /runner/project; git checkout {cluster_type_spec.gitVersion}; ls -al"
+        - |
+            set -ex
+            git clone {cluster_type_spec.gitUrl} /runner/project
+            cd /runner/project
+            git checkout {cluster_type_spec.gitVersion}
+            git submodule update --init --recursive
+            ls -al /runner/project
         volumeMounts:
-        - name: playbooks
+        - name: runner-data
           mountPath: /runner/project
+          subPath: project
       containers:
       - name: run
         image: "{image}"
         command:
         - /bin/bash
         - -c
-        - "{ansible_runner_command}"
+        - |
+            set -ex
+            export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
+            if [ -f /runner/project/requirements.yml ]; then
+              ansible-galaxy install -r /runner/project/requirements.yml
+            elif [ -f /runner/project/roles/requirements.yml ]; then
+              ansible-galaxy install -r /runner/project/roles/requirements.yml
+            fi
+            ansible-runner run /runner -j
+            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove else ""}
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"
+        # OpenStack environment variables are set here rather than envvars
+        # so that they are available for use with the OpenStack CLI if required
         - name: OS_CLOUD
           value: "openstack"
         - name: OS_CLIENT_CONFIG_FILE
-          value: "/openstack/clouds.yaml"
+          value: "/var/lib/caas/cloudcreds/clouds.yaml"
+        # Tell Ansible that we definitely want to use ansible.cfg from the runner directory
+        # This is required because emptyDir does not allow the defaultMode
+        # to be set, and resists any attempts to chmod the mount
+        # Note that we are not subject to any of the security concerns referred
+        # to in the Ansible docs that justify this behaviour
+        # See https://docs.ansible.com/ansible/devel/reference_appendices/config.html#avoiding-security-risks-with-ansible-cfg-in-the-current-directory
+        # We set this here rather than envvars because it needs to be available
+        # to the ansible-galaxy command as well
+        - name: ANSIBLE_CONFIG
+          value: /runner/project/ansible.cfg
+        # Use the writable directory for ansible-home
+        - name: ANSIBLE_HOME
+          value: /var/lib/ansible
         volumeMounts:
-        - name: playbooks
+        - name: runner-data
           mountPath: /runner/project
-        - name: inventory
+          subPath: project
+        - name: runner-data
           mountPath: /runner/inventory
+          subPath: inventory
+        - name: runner-data
+          mountPath: /runner/artifacts
+          subPath: artifacts
+        - name: ansible-home
+          mountPath: /var/lib/ansible
         - name: env
           mountPath: /runner/env
+          readOnly: true
         - name: cloudcreds
-          mountPath: /openstack
+          mountPath: /var/lib/caas/cloudcreds
+          readOnly: true
+        - name: deploy-key
+          mountPath: /var/lib/caas/ssh
+          readOnly: true
         - name: ssh
           mountPath: /home/runner/.ssh
+          readOnly: true
       volumes:
-      - name: playbooks
+      - name: runner-data
         emptyDir: {{}}
-      - name: inventory
+      - name: ansible-home
         emptyDir: {{}}
       - name: env
         configMap:
-          name: {name}-{action}
+          name: {cluster.metadata.name}-{action}
       - name: cloudcreds
         secret:
           secretName: "{cluster.spec.cloudCredentialsSecretName}"
+      - name: deploy-key
+        secret:
+          secretName: "{cluster.metadata.name}-deploy-key"
+          defaultMode: 256
       - name: ssh
         secret:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
@@ -364,7 +459,7 @@ async def _get_ansible_runner_events(client, job_name, namespace):
     if len(pod_names) == 0 or len(pod_names) > 1:
         # TODO(johngarbutt) only works because our jobs don't retry,
         # and we don't yet check the pod is running or finished
-        LOG.debug(f"Found pods:{pod_names} for job {job_name} in {namespace}")
+        LOG.debug(f"Found pods: {pod_names} for job {job_name} in {namespace}")
         return []
     pod_name = pod_names[0]
 
@@ -427,9 +522,6 @@ async def start_job(
 ):
     cluster_type_spec = await cluster_type_utils.get_cluster_type_info(client, cluster)
 
-    # TODO(johngarbutt): generate a deploy ssh key per cluster?
-    cluster_deploy_ssh_public_key = ""
-
     # if required, copy in the specified secret
     if cluster_type_spec.sshSharedSecretName:
         copy_from_namespace = cluster_type_spec.sshSharedSecretNamespace
@@ -451,29 +543,25 @@ async def start_job(
             namespace=namespace,
         )
 
-        public_key_raw = ssh_secret.data.get("id_rsa.pub")
-        if public_key_raw:
-            cluster_deploy_ssh_public_key = (
-                base64.b64decode(public_key_raw).decode("utf-8").strip()
-            )
+    # ensure that we have generated an SSH key for the cluster
+    cluster_deploy_ssh_public_key = await ensure_deploy_key_secret(client, cluster)
 
-    # generate config
-    configmap_data = get_env_configmap(
-        cluster,
-        cluster_type_spec,
-        cluster_deploy_ssh_public_key,
-        remove=remove,
-        update=update,
-    )
-    configmap_resource = await client.api("v1").resource("ConfigMap")
-    await configmap_resource.create_or_patch(
-        configmap_data["metadata"]["name"], configmap_data, namespace=namespace
+    # generate config for the job
+    await client.apply_object(
+        get_env_configmap(
+            cluster,
+            cluster_type_spec,
+            cluster_deploy_ssh_public_key,
+            remove=remove,
+            update=update,
+        ),
+        force=True,
     )
 
     # create the job
-    job_data = get_job(cluster, cluster_type_spec, remove=remove, update=update)
-    job_resource = await client.api("batch/v1").resource("jobs")
-    await job_resource.create(job_data, namespace=namespace)
+    await client.create_object(
+        get_job(cluster, cluster_type_spec, remove=remove, update=update)
+    )
 
 
 async def delete_secret(client, secret_name, namespace):

@@ -1,0 +1,25 @@
+name: on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: main
+  cancel-in-progress: true
+
+jobs:
+  unit_tests:
+    uses: ./.github/workflows/tox.yaml
+
+  publish_images:
+    uses: ./.github/workflows/publish-images.yaml
+
+  publish_charts:
+    needs: [publish_images]
+    uses: ./.github/workflows/publish-charts.yaml
+
+  functional_tests:
+    needs: [publish_images]
+    uses: ./.github/workflows/functional.yaml

@@ -115,6 +115,8 @@ spec:
 
           git clone https://github.com/test.git /runner/project
 
+          git config --global --add safe.directory /runner/project
+
           cd /runner/project
 
           git checkout 12345ab

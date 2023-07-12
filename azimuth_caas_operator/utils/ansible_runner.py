@@ -195,6 +195,7 @@ spec:
         - |
             set -ex
             git clone {cluster_type_spec.gitUrl} /runner/project
+            git config --global --add safe.directory /runner/project
             cd /runner/project
             git checkout {cluster_type_spec.gitVersion}
             git submodule update --init --recursive

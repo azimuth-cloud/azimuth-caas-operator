@@ -32,8 +32,8 @@ async def get_cluster_type_info(
     if cluster_version != cluster.spec.clusterTypeVersion:
         # TODO(johngarbutt): move the cluster to the error state?
         LOG.error(
-            "Requested f{cluster.spec.clusterTypeVersion} "
-            "but we found f{cluster_version}"
+            f"Requested {cluster.spec.clusterTypeVersion} "
+            f"but we found {cluster_version}"
         )
         raise RuntimeError("User must specify the current cluster version!")
 

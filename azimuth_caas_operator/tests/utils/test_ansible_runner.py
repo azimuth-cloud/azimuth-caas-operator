@@ -41,7 +41,7 @@ metadata:
     uid: fakeuid1
 spec:
   activeDeadlineSeconds: 1200
-  backoffLimit: 0
+  backoffLimit: 2
   template:
     spec:
       containers:

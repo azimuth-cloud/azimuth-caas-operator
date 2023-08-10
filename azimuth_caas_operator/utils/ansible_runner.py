@@ -286,7 +286,7 @@ spec:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
           optional: true
-  backoffLimit: 0
+  backoffLimit: {2 if remove else 0}
   # timeout after 20 mins
   activeDeadlineSeconds: 1200"""  # noqa
     return yaml.safe_load(job_yaml)

@@ -365,14 +365,15 @@ def get_job_completed_state(job):
 
     active = job.status.get("active", 0) == 1
     success = job.status.get("succeeded", 0) == 1
-    failed = job.status.get("failed", 0) == 1
+    # with a retry this might be greater than 1
+    failed = job.status.get("failed", 0) >= 1
 
+    if active:
+        return None
     if success:
         return True
     if failed:
         return False
-    if active:
-        return None
     if not active:
         LOG.debug(f"job has not started yet {job.metadata.name}")
     else:

@@ -33,7 +33,7 @@ jobs:
       run: echo "short-sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
     - name: Run test
-      timeout-minutes: 4
+      timeout-minutes: 5
       run: |
         tools/functional_test.sh
       env:

@@ -42,7 +42,7 @@ until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do
 
 kubectl get cluster
 kubectl get clustertype
-kubectl get jobs
+kubectl get jobs -o yaml
 kubectl get pods
 
 # kick off failed delete

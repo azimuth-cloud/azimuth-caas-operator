@@ -389,7 +389,7 @@ def is_any_successful_jobs(job_list):
 
 async def get_outputs_from_job(client, job):
     state = get_job_completed_state(job)
-    if state:
+    if state is not None:
         return await _get_job_outputs(client, job)
 
 

@@ -208,7 +208,7 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         list_iter = async_utils.AsyncIterList(fake_job_list)
         mock_job_resource.return_value = list_iter
 
-        jobs = await ansible_runner.get_jobs_for_cluster("client", "cluster1", "ns")
+        jobs = await ansible_runner._get_jobs_for_cluster("client", "cluster1", "ns")
 
         self.assertEqual(fake_job_list, jobs)
         mock_job_resource.assert_awaited_once_with("client")
@@ -229,7 +229,7 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         list_iter = async_utils.AsyncIterList(fake_job_list)
         mock_job_resource.return_value = list_iter
 
-        jobs = await ansible_runner.get_jobs_for_cluster(
+        jobs = await ansible_runner._get_jobs_for_cluster(
             "client", "cluster1", "ns", remove=True
         )
 

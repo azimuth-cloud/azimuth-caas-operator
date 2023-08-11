@@ -342,9 +342,11 @@ async def get_job_for_cluster(
         raise Exception("too many jobs found!")
 
 
-async def get_jobs_for_cluster(client, cluster_name, namespace, remove=False):
+async def _get_jobs_for_cluster(
+    client, cluster_name, namespace, remove=False, update=False
+):
     job_resource = await get_job_resource(client)
-    action = "remove" if remove else "create"
+    action = "remove" if remove else ("update" if update else "create")
     return [
         job
         async for job in job_resource.list(
@@ -385,17 +387,10 @@ def is_any_successful_jobs(job_list):
     return False
 
 
-async def get_outputs_from_create_job(client, name, namespace):
-    create_jobs = await get_jobs_for_cluster(client, name, namespace)
-    completed_job = None
-    for job in create_jobs:
-        state = get_job_completed_state(job)
-        if state:
-            completed_job = job
-            # TODO(johngarbutt): check for two jobs?
-            break
-    if completed_job:
-        return await _get_job_outputs(client, completed_job)
+async def get_outputs_from_job(client, job):
+    state = get_job_completed_state(job)
+    if state:
+        return await _get_job_outputs(client, job)
 
 
 async def _get_job_outputs(client, job):
@@ -486,7 +481,7 @@ def are_all_jobs_in_error_state(job_list):
 
 
 async def ensure_create_jobs_finished(client, cluster_name, namespace):
-    create_jobs = await get_jobs_for_cluster(client, cluster_name, namespace)
+    create_jobs = await _get_jobs_for_cluster(client, cluster_name, namespace)
     if not create_jobs:
         LOG.warning(f"can't find any create jobs for {cluster_name} in {namespace}")
         return
@@ -503,7 +498,7 @@ async def get_delete_jobs_status(client, cluster_name, namespace):
     True means the job was a success.
     False means the job hit an error."""
     # TODO(johngarbutt): add current task if running
-    delete_jobs = await get_jobs_for_cluster(
+    delete_jobs = await _get_jobs_for_cluster(
         client, cluster_name, namespace, remove=True
     )
     return [get_job_completed_state(job) for job in delete_jobs]

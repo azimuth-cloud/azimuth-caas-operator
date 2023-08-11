@@ -142,10 +142,8 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
             raise kopf.TemporaryError(msg, delay=20)
 
         # if the job finished, update the cluster
+        outputs = await ansible_runner.get_outputs_from_job(K8S_CLIENT, create_job)
         if is_job_success:
-            outputs = await ansible_runner.get_outputs_from_create_job(
-                K8S_CLIENT, name, namespace
-            )
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
                 name,
@@ -169,6 +167,7 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 cluster_crd.ClusterPhase.FAILED,
                 # TODO(johngarbutt): we to better information on the reason!
                 error=error,
+                outputs=outputs,
             )
             LOG.error(f"Create job failed for {name} in {namespace} because {reason}")
             return
@@ -232,10 +231,8 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
             raise kopf.TemporaryError(msg, delay=20)
 
         # if the job finished, update the cluster
+        outputs = await ansible_runner.get_outputs_from_job(K8S_CLIENT, update_job)
         if is_job_success:
-            outputs = await ansible_runner.get_outputs_from_create_job(
-                K8S_CLIENT, name, namespace
-            )
             await ansible_runner.unlabel_job(K8S_CLIENT, update_job)
             await cluster_utils.update_cluster(
                 K8S_CLIENT,
@@ -261,6 +258,7 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
                 cluster_crd.ClusterPhase.FAILED,
                 # TODO(johngarbutt): we to better information on the reason!
                 error=error,
+                outputs=outputs,
             )
             LOG.error(f"Update job failed for {name} in {namespace} because {reason}")
             return

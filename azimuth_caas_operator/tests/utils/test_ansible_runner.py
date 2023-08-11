@@ -309,4 +309,4 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([], event)
         mock_pod_names.assert_awaited_once_with("client", "job", "ns")
-        mock_get_lines.assert_not_awaited()
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")

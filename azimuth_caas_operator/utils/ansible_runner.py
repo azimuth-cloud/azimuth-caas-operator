@@ -443,7 +443,7 @@ async def _get_pod_log_lines(client, pod_name, namespace):
     log_resource = await client.api("v1").resource("pods/log")
     # last 5 is a bit random, but does the trick?
     log_string = await log_resource.fetch(
-        pod_name, namespace=namespace, params=dict(tail=-5)
+        pod_name, namespace=namespace, params=dict(tail=-10)
     )
     # remove trailing space
     log_string = log_string.strip()
@@ -456,8 +456,7 @@ async def _get_ansible_runner_events(client, job_name, namespace):
     if len(pod_names) == 0 or len(pod_names) > 1:
         # TODO(johngarbutt) only works because our jobs don't retry,
         # and we don't yet check the pod is running or finished
-        LOG.debug(f"Found pods: {pod_names} for job {job_name} in {namespace}")
-        return []
+        LOG.warning(f"Found pods: {pod_names} for job {job_name} in {namespace}")
     pod_name = pod_names[0]
 
     log_lines = await _get_pod_log_lines(client, pod_name, namespace)
@@ -467,7 +466,7 @@ async def _get_ansible_runner_events(client, job_name, namespace):
             json_log = json.loads(line)
             json_events.append(json_log)
         except json.decoder.JSONDecodeError:
-            LOG.debug("failed to decode log, most likely not ansible json output.")
+            LOG.warning("failed to decode log, most likely not ansible json output.")
     return json_events
 
 

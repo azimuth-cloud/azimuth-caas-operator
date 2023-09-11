@@ -299,7 +299,7 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "LOG")
     @mock.patch.object(ansible_runner, "_get_pod_log_lines")
     @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
-    async def test_get_ansible_runner_event_returns_no_event_multi_pod(
+    async def test_get_ansible_runner_event_returns_multi_pod(
         self, mock_pod_names, mock_get_lines, mock_log
     ):
         mock_pod_names.return_value = ["pod1", "pod2"]

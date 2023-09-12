@@ -286,7 +286,7 @@ spec:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
           optional: true
-  backoffLimit: 0
+  backoffLimit: {1 if remove else 0}
   # timeout after 20 mins
   activeDeadlineSeconds: 1200"""  # noqa
     return yaml.safe_load(job_yaml)
@@ -365,14 +365,15 @@ def get_job_completed_state(job):
 
     active = job.status.get("active", 0) == 1
     success = job.status.get("succeeded", 0) == 1
-    failed = job.status.get("failed", 0) == 1
+    # with a retry this might be greater than 1
+    failed = job.status.get("failed", 0) >= 1
 
+    if active:
+        return None
     if success:
         return True
     if failed:
         return False
-    if active:
-        return None
     if not active:
         LOG.debug(f"job has not started yet {job.metadata.name}")
     else:
@@ -442,7 +443,7 @@ async def _get_pod_log_lines(client, pod_name, namespace):
     log_resource = await client.api("v1").resource("pods/log")
     # last 5 is a bit random, but does the trick?
     log_string = await log_resource.fetch(
-        pod_name, namespace=namespace, params=dict(tail=-5)
+        pod_name, namespace=namespace, params=dict(tail=-10)
     )
     # remove trailing space
     log_string = log_string.strip()
@@ -453,10 +454,8 @@ async def _get_pod_log_lines(client, pod_name, namespace):
 async def _get_ansible_runner_events(client, job_name, namespace):
     pod_names = await _get_pod_names_for_job(client, job_name, namespace)
     if len(pod_names) == 0 or len(pod_names) > 1:
-        # TODO(johngarbutt) only works because our jobs don't retry,
-        # and we don't yet check the pod is running or finished
+        # we hit this when a job does a retry
         LOG.debug(f"Found pods: {pod_names} for job {job_name} in {namespace}")
-        return []
     pod_name = pod_names[0]
 
     log_lines = await _get_pod_log_lines(client, pod_name, namespace)
@@ -466,7 +465,7 @@ async def _get_ansible_runner_events(client, job_name, namespace):
             json_log = json.loads(line)
             json_events.append(json_log)
         except json.decoder.JSONDecodeError:
-            LOG.debug("failed to decode log, most likely not ansible json output.")
+            LOG.warning("failed to decode log, most likely not ansible json output.")
     return json_events
 
 

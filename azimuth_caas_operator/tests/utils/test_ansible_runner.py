@@ -41,7 +41,7 @@ metadata:
     uid: fakeuid1
 spec:
   activeDeadlineSeconds: 1200
-  backoffLimit: 0
+  backoffLimit: 1
   template:
     spec:
       containers:
@@ -299,7 +299,7 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "LOG")
     @mock.patch.object(ansible_runner, "_get_pod_log_lines")
     @mock.patch.object(ansible_runner, "_get_pod_names_for_job")
-    async def test_get_ansible_runner_event_returns_no_event_multi_pod(
+    async def test_get_ansible_runner_event_returns_multi_pod(
         self, mock_pod_names, mock_get_lines, mock_log
     ):
         mock_pod_names.return_value = ["pod1", "pod2"]
@@ -309,4 +309,4 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([], event)
         mock_pod_names.assert_awaited_once_with("client", "job", "ns")
-        mock_get_lines.assert_not_awaited()
+        mock_get_lines.assert_awaited_once_with("client", "pod1", "ns")

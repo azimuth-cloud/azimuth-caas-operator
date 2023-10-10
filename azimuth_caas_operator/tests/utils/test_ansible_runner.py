@@ -200,6 +200,39 @@ metadata:
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(config))
 
+    @mock.patch.dict(
+        os.environ,
+        {
+            "CONSUL_HTTP_ADDR": "fakeconsulurl",
+            "ARA_API_SERVER": "fakearaurl",
+        },
+        clear=True,
+    )
+    def test_get_job_env_configmap_existing_id(self):
+        cluster = cluster_crd.get_fake()
+        cluster_type = cluster_type_crd.get_fake()
+        cluster.spec.extraVars["cluster_id"] = "foobar"
+
+        config = ansible_runner.get_env_configmap(cluster, cluster_type.spec, "fakekey")
+        envars = config["data"]["extravars"]
+        expected = """\
+cluster_deploy_ssh_public_key: fakekey
+cluster_id: foobar
+cluster_image: testimage1
+cluster_name: test1
+cluster_ssh_private_key_file: /var/lib/caas/ssh/id_ed25519
+cluster_type: type1
+foo: bar
+nested:
+  baz: bob
+random_bool: true
+random_dict:
+  random_str: foo
+random_int: 8
+very_random_int: 42
+"""
+        self.assertEqual(expected, envars)
+
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "get_job_resource")

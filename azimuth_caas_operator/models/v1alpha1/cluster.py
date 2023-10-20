@@ -69,7 +69,7 @@ class Cluster(
             "type": "string",
             "jsonPath": ".status.clusterID",
         },
-    ]
+    ],
 ):
     spec: ClusterSpec
     status: ClusterStatus = pydantic.Field(default_factory=ClusterStatus)

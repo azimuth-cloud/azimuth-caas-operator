@@ -18,7 +18,7 @@ async def ensure_cluster_id(client, cluster: cluster_crd.Cluster):
     if cluster.status.clusterID:
         return
     # Only update the status of the cluster object we were given if the
-    # patch is successful
+    # patch is successful
     name = cluster.metadata.name
     namespace = cluster.metadata.namespace
     cluster_resource = await client.api(registry.API_VERSION).resource("cluster")

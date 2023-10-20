@@ -111,7 +111,7 @@ class ClusterType(
             "type": "string",
             "jsonPath": ".status.phase",
         },
-    ]
+    ],
 ):
     spec: ClusterTypeSpec
     status: ClusterTypeStatus = pydantic.Field(default_factory=ClusterTypeStatus)

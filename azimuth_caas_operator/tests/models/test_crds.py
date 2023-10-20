@@ -216,6 +216,26 @@ class TestModels(base.TestCase):
         "subresources": {},
         "additionalPrinterColumns": [
           {
+            "name": "Git URL",
+            "type": "string",
+            "jsonPath": ".spec.gitUrl"
+          },
+          {
+            "name": "Git Version",
+            "type": "string",
+            "jsonPath": ".spec.gitVersion"
+          },
+          {
+            "name": "Playbook",
+            "type": "string",
+            "jsonPath": ".spec.playbook"
+          },
+          {
+            "name": "Phase",
+            "type": "string",
+            "jsonPath": ".status.phase"
+          },
+          {
             "name": "Age",
             "type": "date",
             "jsonPath": ".metadata.creationTimestamp"
@@ -310,6 +330,9 @@ class TestModels(base.TestCase):
                     ],
                     "type": "string"
                   },
+                  "clusterID": {
+                    "type": "string"
+                  },
                   "clusterTypeSpec": {
                     "description": "Base model for use within CRD definitions.",
                     "type": "object",
@@ -389,6 +412,26 @@ class TestModels(base.TestCase):
         },
         "subresources": {},
         "additionalPrinterColumns": [
+          {
+            "name": "Cluster Type",
+            "type": "string",
+            "jsonPath": ".spec.clusterTypeName"
+          },
+          {
+            "name": "Cluster Type Version",
+            "type": "string",
+            "jsonPath": ".spec.clusterTypeVersion"
+          },
+          {
+            "name": "Phase",
+            "type": "string",
+            "jsonPath": ".status.phase"
+          },
+          {
+            "name": "Cluster ID",
+            "type": "string",
+            "jsonPath": ".status.clusterID"
+          },
           {
             "name": "Age",
             "type": "date",

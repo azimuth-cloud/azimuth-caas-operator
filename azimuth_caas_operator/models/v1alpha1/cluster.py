@@ -90,4 +90,5 @@ def get_fake_dict():
             cloudCredentialsSecretName="cloudsyaml",
             extraVars=dict(foo="bar", very_random_int=42, nested=dict(baz="bob")),
         ),
+        status=dict(clusterID="fakeclusterID1"),
     )

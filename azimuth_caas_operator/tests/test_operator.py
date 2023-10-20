@@ -54,7 +54,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         fake_body = cluster_crd.get_fake_dict()
         fake_cluster = cluster_crd.Cluster(**fake_body)
         await operator.cluster_resume(fake_body, "cluster1", "ns")
-        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, fake_cluster)
+        mock_ensure_cluster_id.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
 
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
@@ -293,7 +295,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             str(ctx.exception),
         )
 
-        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, fake_cluster)
+        mock_ensure_cluster_id.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
         mock_start.assert_awaited_once_with(
             operator.K8S_CLIENT, fake_cluster, "ns", update=True
         )

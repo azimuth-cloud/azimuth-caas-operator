@@ -45,5 +45,5 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         mock_resource.patch.assert_awaited_once_with(
             fake_cluster.metadata.name,
             {"status": {"clusterID": fake_cluster.metadata.uid}},
-            namespace=fake_cluster.metadata.namespace
+            namespace=fake_cluster.metadata.namespace,
         )

@@ -19,6 +19,8 @@ class ClusterPhase(str, schema.Enum):
 
 class ClusterStatus(schema.BaseModel):
     phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
+    # Persistent cluster ID (set to Kubernetes UID on create or if not set)
+    clusterID: typing.Optional[str]
     clusterTypeSpec: typing.Optional[ClusterTypeSpec]
     # used to detect upgrade requests
     clusterTypeVersion: typing.Optional[str]
@@ -43,7 +45,32 @@ class ClusterSpec(schema.BaseModel):
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
 
 
-class Cluster(crd.CustomResource, scope=crd.Scope.NAMESPACED):
+class Cluster(
+    crd.CustomResource,
+    scope=crd.Scope.NAMESPACED,
+    printer_columns=[
+        {
+            "name": "Cluster Type",
+            "type": "string",
+            "jsonPath": ".spec.clusterTypeName",
+        },
+        {
+            "name": "Cluster Type Version",
+            "type": "string",
+            "jsonPath": ".spec.clusterTypeVersion",
+        },
+        {
+            "name": "Phase",
+            "type": "string",
+            "jsonPath": ".status.phase",
+        },
+        {
+            "name": "Cluster ID",
+            "type": "string",
+            "jsonPath": ".status.clusterID",
+        },
+    ]
+):
     spec: ClusterSpec
     status: ClusterStatus = pydantic.Field(default_factory=ClusterStatus)
 

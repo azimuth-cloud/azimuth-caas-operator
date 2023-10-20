@@ -4,10 +4,31 @@ import logging
 import yaml
 
 from azimuth_caas_operator.models import registry
+from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.utils import image as image_utils
 
 
 LOG = logging.getLogger(__name__)
+
+
+async def ensure_cluster_id(client, cluster: cluster_crd.Cluster):
+    """
+    Ensures that the given cluster has it's ID set.
+    """
+    if cluster.status.clusterID:
+        return
+    # Only update the status of the cluster object we were given if the
+    # patch is successful
+    name = cluster.metadata.name
+    namespace = cluster.metadata.namespace
+    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    await cluster_resource.patch(
+        name,
+        {"status": {"clusterID": cluster.metadata.uid}},
+        namespace=namespace,
+    )
+    cluster.status.clusterID = cluster.metadata.uid
+    LOG.debug(f"set clusterID for {name} in {namespace}")
 
 
 async def update_cluster(

@@ -90,7 +90,8 @@ def get_env_configmap(
 ):
     extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
-    extraVars["cluster_id"] = cluster.metadata.uid
+    extraVars["cluster_id"] = cluster.status.clusterID
+    print(extraVars["cluster_id"])
     extraVars["cluster_type"] = cluster.spec.clusterTypeName
     extraVars["cluster_deploy_ssh_public_key"] = cluster_deploy_ssh_public_key
     # This is the file containing the private key for the deploy key

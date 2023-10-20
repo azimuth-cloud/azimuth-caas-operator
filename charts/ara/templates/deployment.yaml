@@ -4,7 +4,12 @@ metadata:
   name: {{ include "ara.fullname" . }}
   labels: {{ include "ara.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  # Because we use a RWO PVC for sqlite, we can only have one replica at a time
+  # Also, we must use the recreate strategy in order to avoid races for the PVC
+  # If we want to use multiple replicas, we need to configure ARA to use an external DB
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels: {{ include "ara.selectorLabels" . | nindent 6 }}
   template:
@@ -57,11 +62,16 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        # TODO(mkjpryor) Use a proper database for ARA data rather than
-        #                an ephemeral SQLite database
-        #                In terms of this chart, that would mean having the ability
-        #                to inject connection details for a PostgreSQL DB, for example
         - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            {{- if .Values.persistence.existingClaim }}
+            claimName: {{ .Values.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ include "ara.fullname" . }}
+            {{- end }}
+          {{- else }}
           emptyDir: {}
+          {{- end }}
         - name: tmp
           emptyDir: {}

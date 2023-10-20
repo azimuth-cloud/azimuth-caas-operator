@@ -1,6 +1,3 @@
-# The number of replicas for the ARA deployment
-replicaCount: 1
-
 # The image to use for the ARA deployment
 image:
   # This is a mirror of quay.io/recordsansible/ara-api that is mirrored
@@ -55,3 +52,28 @@ affinity: {}
 
 # Tolerations for ARA pods
 tolerations: []
+
+# Settings for persistence for ARA
+persistence:
+  # Indicates whether persistence should be enabled
+  enabled: true
+  # If set, use an existing PVC instead of creating one
+  existingClaim:
+  # The access modes for the PVC
+  accessModes:
+    - ReadWriteOnce
+  # The storage class to use for the PVC
+  # If not given, the default storage class is used
+  # If set to "-" then storageClassName is set to "", disabling dynamic provisioning
+  storageClass:
+  # The volume binding mode for the created PVC
+  # If not given, the default volume binding mode for the storage class is used
+  volumeBindingMode:
+  # The size of the PVC
+  size: 8Gi
+  # The label selector to use to filter eligible PVs
+  # Useful if PVs have been provisioned in advance
+  selector:
+  # The name of a specific PV to bind
+  # Useful if you want to bind to a specific pre-provisioned PV
+  volumeName:

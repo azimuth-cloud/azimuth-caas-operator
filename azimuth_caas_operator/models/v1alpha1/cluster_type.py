@@ -87,7 +87,32 @@ class ClusterTypeSpec(schema.BaseModel):
     sshSharedSecretNamespace: typing.Optional[str]
 
 
-class ClusterType(crd.CustomResource, scope=crd.Scope.CLUSTER):
+class ClusterType(
+    crd.CustomResource,
+    scope=crd.Scope.CLUSTER,
+    printer_columns=[
+        {
+            "name": "Git URL",
+            "type": "string",
+            "jsonPath": ".spec.gitUrl",
+        },
+        {
+            "name": "Git Version",
+            "type": "string",
+            "jsonPath": ".spec.gitVersion",
+        },
+        {
+            "name": "Playbook",
+            "type": "string",
+            "jsonPath": ".spec.playbook",
+        },
+        {
+            "name": "Phase",
+            "type": "string",
+            "jsonPath": ".status.phase",
+        },
+    ],
+):
     spec: ClusterTypeSpec
     status: ClusterTypeStatus = pydantic.Field(default_factory=ClusterTypeStatus)
 

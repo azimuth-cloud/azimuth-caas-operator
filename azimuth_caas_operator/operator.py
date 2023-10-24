@@ -115,10 +115,21 @@ async def cluster_type_updated(body, name, namespace, labels, **kwargs):
         await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
 
 
+@kopf.on.resume(registry.API_GROUP, "cluster")
+async def cluster_resume(body, name, namespace, **kwargs):
+    LOG.debug(f"Resuming cluster {name} in {namespace}")
+    # Ensure that the clusterID is set for all clusters
+    cluster = cluster_crd.Cluster(**body)
+    await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+
 @kopf.on.create(registry.API_GROUP, "cluster")
 async def cluster_create(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster create for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
+
+    # Before doing anything, ensure the clusterID is set
+    await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
 
     # Check for an existing create job
     create_job = await ansible_runner.get_create_job_for_cluster(
@@ -202,6 +213,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
 async def cluster_update(body, name, namespace, labels, **kwargs):
     LOG.debug(f"Attempt cluster update for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
+
+    # Before doing anything, ensure the clusterID is set
+    await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
 
     # Fail if create is still in progress
     # Note that we don't care if create worked.
@@ -295,6 +309,9 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
 async def cluster_delete(body, name, namespace, labels, **kwargs):
     LOG.info(f"Attempt cluster delete for {name} in {namespace}")
     cluster = cluster_crd.Cluster(**body)
+
+    # Before doing anything, ensure the clusterID is set
+    await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
 
     # Check for any pending jobs
     # and fail if we are still running a create job

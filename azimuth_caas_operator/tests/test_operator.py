@@ -49,11 +49,25 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             ),
         )
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    async def test_cluster_resume_ensures_cluster_id(self, mock_ensure_cluster_id):
+        fake_body = cluster_crd.get_fake_dict()
+        fake_cluster = cluster_crd.Cluster(**fake_body)
+        await operator.cluster_resume(fake_body, "cluster1", "ns")
+        mock_ensure_cluster_id.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
+
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_creates_job_and_raise(
-        self, mock_get_jobs, mock_start, mock_update
+        self,
+        mock_get_jobs,
+        mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         # testing the zero jobs case
         mock_get_jobs.return_value = None
@@ -77,17 +91,20 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             cluster_crd.ClusterPhase.CREATING,
             extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
-    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_spots_successful_job(
         self,
         mock_get_jobs,
-        mock_update,
         mock_outputs,
         mock_success,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_get_jobs.return_value = "fakejob"
         fake_body = cluster_crd.get_fake_dict()
@@ -96,6 +113,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -107,9 +126,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_success.assert_called_once_with("fakejob")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(ansible_runner, "is_create_job_finished")
     async def test_cluster_update_waits_for_create_job_to_complete(
-        self, mock_create_job
+        self,
+        mock_create_job,
+        mock_ensure_cluster_id,
     ):
         mock_create_job.return_value = False
         fake_body = cluster_crd.get_fake_dict()
@@ -121,8 +143,11 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "Can't process update until create completed for cluster1 in ns",
             str(ctx.exception),
         )
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_create_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
@@ -133,6 +158,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job,
         mock_completed,
         mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
@@ -147,6 +173,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "Waiting for update job to complete for cluster1 in ns",
             str(ctx.exception),
         )
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -156,9 +184,10 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
-    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
     @mock.patch.object(ansible_runner, "is_create_job_finished")
@@ -167,9 +196,10 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_create_job,
         mock_update_job,
         mock_completed,
-        mock_update,
         mock_outputs,
         mock_unlabel,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
@@ -180,6 +210,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         await operator.cluster_update(fake_body, "cluster1", "ns", {})
 
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -192,10 +224,11 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
     @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
-    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
     @mock.patch.object(ansible_runner, "is_create_job_finished")
@@ -204,10 +237,11 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_create_job,
         mock_update_job,
         mock_completed,
-        mock_update,
         mock_outputs,
         mock_error,
         mock_unlabel,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = "update-job"
@@ -219,6 +253,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         await operator.cluster_update(fake_body, "cluster1", "ns", {})
 
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -232,16 +268,18 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
 
-    @mock.patch.object(ansible_runner, "start_job")
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
     @mock.patch.object(ansible_runner, "is_create_job_finished")
     async def test_cluster_update_creates_update_job_and_raise(
         self,
         mock_create_job,
         mock_update_job,
-        mock_update,
         mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_create_job.return_value = True
         mock_update_job.return_value = None
@@ -257,6 +295,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             str(ctx.exception),
         )
 
+        mock_ensure_cluster_id.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
         mock_start.assert_awaited_once_with(
             operator.K8S_CLIENT, fake_cluster, "ns", update=True
         )
@@ -269,13 +310,20 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
     @mock.patch.object(ansible_runner, "get_job_error_message")
-    @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_raise_on_failed_jobs(
-        self, mock_get_jobs, mock_success, mock_update, mock_error, mock_outputs
+        self,
+        mock_get_jobs,
+        mock_success,
+        mock_error,
+        mock_outputs,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         # TODO(johngarbutt): should generate a working fake job list!
         mock_get_jobs.return_value = "fakejob"
@@ -286,6 +334,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         await operator.cluster_create(fake_body, "cluster1", "ns", {})
 
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -301,11 +351,16 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
         mock_error.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
     async def test_cluster_create_waits_for_job_to_complete(
-        self, mock_get_jobs, mock_success, mock_update
+        self,
+        mock_get_jobs,
+        mock_success,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_success.return_value = None
@@ -317,16 +372,24 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             "Waiting for create job to complete for cluster1 in ns", str(ctx.exception)
         )
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
         )
 
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(ansible_runner, "get_delete_job_for_cluster")
     @mock.patch.object(ansible_runner, "ensure_create_jobs_finished")
     async def test_cluster_delete_creates_job_and_raises(
-        self, mock_create_finsish, mock_get_jobs, mock_start, mock_update
+        self,
+        mock_create_finsish,
+        mock_get_jobs,
+        mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
     ):
         # testing the zero jobs case
         mock_get_jobs.return_value = None
@@ -349,6 +412,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.DELETING
         )
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(operator, "_fetch_text_from_url")
     async def test_fetch_ui_meta_from_url_success(self, mock_fetch):

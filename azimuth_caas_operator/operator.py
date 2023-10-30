@@ -42,7 +42,7 @@ async def _update_cluster_type(client, name, namespace, status):
     status.updatedTimestamp = now_string
 
     cluster_type_resource = await client.api(registry.API_VERSION).resource(
-        "clustertype"
+        "clustertypes/status"
     )
     await cluster_type_resource.patch(
         name,

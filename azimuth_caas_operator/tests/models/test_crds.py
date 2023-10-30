@@ -213,7 +213,9 @@ class TestModels(base.TestCase):
             "x-kubernetes-preserve-unknown-fields": true
           }
         },
-        "subresources": {},
+        "subresources": {
+          "status": {}
+        },
         "additionalPrinterColumns": [
           {
             "name": "Git URL",
@@ -410,7 +412,9 @@ class TestModels(base.TestCase):
             "x-kubernetes-preserve-unknown-fields": true
           }
         },
-        "subresources": {},
+        "subresources": {
+          "status": {}
+        },
         "additionalPrinterColumns": [
           {
             "name": "Cluster Type",

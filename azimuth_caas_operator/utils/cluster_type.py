@@ -42,7 +42,9 @@ async def get_cluster_type_info(
 
 
 async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version):
-    cluster_resource = await client.api(registry.API_VERSION).resource("clusters/status")
+    cluster_resource = await client.api(registry.API_VERSION).resource(
+        "clusters/status"
+    )
     await cluster_resource.patch(
         cluster.metadata.name,
         dict(

@@ -3,10 +3,20 @@
 set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-# Export environment variables required for the tests
-export CONSUL_HTTP_ADDR="zenith-consul-server.zenith:8500"
-tox -e kopf &
-sleep 10
+
+# Install the CaaS operator from the chart we are about to ship
+# Make sure to use the images that we just built
+helm upgrade azimuth-caas-operator ./charts/operator \
+  --dependency-update \
+  --namespace azimuth-caas-operator \
+  --create-namespace \
+  --install \
+  --wait \
+  --timeout 10m \
+  --set image.tag=${GITHUB_SHA::7} \
+  --set config.ansibleRunnerImage.tag=${GITHUB_SHA::7} \
+  --set ara.image.tag=${GITHUB_SHA::7} \
+  --set config.consulUrl=fakeconsul
 
 # add required secrets, not that they care used for this test
 echo "foo" >clouds.yaml
@@ -58,4 +68,3 @@ until kubectl wait --for=jsonpath='{.status.phase}'=Failed cluster quick-test-fa
 
 kubectl get cluster
 kubectl get cluster -o yaml
-kill %1

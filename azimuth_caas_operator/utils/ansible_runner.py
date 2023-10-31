@@ -429,14 +429,21 @@ async def get_job_error_message(client, job):
             return None
 
 
-async def _get_pod_names_for_job(client, job_name, namespace):
+async def _get_most_recent_pod_for_job(client, job_name, namespace):
     pod_resource = await k8s.get_pod_resource(client)
-    return [
-        pod["metadata"]["name"]
+    job_pods = [
+        pod
         async for pod in pod_resource.list(
             labels={"job-name": job_name}, namespace=namespace
         )
     ]
+    sorted_pods = sorted(
+        job_pods, key=lambda p: p["metadata"]["creationTimestamp"], reverse=True
+    )
+    if len(sorted_pods) > 0:
+        return sorted_pods[0]["metadata"]["name"]
+    else:
+        return None
 
 
 async def _get_pod_log_lines(client, pod_name, namespace):
@@ -452,11 +459,12 @@ async def _get_pod_log_lines(client, pod_name, namespace):
 
 
 async def _get_ansible_runner_events(client, job_name, namespace):
-    pod_names = await _get_pod_names_for_job(client, job_name, namespace)
-    if len(pod_names) == 0 or len(pod_names) > 1:
-        # we hit this when a job does a retry
-        LOG.debug(f"Found pods: {pod_names} for job {job_name} in {namespace}")
-    pod_name = pod_names[0]
+    pod_name = await _get_most_recent_pod_for_job(client, job_name, namespace)
+    if pod_name:
+        LOG.debug(f"found pod {pod_name} for job {job_name} in {namespace}")
+    else:
+        LOG.debug(f"no pods found for job {job_name} in {namespace}")
+        return []
 
     log_lines = await _get_pod_log_lines(client, pod_name, namespace)
     json_events = []

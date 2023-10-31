@@ -48,6 +48,7 @@ class ClusterSpec(schema.BaseModel):
 class Cluster(
     crd.CustomResource,
     scope=crd.Scope.NAMESPACED,
+    subresources={"status": {}},
     printer_columns=[
         {
             "name": "Cluster Type",

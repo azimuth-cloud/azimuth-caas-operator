@@ -21,7 +21,9 @@ async def ensure_cluster_id(client, cluster: cluster_crd.Cluster):
     # patch is successful
     name = cluster.metadata.name
     namespace = cluster.metadata.namespace
-    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    cluster_resource = await client.api(registry.API_VERSION).resource(
+        "clusters/status"
+    )
     await cluster_resource.patch(
         name,
         {"status": {"clusterID": cluster.metadata.uid}},
@@ -48,7 +50,9 @@ async def update_cluster(
     else:
         status_updates["error"] = None
 
-    cluster_resource = await client.api(registry.API_VERSION).resource("cluster")
+    cluster_resource = await client.api(registry.API_VERSION).resource(
+        "clusters/status"
+    )
     await cluster_resource.patch(
         name,
         dict(status=status_updates),

@@ -41,7 +41,7 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(fake_cluster.status.clusterID, fake_cluster.metadata.uid)
 
         mock_client.api.assert_called_once_with(registry.API_VERSION)
-        mock_api.resource.assert_awaited_once_with("cluster")
+        mock_api.resource.assert_awaited_once_with("clusters/status")
         mock_resource.patch.assert_awaited_once_with(
             fake_cluster.metadata.name,
             {"status": {"clusterID": fake_cluster.metadata.uid}},

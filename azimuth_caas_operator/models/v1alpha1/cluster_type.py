@@ -90,6 +90,7 @@ class ClusterTypeSpec(schema.BaseModel):
 class ClusterType(
     crd.CustomResource,
     scope=crd.Scope.CLUSTER,
+    subresources={"status": {}},
     printer_columns=[
         {
             "name": "Git URL",

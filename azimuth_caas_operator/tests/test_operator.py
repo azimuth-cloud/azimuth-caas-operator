@@ -39,7 +39,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         await operator.cluster_type_create(
             cluster_type_crd.get_fake_dict(), "type1", "ns", {}
         )
-        mock_fetch.assert_awaited_once_with("https://url1")
+        mock_fetch.assert_awaited_once_with("https://url1/")
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "type1",

@@ -99,6 +99,8 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
 
     envvars = {}
+    if 'inventory' in cluster.spec:
+        envvars["ANSIBLE_INVENTORY"] = cluster.spec.inventory
     try:
         envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
     except KeyError:
@@ -174,19 +176,6 @@ spec:
       restartPolicy: Never
       initContainers:
       - image: "{image}"
-        name: inventory
-        workingDir: /inventory
-        command:
-        - /bin/bash
-        - -c
-        - |
-            echo '[openstack]' >/runner/inventory/hosts
-            echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
-        volumeMounts:
-        - name: runner-data
-          mountPath: /runner/inventory
-          subPath: inventory
-      - image: "{image}"
         name: clone
         workingDir: /runner
         command:
@@ -246,9 +235,6 @@ spec:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
-        - name: runner-data
-          mountPath: /runner/inventory
-          subPath: inventory
         - name: runner-data
           mountPath: /runner/artifacts
           subPath: artifacts

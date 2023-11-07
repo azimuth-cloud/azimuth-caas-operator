@@ -413,7 +413,7 @@ async def _get_job_outputs(client, job):
                 debug_result = event_data.get("res", {})
                 outputs = debug_result.get("outputs", {})
                 if outputs:
-                    LOG.debug(f"Outputs found for job: {job} {outputs}")
+                    LOG.info(f"Outputs found for job: {job} {outputs}")
                     return outputs
     LOG.info(f"No outputs found for job: {job}")
 

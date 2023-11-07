@@ -393,7 +393,7 @@ async def get_outputs_from_job(client, job):
     if state is not None:
         return await _get_job_outputs(client, job)
     else:
-        LOG.warning("No outputs as job not completed: f{job}")
+        LOG.warning(f"No outputs as job not completed: {job}")
 
 
 async def _get_job_outputs(client, job):
@@ -413,9 +413,9 @@ async def _get_job_outputs(client, job):
                 debug_result = event_data.get("res", {})
                 outputs = debug_result.get("outputs", {})
                 if outputs:
-                    LOG.debug("Outputs found for job: f{job} f{outputs}")
+                    LOG.debug(f"Outputs found for job: {job} {outputs}")
                     return outputs
-    LOG.info("No outputs found for job: f{job}")
+    LOG.info(f"No outputs found for job: {job}")
 
 
 async def get_job_error_message(client, job):

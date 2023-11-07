@@ -412,9 +412,11 @@ async def _get_job_outputs(client, job):
             if task_action == "debug":
                 debug_result = event_data.get("res", {})
                 outputs = debug_result.get("outputs", {})
-                if outputs:
+                if isinstance(outputs, dict):
                     LOG.info(f"Outputs found for job: {job} {outputs}")
                     return outputs
+                else:
+                    LOG.warning(f"Invalid outputs found for job: {job} {outputs}")
     LOG.info(f"No outputs found for job: {job}")
 
 

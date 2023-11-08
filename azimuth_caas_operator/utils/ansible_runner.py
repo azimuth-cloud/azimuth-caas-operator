@@ -98,8 +98,7 @@ def get_env_configmap(
     if remove:
         extraVars["cluster_state"] = "absent"
 
-    envvars = {}
-    envvars["ANSIBLE_INVENTORY"] = cluster_type_spec.inventory
+    envvars = dict(cluster_type_spec.envVars)
     try:
         envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
     except KeyError:

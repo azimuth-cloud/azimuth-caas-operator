@@ -99,7 +99,8 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
 
     envvars = {}
-    envvars["ANSIBLE_INVENTORY"] = cluster_type_spec.inventory
+    LOG.debug(f"DEBUG: ANSIBLE_INVENTORY: {cluster_type_spec.inventory} <end>")
+    envvars["ANSIBLE_INVENTORY"] = "THIS IS A TEST STRING" #cluster_type_spec.inventory
     try:
         envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
     except KeyError:

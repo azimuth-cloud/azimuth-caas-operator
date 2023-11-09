@@ -42,7 +42,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
+          image-ref: 'ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
 
@@ -52,13 +52,15 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-       - name: cosign-installer
-         uses: sigstore/cosign-installer@v2.0.0
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v2.0.0
 
-       - name: Sign the published Docker image
-         env:
-           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-         run: cosign sign --key cosign.key ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
+      - name: Sign the published Docker image
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+           cosign sign --key cosign.key \
+             ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
 
   build_push_ansible_runner_image:
     name: Build and push ansible runner image

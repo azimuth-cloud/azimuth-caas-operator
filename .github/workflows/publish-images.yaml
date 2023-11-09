@@ -56,11 +56,9 @@ jobs:
         uses: sigstore/cosign-installer@v2.0.0
 
       - name: Sign the published Docker image
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        # if: ${{ github.event_name != 'pull_request' }}
         run: |
-           cosign sign --key cosign.key \
-             ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
+           cosign sign ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
 
   build_push_ansible_runner_image:
     name: Build and push ansible runner image

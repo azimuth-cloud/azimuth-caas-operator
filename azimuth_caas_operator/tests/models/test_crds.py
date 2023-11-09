@@ -145,9 +145,7 @@ class TestModels(base.TestCase):
                               "type": "boolean"
                             },
                             "default": {
-                              "default": null,
                               "nullable": true,
-                              "title": "Default",
                               "x-kubernetes-preserve-unknown-fields": true
                             }
                           },

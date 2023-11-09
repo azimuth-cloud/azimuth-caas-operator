@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.11-slim-bookworm
 
 # Create the user that will be used to run the app
 ENV APP_UID 1001
@@ -16,7 +16,8 @@ RUN groupadd --gid $APP_GID $APP_GROUP && \
 
 # Install tini, which we will use to marshal the processes
 RUN apt-get update && \
-    apt-get install -y tini && \
+    apt-get install -y tini git && \
+    apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Don't buffer stdout and stderr as it breaks realtime logging

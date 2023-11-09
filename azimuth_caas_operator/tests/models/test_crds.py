@@ -39,23 +39,17 @@ class TestModels(base.TestCase):
         "storage": true,
         "schema": {
           "openAPIV3Schema": {
-            "description": "Base class for defining custom resources.",
-            "type": "object",
             "properties": {
               "spec": {
-                "description": "Base model for use within CRD definitions.",
-                "type": "object",
                 "properties": {
                   "uiMetaUrl": {
-                    "minLength": 1,
-                    "maxLength": 65536,
                     "format": "uri",
+                    "minLength": 1,
                     "type": "string"
                   },
                   "gitUrl": {
-                    "minLength": 1,
-                    "maxLength": 65536,
                     "format": "uri",
+                    "minLength": 1,
                     "type": "string"
                   },
                   "gitVersion": {
@@ -65,16 +59,18 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "extraVars": {
-                    "x-kubernetes-preserve-unknown-fields": true,
-                    "type": "object",
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
-                    }
+                    },
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   },
                   "sshSharedSecretName": {
+                    "nullable": true,
                     "type": "string"
                   },
                   "sshSharedSecretNamespace": {
+                    "nullable": true,
                     "type": "string"
                   }
                 },
@@ -83,14 +79,12 @@ class TestModels(base.TestCase):
                   "gitUrl",
                   "gitVersion",
                   "playbook"
-                ]
+                ],
+                "type": "object"
               },
               "status": {
-                "description": "Base model for use within CRD definitions.",
-                "type": "object",
                 "properties": {
                   "phase": {
-                    "description": "An enumeration.",
                     "enum": [
                       "Pending",
                       "Available",
@@ -99,8 +93,7 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "uiMeta": {
-                    "description": "Base model for use within CRD definitions.",
-                    "type": "object",
+                    "nullable": true,
                     "properties": {
                       "name": {
                         "type": "string"
@@ -109,19 +102,19 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "description": {
+                        "nullable": true,
                         "type": "string"
                       },
                       "logo": {
+                        "nullable": true,
                         "type": "string"
                       },
                       "requiresSshKey": {
+                        "nullable": true,
                         "type": "boolean"
                       },
                       "parameters": {
-                        "type": "array",
                         "items": {
-                          "description": "Base model for use within CRD definitions.",
-                          "type": "object",
                           "properties": {
                             "name": {
                               "type": "string"
@@ -130,25 +123,29 @@ class TestModels(base.TestCase):
                               "type": "string"
                             },
                             "description": {
+                              "nullable": true,
                               "type": "string"
                             },
                             "kind": {
                               "type": "string"
                             },
                             "options": {
-                              "x-kubernetes-preserve-unknown-fields": true,
-                              "type": "object",
                               "additionalProperties": {
                                 "x-kubernetes-preserve-unknown-fields": true
-                              }
+                              },
+                              "type": "object",
+                              "x-kubernetes-preserve-unknown-fields": true
                             },
                             "immutable": {
+                              "nullable": true,
                               "type": "boolean"
                             },
                             "required": {
+                              "nullable": true,
                               "type": "boolean"
                             },
                             "default": {
+                              "nullable": true,
                               "x-kubernetes-preserve-unknown-fields": true
                             }
                           },
@@ -156,14 +153,13 @@ class TestModels(base.TestCase):
                             "name",
                             "label",
                             "kind"
-                          ]
-                        }
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
                       },
                       "services": {
-                        "type": "array",
                         "items": {
-                          "description": "Base model for use within CRD definitions.",
-                          "type": "object",
                           "properties": {
                             "name": {
                               "type": "string"
@@ -172,45 +168,53 @@ class TestModels(base.TestCase):
                               "type": "string"
                             },
                             "iconUrl": {
+                              "nullable": true,
                               "type": "string"
                             },
                             "when": {
+                              "nullable": true,
                               "type": "string"
                             }
                           },
                           "required": [
                             "name",
                             "label"
-                          ]
-                        }
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
                       },
                       "usageTemplate": {
+                        "nullable": true,
                         "type": "string"
                       }
                     },
                     "required": [
                       "name",
                       "label"
-                    ]
+                    ],
+                    "type": "object"
                   },
                   "uiMetaUrl": {
-                    "minLength": 1,
-                    "maxLength": 65536,
                     "format": "uri",
+                    "minLength": 1,
+                    "nullable": true,
                     "type": "string"
                   },
                   "updatedTimestamp": {
                     "description": "The timestamp at which the resource was updated.",
-                    "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true,
+                    "type": "string"
                   }
-                }
+                },
+                "type": "object"
               }
             },
             "required": [
               "spec"
             ],
-            "x-kubernetes-preserve-unknown-fields": true
+            "type": "object"
           }
         },
         "subresources": {
@@ -283,12 +287,8 @@ class TestModels(base.TestCase):
         "storage": true,
         "schema": {
           "openAPIV3Schema": {
-            "description": "Base class for defining custom resources.",
-            "type": "object",
             "properties": {
               "spec": {
-                "description": "Base model for use within CRD definitions.",
-                "type": "object",
                 "properties": {
                   "clusterTypeName": {
                     "minLength": 1,
@@ -303,25 +303,23 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "extraVars": {
-                    "x-kubernetes-preserve-unknown-fields": true,
-                    "type": "object",
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
-                    }
+                    },
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   }
                 },
                 "required": [
                   "clusterTypeName",
                   "clusterTypeVersion",
                   "cloudCredentialsSecretName"
-                ]
+                ],
+                "type": "object"
               },
               "status": {
-                "description": "Base model for use within CRD definitions.",
-                "type": "object",
                 "properties": {
                   "phase": {
-                    "description": "An enumeration.",
                     "enum": [
                       "Creating",
                       "Configuring",
@@ -333,22 +331,20 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "clusterID": {
+                    "nullable": true,
                     "type": "string"
                   },
                   "clusterTypeSpec": {
-                    "description": "Base model for use within CRD definitions.",
-                    "type": "object",
+                    "nullable": true,
                     "properties": {
                       "uiMetaUrl": {
-                        "minLength": 1,
-                        "maxLength": 65536,
                         "format": "uri",
+                        "minLength": 1,
                         "type": "string"
                       },
                       "gitUrl": {
-                        "minLength": 1,
-                        "maxLength": 65536,
                         "format": "uri",
+                        "minLength": 1,
                         "type": "string"
                       },
                       "gitVersion": {
@@ -358,16 +354,18 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "extraVars": {
-                        "x-kubernetes-preserve-unknown-fields": true,
-                        "type": "object",
                         "additionalProperties": {
                           "x-kubernetes-preserve-unknown-fields": true
-                        }
+                        },
+                        "type": "object",
+                        "x-kubernetes-preserve-unknown-fields": true
                       },
                       "sshSharedSecretName": {
+                        "nullable": true,
                         "type": "string"
                       },
                       "sshSharedSecretNamespace": {
+                        "nullable": true,
                         "type": "string"
                       }
                     },
@@ -376,40 +374,46 @@ class TestModels(base.TestCase):
                       "gitUrl",
                       "gitVersion",
                       "playbook"
-                    ]
+                    ],
+                    "type": "object"
                   },
                   "clusterTypeVersion": {
+                    "nullable": true,
                     "type": "string"
                   },
                   "appliedExtraVars": {
-                    "x-kubernetes-preserve-unknown-fields": true,
-                    "type": "object",
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
-                    }
+                    },
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   },
                   "updatedTimestamp": {
                     "description": "The timestamp at which the resource was updated.",
-                    "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true,
+                    "type": "string"
                   },
                   "outputs": {
-                    "x-kubernetes-preserve-unknown-fields": true,
-                    "type": "object",
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
-                    }
+                    },
+                    "nullable": true,
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   },
                   "error": {
+                    "nullable": true,
                     "type": "string"
                   }
-                }
+                },
+                "type": "object"
               }
             },
             "required": [
               "spec"
             ],
-            "x-kubernetes-preserve-unknown-fields": true
+            "type": "object"
           }
         },
         "subresources": {

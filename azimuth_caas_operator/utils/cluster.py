@@ -53,12 +53,12 @@ async def update_cluster(
     cluster_resource = await client.api(registry.API_VERSION).resource(
         "clusters/status"
     )
+    LOG.debug(f"patching {name} in {namespace} with: {status_updates}")
     await cluster_resource.patch(
         name,
         dict(status=status_updates),
         namespace=namespace,
     )
-    LOG.debug(f"patched {name} in {namespace} with: {status_updates}")
 
 
 async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hours):

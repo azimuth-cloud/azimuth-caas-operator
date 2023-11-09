@@ -30,7 +30,7 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push image
-        uses: stackhpc/github-actions/docker-multiarch-build-push@master
+        uses: stackhpc/github-actions/docker-multiarch-build-push@feature/scanning
         with:
           cache-key: azimuth-caas-operator
           context: .
@@ -38,32 +38,6 @@ jobs:
           push: true
           tags: ${{ steps.image-meta.outputs.tags }}
           labels: ${{ steps.image-meta.outputs.labels }}
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: cosign-installer
-        uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: 'v2.2.1'
-
-      - name: Check install!
-        run: cosign version
-
-      - name: Sign the published Docker image
-        # if: ${{ github.event_name != 'pull_request' }}
-        run: |
-           cosign sign --yes ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
 
   build_push_ansible_runner_image:
     name: Build and push ansible runner image

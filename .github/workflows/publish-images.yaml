@@ -53,12 +53,17 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: cosign-installer
-        uses: sigstore/cosign-installer@v2.0.0
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.1'
+
+      - name: Check install!
+        run: cosign version
 
       - name: Sign the published Docker image
         # if: ${{ github.event_name != 'pull_request' }}
         run: |
-           cosign sign ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
+           cosign sign --yes ghcr.io/stackhpc/azimuth-caas-operator:${{ steps.image-meta.outputs.tags[0] }}
 
   build_push_ansible_runner_image:
     name: Build and push ansible runner image

@@ -10,6 +10,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./requirements.txt /azimuth-caas-operator/requirements.txt
+RUN pip install -U pip setuptools
 RUN pip install --requirement /azimuth-caas-operator/requirements.txt
 
 COPY . /azimuth-caas-operator

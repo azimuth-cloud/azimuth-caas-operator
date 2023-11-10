@@ -23,7 +23,7 @@ FROM ubuntu:jammy as run-image
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends python3.10-minimal tini -y && \
+    apt-get install --no-install-recommends python3 tini -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy accross the venv

@@ -23,7 +23,7 @@ FROM ubuntu:jammy as run-image
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends python3 tini -y && \
+    apt-get install --no-install-recommends python3 tini ca-certificates -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy accross the venv

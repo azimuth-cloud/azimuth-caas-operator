@@ -18,7 +18,7 @@ httpx==0.25.1
 idna==3.4
 iso8601==2.1.0
 kopf==1.36.2
-kube-custom-resource @ git+https://github.com/stackhpc/kube-custom-resource.git@0a15ca86fa820ecbdbb24f726b3583efaffa4ae7
+kube-custom-resource==0.2.0
 multidict==6.0.4
 pbr==5.11.1
 pycparser==2.21

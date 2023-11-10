@@ -150,6 +150,22 @@ def get_job(
 
     image = image_utils.get_ansible_runner_image()
 
+    init_inventory_yaml = f"""
+      - image: "{image}"
+        name: inventory
+        workingDir: /inventory
+        command:
+        - /bin/bash
+        - -c
+        - |
+            echo '[openstack]' >/runner/inventory/hosts
+            echo 'localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3' >>/runner/inventory/hosts
+        volumeMounts:
+        - name: runner-data
+          mountPath: /runner/inventory
+          subPath: inventory
+"""
+
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -173,6 +189,7 @@ spec:
         fsGroup: 1000
       restartPolicy: Never
       initContainers:
+{ init_inventory_yaml if 'ANSIBLE_INVENTORY' not in dict(cluster_type_spec.envVars) else ''}
       - image: "{image}"
         name: clone
         workingDir: /runner

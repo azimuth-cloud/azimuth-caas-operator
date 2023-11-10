@@ -1,4 +1,34 @@
-FROM python:3.9
+FROM ubuntu:jammy as build-image
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends python3.10-venv git -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# build into a venv we can copy across
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY ./requirements.txt /azimuth-caas-operator/requirements.txt
+RUN pip install -U pip setuptools
+RUN pip install --requirement /azimuth-caas-operator/requirements.txt
+
+COPY . /azimuth-caas-operator
+RUN pip install /azimuth-caas-operator
+
+#
+# Now the image we run with
+#
+FROM ubuntu:jammy as run-image
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --no-install-recommends python3 tini ca-certificates -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy accross the venv
+COPY --from=build-image /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Create the user that will be used to run the app
 ENV APP_UID 1001
@@ -14,22 +44,8 @@ RUN groupadd --gid $APP_GID $APP_GROUP && \
       --uid $APP_UID \
       $APP_USER
 
-# Install tini, which we will use to marshal the processes
-RUN apt-get update && \
-    apt-get install -y tini && \
-    rm -rf /var/lib/apt/lists/*
-
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED 1
-
-# Install dependencies
-# Doing this separately by copying only the requirements file enables better use of the build cache
-COPY ./requirements.txt /azimuth-caas-operator/requirements.txt
-RUN pip install --no-deps --requirement /azimuth-caas-operator/requirements.txt
-
-# Install the perftest package
-COPY . /azimuth-caas-operator
-RUN pip install --no-deps -e /azimuth-caas-operator
 
 # By default, run the operator using kopf
 USER $APP_UID

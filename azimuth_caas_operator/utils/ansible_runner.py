@@ -224,7 +224,6 @@ spec:
             fi
             ansible-runner run /runner -j
             {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove else ""}
-            {"sleep 1000" if "CAAS_DEBUG_SLEEP" in dict(cluster_type_spec.envVars) else ""}
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"

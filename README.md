@@ -4,8 +4,6 @@
 
 K8s operator to create clusters using K8s CRDs
 
-This is still very much work in progress!!
-
 ## Installation of Operator
 
 The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):

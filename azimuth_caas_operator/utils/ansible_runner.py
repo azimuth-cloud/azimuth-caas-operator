@@ -252,6 +252,9 @@ spec:
           mountPath: /runner/project
           subPath: project
         - name: runner-data
+          mountPath: /runner/inventory
+          subPath: inventory
+        - name: runner-data
           mountPath: /runner/artifacts
           subPath: artifacts
         - name: ansible-home

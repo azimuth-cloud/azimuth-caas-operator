@@ -1,5 +1,4 @@
 import datetime
-import typing
 
 import kube_custom_resource as crd
 from kube_custom_resource import schema
@@ -20,21 +19,21 @@ class ClusterPhase(str, schema.Enum):
 class ClusterStatus(schema.BaseModel):
     phase: ClusterPhase = pydantic.Field(ClusterPhase.CREATING)
     # Persistent cluster ID (set to Kubernetes UID on create or if not set)
-    clusterID: typing.Optional[str]
-    clusterTypeSpec: typing.Optional[ClusterTypeSpec]
+    clusterID: schema.Optional[str] = None
+    clusterTypeSpec: schema.Optional[ClusterTypeSpec] = None
     # used to detect upgrade requests
-    clusterTypeVersion: typing.Optional[str]
+    clusterTypeVersion: schema.Optional[str] = None
     # used to detect extra var changes
     appliedExtraVars: schema.Dict[str, schema.Any] = pydantic.Field(
         default_factory=dict
     )
-    updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
+    updatedTimestamp: schema.Optional[datetime.datetime] = pydantic.Field(
         None, description="The timestamp at which the resource was updated."
     )
-    outputs: typing.Optional[schema.Dict[str, schema.Any]] = pydantic.Field(
+    outputs: schema.Optional[schema.Dict[str, schema.Any]] = pydantic.Field(
         default_factory=dict
     )
-    error: typing.Optional[str]
+    error: schema.Optional[str] = None
 
 
 class ClusterSpec(schema.BaseModel):

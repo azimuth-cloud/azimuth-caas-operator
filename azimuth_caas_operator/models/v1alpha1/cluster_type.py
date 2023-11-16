@@ -18,19 +18,17 @@ class ClusterParameter(schema.BaseModel):
     #: A human-readable label for the parameter
     label: str
     #: A description of the parameter
-    description: typing.Optional[str]
+    description: schema.Optional[str] = None
     #: The kind of the parameter
     kind: str
     #: A dictionary of kind-specific options for the parameter
     options: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     #: Indicates if the option is immutable, i.e. cannot be updated
-    immutable: typing.Optional[bool]
+    immutable: schema.Optional[bool] = None
     #: Indicates if the parameter is required
-    required: typing.Optional[bool]
+    required: schema.Optional[bool] = None
     #: A default value for the parameter
-    default: typing.Optional[
-        schema.Any
-    ]  # TODO(johngarbutt): k8s said no if this was any before?!
+    default: schema.Optional[schema.Any] = None
 
 
 class ClusterServiceSpec(schema.BaseModel):
@@ -39,9 +37,9 @@ class ClusterServiceSpec(schema.BaseModel):
     #: A human-readable label for the service
     label: str
     #: The URL of an icon for the service
-    iconUrl: typing.Optional[str]
+    iconUrl: schema.Optional[str] = None
     #: An expression indicating when the service is available
-    when: typing.Optional[str]
+    when: schema.Optional[str] = None
 
 
 class ClusterUiMeta(schema.BaseModel):
@@ -50,33 +48,33 @@ class ClusterUiMeta(schema.BaseModel):
     #: A human-readable label for the cluster type
     label: str
     #: A description of the cluster type
-    description: typing.Optional[str]
+    description: schema.Optional[str] = None
     #: The URL or data URI of the logo for the cluster type
-    logo: typing.Optional[str]
+    logo: schema.Optional[str] = None
     #: Indicates whether the cluster requires a user SSH key
-    requiresSshKey: typing.Optional[bool]
+    requiresSshKey: schema.Optional[bool] = None
     #: The parameters for the cluster type
-    parameters: typing.Optional[typing.Sequence[ClusterParameter]]
+    parameters: typing.Sequence[ClusterParameter] = pydantic.Field(default_factory=list)
     #: The services for the cluster type
-    services: typing.Optional[typing.Sequence[ClusterServiceSpec]]
+    services: typing.Sequence[ClusterServiceSpec] = pydantic.Field(default_factory=list)
     #: Template for the usage of the clusters deployed using this type
     #: Can use Jinja2 syntax and should produce valid Markdown
     #: Receives the cluster parameters, as defined in `parameters`, as template args
-    usageTemplate: typing.Optional[str]
+    usageTemplate: schema.Optional[str] = None
 
 
 class ClusterTypeStatus(schema.BaseModel):
     phase: ClusterTypePhase = pydantic.Field(ClusterTypePhase.PENDING)
-    uiMeta: typing.Optional[ClusterUiMeta]
-    uiMetaUrl: typing.Optional[pydantic.AnyHttpUrl]
-    updatedTimestamp: typing.Optional[datetime.datetime] = pydantic.Field(
+    uiMeta: schema.Optional[ClusterUiMeta] = None
+    uiMetaUrl: schema.Optional[schema.AnyHttpUrl] = None
+    updatedTimestamp: schema.Optional[datetime.datetime] = pydantic.Field(
         None, description="The timestamp at which the resource was updated."
     )
 
 
 class ClusterTypeSpec(schema.BaseModel):
-    uiMetaUrl: pydantic.AnyHttpUrl
-    gitUrl: pydantic.AnyUrl
+    uiMetaUrl: schema.AnyHttpUrl
+    gitUrl: schema.AnyUrl
     gitVersion: str
     # Playbook is contained in the above git repo
     playbook: str
@@ -85,8 +83,8 @@ class ClusterTypeSpec(schema.BaseModel):
     # Option to define cluster-type specific details, like inventory
     envVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     # optionally copy in a secret to mount as ~/.ssh
-    sshSharedSecretName: typing.Optional[str]
-    sshSharedSecretNamespace: typing.Optional[str]
+    sshSharedSecretName: schema.Optional[str] = None
+    sshSharedSecretNamespace: schema.Optional[str] = None
 
 
 class ClusterType(

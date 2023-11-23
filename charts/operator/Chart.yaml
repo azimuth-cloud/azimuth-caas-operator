@@ -12,7 +12,6 @@ dependencies:
     repository: file://../ara
   - name: kube-state-metrics
     repository: https://prometheus-community.github.io/helm-charts
-    version: 5.8.0
     version: 5.15.2
     alias: metrics
     condition: metrics.enabled

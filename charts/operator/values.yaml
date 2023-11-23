@@ -108,7 +108,7 @@ metrics:
               cluster_type_version: [metadata, resourceVersion]
             metrics:
               - name: phase
-                help: "Cluster phase"
+                help: "Cluster type phase"
                 each:
                   type: Info
                   info:

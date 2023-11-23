@@ -332,3 +332,37 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([], event)
         mock_pod_name.assert_awaited_once_with("client", "job", "ns")
         mock_get_lines.assert_not_awaited()
+
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
+    async def test_is_create_job_running_returns_true(self, mock_get_create_job):
+        mock_job = mock.MagicMock()
+        mock_job.status = {"active": 1}
+        mock_get_create_job.return_value = mock_job
+
+        result = await ansible_runner.is_create_job_running("client", "cluster", "ns")
+
+        self.assertTrue(result)
+        mock_get_create_job.assert_awaited_once_with("client", "cluster", "ns")
+
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
+    async def test_is_create_job_running_returns_false_no_job(
+        self, mock_get_create_job
+    ):
+        mock_get_create_job.return_value = None
+
+        result = await ansible_runner.is_create_job_running("client", "cluster", "ns")
+
+        self.assertFalse(result)
+
+    @mock.patch.object(ansible_runner, "get_create_job_for_cluster")
+    async def test_is_create_job_running_returns_false_not_active(
+        self, mock_get_create_job
+    ):
+        mock_job = mock.MagicMock()
+        mock_job.status = {}
+        mock_get_create_job.return_value = mock_job
+
+        result = await ansible_runner.is_create_job_running("client", "cluster", "ns")
+
+        self.assertFalse(result)
+        mock_get_create_job.assert_awaited_once_with("client", "cluster", "ns")

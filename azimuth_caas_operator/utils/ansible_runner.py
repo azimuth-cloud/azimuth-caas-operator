@@ -150,7 +150,7 @@ def get_job(
 
     image = image_utils.get_ansible_runner_image()
 
-    defines_inventory = 'ANSIBLE_INVENTORY' in dict(cluster_type_spec.envVars)
+    defines_inventory = "ANSIBLE_INVENTORY" in dict(cluster_type_spec.envVars)
 
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1

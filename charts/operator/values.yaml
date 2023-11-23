@@ -42,7 +42,7 @@ tolerations: []
 
 # Settings for kube-state-metrics
 metrics:
-  enabled: true
+  enabled: false
   # Configuration for the dashboard
   dashboard:
     enabled: false

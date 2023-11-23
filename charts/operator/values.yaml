@@ -86,7 +86,7 @@ metrics:
             labelsFromPath:
               cluster_namespace: [metadata, namespace]
               cluster_name: [metadata, name]
-              cluster_type: [spec, clusterTypeName]
+              cluster_type_name: [spec, clusterTypeName]
               cluster_type_version: [spec, clusterTypeVersion]
             metrics:
               - name: phase
@@ -105,6 +105,7 @@ metrics:
             labelsFromPath:
               cluster_type_namespace: [metadata, namespace]
               cluster_type_name: [metadata, name]
+              cluster_type_version: [metadata, resourceVersion]
             metrics:
               - name: phase
                 help: "Cluster phase"

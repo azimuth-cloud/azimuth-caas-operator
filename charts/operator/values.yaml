@@ -84,8 +84,10 @@ metrics:
               kind: Clusters
             metricNamePrefix: azimuth_caas_clusters
             labelsFromPath:
-              realm_namespace: [metadata, namespace]
-              realm_name: [metadata, name]
+              cluster_namespace: [metadata, namespace]
+              cluster_name: [metadata, name]
+              cluster_type: [spec, clusterTypeName]
+              cluster_type_version: [spec, clusterTypeVersion]
             metrics:
               - name: phase
                 help: "Cluster phase"
@@ -101,8 +103,8 @@ metrics:
               kind: ClusterTypes
             metricNamePrefix: azimuth_caas_clustertypes
             labelsFromPath:
-              realm_namespace: [metadata, namespace]
-              realm_name: [metadata, name]
+              cluster_type_namespace: [metadata, namespace]
+              cluster_type_name: [metadata, name]
             metrics:
               - name: phase
                 help: "Cluster phase"

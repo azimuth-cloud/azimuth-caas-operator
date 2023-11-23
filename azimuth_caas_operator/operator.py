@@ -220,7 +220,7 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
     # Fail if create is still in progress
     # Note that we don't care if create worked.
     # If create failed, we allow update and patch to trigger a retry
-    if not await ansible_runner.is_create_job_finished(K8S_CLIENT, name, namespace):
+    if await ansible_runner.is_create_job_running(K8S_CLIENT, name, namespace):
         raise kopf.TemporaryError(
             f"Can't process update until create completed for {name} in {namespace}"
         )

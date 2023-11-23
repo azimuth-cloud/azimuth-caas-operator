@@ -127,13 +127,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success.assert_called_once_with("fakejob")
 
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
-    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_waits_for_create_job_to_complete(
         self,
         mock_create_job,
         mock_ensure_cluster_id,
     ):
-        mock_create_job.return_value = False
+        mock_create_job.return_value = True
         fake_body = cluster_crd.get_fake_dict()
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
@@ -151,7 +151,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
-    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_waits_for_update_job_to_complete(
         self,
         mock_create_job,
@@ -160,7 +160,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update,
         mock_ensure_cluster_id,
     ):
-        mock_create_job.return_value = True
+        mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
         mock_completed.return_value = None
 
@@ -190,7 +190,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
-    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_spots_job_success(
         self,
         mock_create_job,
@@ -201,7 +201,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update,
         mock_ensure_cluster_id,
     ):
-        mock_create_job.return_value = True
+        mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
         mock_completed.return_value = True
         mock_outputs.return_value = {"asdf": 42}
@@ -231,7 +231,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
-    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_spots_job_failure(
         self,
         mock_create_job,
@@ -243,7 +243,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update,
         mock_ensure_cluster_id,
     ):
-        mock_create_job.return_value = True
+        mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
         mock_completed.return_value = False
         mock_outputs.return_value = {"asdf": 42}
@@ -272,7 +272,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
     @mock.patch.object(ansible_runner, "get_update_job_for_cluster")
-    @mock.patch.object(ansible_runner, "is_create_job_finished")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_creates_update_job_and_raise(
         self,
         mock_create_job,
@@ -281,7 +281,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update,
         mock_ensure_cluster_id,
     ):
-        mock_create_job.return_value = True
+        mock_create_job.return_value = False
         mock_update_job.return_value = None
 
         fake_body = cluster_crd.get_fake_dict()

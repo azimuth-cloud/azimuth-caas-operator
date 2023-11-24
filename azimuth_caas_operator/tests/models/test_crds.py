@@ -65,6 +65,13 @@ class TestModels(base.TestCase):
                     "type": "object",
                     "x-kubernetes-preserve-unknown-fields": true
                   },
+                  "envVars": {
+                    "additionalProperties": {
+                      "x-kubernetes-preserve-unknown-fields": true
+                    },
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
                   "sshSharedSecretName": {
                     "nullable": true,
                     "type": "string"
@@ -354,6 +361,13 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "extraVars": {
+                        "additionalProperties": {
+                          "x-kubernetes-preserve-unknown-fields": true
+                        },
+                        "type": "object",
+                        "x-kubernetes-preserve-unknown-fields": true
+                      },
+                      "envVars": {
                         "additionalProperties": {
                           "x-kubernetes-preserve-unknown-fields": true
                         },

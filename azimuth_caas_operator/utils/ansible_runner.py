@@ -98,7 +98,7 @@ def get_env_configmap(
     if remove:
         extraVars["cluster_state"] = "absent"
 
-    envvars = {}
+    envvars = dict(cluster_type_spec.envVars)
     try:
         envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
     except KeyError:
@@ -150,6 +150,9 @@ def get_job(
 
     image = image_utils.get_ansible_runner_image()
 
+    defines_inventory = "ANSIBLE_INVENTORY" in dict(cluster_type_spec.envVars)
+    # for ANSIBLE_INVENTORY in envvars to work, there must be no inventory/ directory
+
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -173,6 +176,7 @@ spec:
         fsGroup: 1000
       restartPolicy: Never
       initContainers:
+{f'''
       - image: "{image}"
         name: inventory
         workingDir: /inventory
@@ -186,6 +190,7 @@ spec:
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
+''' if not defines_inventory else ''}
       - image: "{image}"
         name: clone
         workingDir: /runner
@@ -246,9 +251,11 @@ spec:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
+{'''
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
+''' if not defines_inventory else ''}
         - name: runner-data
           mountPath: /runner/artifacts
           subPath: artifacts

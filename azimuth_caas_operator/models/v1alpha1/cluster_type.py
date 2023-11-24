@@ -80,6 +80,8 @@ class ClusterTypeSpec(schema.BaseModel):
     playbook: str
     # Option to add cloud specific details, like the image
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
+    # Option to define cluster-type specific details, like inventory
+    envVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     # optionally copy in a secret to mount as ~/.ssh
     sshSharedSecretName: schema.Optional[str] = None
     sshSharedSecretNamespace: schema.Optional[str] = None

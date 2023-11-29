@@ -2,11 +2,17 @@ name: Publish charts
 
 on:
   workflow_call:
+    outputs:
+      chart-version:
+        description: The chart version that was published
+        value: ${{ jobs.publish_charts.outputs.chart-version }}
 
 jobs:
   publish_charts:
     name: Publish Helm charts to GitHub pages
     runs-on: ubuntu-latest
+    outputs:
+      chart-version: ${{ steps.semver.outputs.version }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3

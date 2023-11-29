@@ -36,3 +36,13 @@ jobs:
     needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
     if: github.repository == 'stackhpc/azimuth-caas-operator'
+
+  # The integration tests require the charts, and are only worth running once
+  # the functional tests are passing
+  integration_tests:
+    needs: [publish_charts, functional_tests]
+    uses: ./.github/workflows/integration.yaml
+    with:
+      chart-version: ${{ needs.publish_charts.outputs.chart-version }}
+    secrets: inherit
+    if: github.repository == 'stackhpc/azimuth-caas-operator'

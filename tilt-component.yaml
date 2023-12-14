@@ -1,0 +1,11 @@
+chart: ./charts/operator
+
+images:
+  azimuth-caas-operator:
+    context: .
+    chart_path: image
+
+  ara-api:
+    action: mirror
+    source_image: quay.io/recordsansible/ara-api:latest
+    chart_path: ara.image

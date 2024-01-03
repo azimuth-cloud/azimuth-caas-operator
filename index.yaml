@@ -3,7 +3,7 @@ entries:
   ara:
   - apiVersion: v2
     appVersion: 6084d61
-    created: "2024-01-03T09:31:45.571478516Z"
+    created: "2024-01-03T10:24:56.010329141Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 6c4a75695116fa342817362c1df98014b91374099aa193beddfb91da910c80f2
     name: ara
@@ -13,7 +13,7 @@ entries:
     version: 0.8.1-dev.0.update-logging-ui-meta.3
   - apiVersion: v2
     appVersion: "2075835"
-    created: "2024-01-03T09:31:45.571134747Z"
+    created: "2024-01-03T10:24:56.010036294Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 9fb9a59024fce63a521f2028b882fb11dc933f5ebdb037fcc8d6c964d69a420f
     name: ara
@@ -22,8 +22,18 @@ entries:
     - ara-0.8.1-dev.0.update-logging-ui-meta.2.tgz
     version: 0.8.1-dev.0.update-logging-ui-meta.2
   - apiVersion: v2
+    appVersion: dac1dea
+    created: "2024-01-03T10:24:56.009748816Z"
+    description: Helm chart for deploying ARA on Kubernetes
+    digest: 76646edfe7122da02d9ff53c3405c092cf2131f4b120a0e1119c6051320f8023
+    name: ara
+    type: application
+    urls:
+    - ara-0.8.1-dev.0.main.1.tgz
+    version: 0.8.1-dev.0.main.1
+  - apiVersion: v2
     appVersion: b863a7c
-    created: "2024-01-03T09:31:45.570835662Z"
+    created: "2024-01-03T10:24:56.009464876Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: d42076be39c36bda7352f9422b410881384ac2abeba797ccf637c8308714b4d6
     name: ara
@@ -33,7 +43,7 @@ entries:
     version: 0.8.0
   - apiVersion: v2
     appVersion: b863a7c
-    created: "2024-01-03T09:31:45.570540354Z"
+    created: "2024-01-03T10:24:56.009179472Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 85eeea517ab53bc24c8113301e3628f577b323d6d576dc8de46de906eaaf8ef8
     name: ara
@@ -43,7 +53,7 @@ entries:
     version: 0.7.1-dev.0.main.1
   - apiVersion: v2
     appVersion: fd0c1cd
-    created: "2024-01-03T09:31:45.570209259Z"
+    created: "2024-01-03T10:24:56.008884851Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: b67302a14cc567f7cb2a5609566d417ee2c581ddfab46c70defb6fd4b84c7a84
     name: ara
@@ -53,7 +63,7 @@ entries:
     version: 0.7.1-dev.0.feature-tilt-component.4
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.569910946Z"
+    created: "2024-01-03T10:24:56.008586202Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1e75bd508fc26d6abc5b068b7bf13b10765f6f05efa282c837082b1a35b53138
     name: ara
@@ -63,7 +73,7 @@ entries:
     version: 0.7.0
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.569618654Z"
+    created: "2024-01-03T10:24:56.008282785Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 564733e67e3ffa4e43bf8b4d3ffeeacc3ed48eb405fcd47c70aa9a60bd65fa03
     name: ara
@@ -73,7 +83,7 @@ entries:
     version: 0.7.0-rc.1
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.569295865Z"
+    created: "2024-01-03T10:24:56.007958068Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: d4a088e5e4a1f906721d777a9dfc25dbf738155b91b26c841f0514301a3b24b1
     name: ara
@@ -83,7 +93,7 @@ entries:
     version: 0.6.1-dev.0.main.2
   - apiVersion: v2
     appVersion: 7ea93c6
-    created: "2024-01-03T09:31:45.568916459Z"
+    created: "2024-01-03T10:24:56.007335758Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 86c90b0f4b601f4ad8179737844e314b2474ea70734d2090066b5ba1da44b929
     name: ara
@@ -93,7 +103,7 @@ entries:
     version: 0.6.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 05cbaa7
-    created: "2024-01-03T09:31:45.568568111Z"
+    created: "2024-01-03T10:24:56.00657942Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2a7eea994dc6a8c0fb35383af5564f5fd1f37d384b0a756a7872a5141a08442c
     name: ara
@@ -103,7 +113,7 @@ entries:
     version: 0.6.1-dev.0.feature-integration-tests.3
   - apiVersion: v2
     appVersion: 27e50e5
-    created: "2024-01-03T09:31:45.568208151Z"
+    created: "2024-01-03T10:24:56.006122996Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 573de0315d49725e1d8ac57f207580215103565062799776346bd7903a0e7c79
     name: ara
@@ -113,7 +123,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 27e50e5
-    created: "2024-01-03T09:31:45.567861918Z"
+    created: "2024-01-03T10:24:56.005837182Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1cba42cce5e666a2f6b7a6bd93e96c3582b27a9b2188a213900a4fdeede4d265
     name: ara
@@ -123,7 +133,7 @@ entries:
     version: 0.5.1-dev.0.main.21
   - apiVersion: v2
     appVersion: a20fee0
-    created: "2024-01-03T09:31:45.567173378Z"
+    created: "2024-01-03T10:24:56.00555239Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ac4ac69e43a3d96f3ded17fac5f2b90a6bbd5fac43db94f8e38dde4237d1b5ad
     name: ara
@@ -133,7 +143,7 @@ entries:
     version: 0.5.1-dev.0.main.1
   - apiVersion: v2
     appVersion: a00cc8c
-    created: "2024-01-03T09:31:45.566361397Z"
+    created: "2024-01-03T10:24:56.005266265Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 9c367d0cccc037e6165c58ee940ad3b6015b15d4f4c8a58715ef02b0b2056cf6
     name: ara
@@ -143,7 +153,7 @@ entries:
     version: 0.5.1-dev.0.fix-missing-create-job.2
   - apiVersion: v2
     appVersion: 0540b03
-    created: "2024-01-03T09:31:45.565578479Z"
+    created: "2024-01-03T10:24:56.00468643Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ed793868a40b859a58ed308be97e949263c678550d69077afb26c6f6d2fba1c1
     name: ara
@@ -153,7 +163,7 @@ entries:
     version: 0.5.1-dev.0.feature-integration-tests.25
   - apiVersion: v2
     appVersion: 76d3b99
-    created: "2024-01-03T09:31:45.565869028Z"
+    created: "2024-01-03T10:24:56.004978547Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 03ffacd037b5b81f705b0565f67660404443591236b03d2b7f087c636b62ef7b
     name: ara
@@ -163,7 +173,7 @@ entries:
     version: 0.5.1-dev.0.feature-integration-tests.4
   - apiVersion: v2
     appVersion: 8d02145
-    created: "2024-01-03T09:31:45.565283663Z"
+    created: "2024-01-03T10:24:56.004379076Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 7c655cb74729e953d11bc94d87106f01d07f444bfbe6c1b87c5a3730ed677dd2
     name: ara
@@ -173,7 +183,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.21
   - apiVersion: v2
     appVersion: c31ada7
-    created: "2024-01-03T09:31:45.564991241Z"
+    created: "2024-01-03T10:24:56.004088843Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 29cf036cd2fc12245c4673f8f5fa1dfd91d984be70eaab68545b3b1e7ef22837
     name: ara
@@ -183,7 +193,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.20
   - apiVersion: v2
     appVersion: 22761de
-    created: "2024-01-03T09:31:45.564697035Z"
+    created: "2024-01-03T10:24:56.003786748Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 47ebffe683667c7f27f1f8cf5d6d4b29fd646c87ec8834f742a8db60106e005c
     name: ara
@@ -193,7 +203,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.19
   - apiVersion: v2
     appVersion: 418885f
-    created: "2024-01-03T09:31:45.564404813Z"
+    created: "2024-01-03T10:24:56.003490284Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5eb088a4c3c34ae330654c79a7dffc6044859a0c40e34cd10c757ca151ee56fb
     name: ara
@@ -203,7 +213,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.17
   - apiVersion: v2
     appVersion: 93ce184
-    created: "2024-01-03T09:31:45.56411127Z"
+    created: "2024-01-03T10:24:56.00319378Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 7414047b4e3acfcc98f2bff8278755bb3276936b197dac7322990d5ccb724322
     name: ara
@@ -213,7 +223,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.16
   - apiVersion: v2
     appVersion: 926b822
-    created: "2024-01-03T09:31:45.561970608Z"
+    created: "2024-01-03T10:24:56.001079687Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 802de78a6866d860f0790024a7f36cb24e71123e98d22b793627b69b62719fa9
     name: ara
@@ -223,7 +233,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.30
   - apiVersion: v2
     appVersion: e8102d8
-    created: "2024-01-03T09:31:45.563816172Z"
+    created: "2024-01-03T10:24:56.00286763Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 9bef825079c7acb539399727f3367c154216cf31d18e23fc5a57e557ed0038f4
     name: ara
@@ -233,7 +243,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.9
   - apiVersion: v2
     appVersion: 3b25509
-    created: "2024-01-03T09:31:45.563504324Z"
+    created: "2024-01-03T10:24:56.00257349Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a08d1a87359c8c7571f7df4e3c61726e9bc4f63105f28c11759b5bedddd08b39
     name: ara
@@ -243,7 +253,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.8
   - apiVersion: v2
     appVersion: 73d32fd
-    created: "2024-01-03T09:31:45.563203185Z"
+    created: "2024-01-03T10:24:56.002278729Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: b59338c5530a1cdfca0561d8e8494b4160a74f8c3c643b78940552d61f3c8f2a
     name: ara
@@ -253,7 +263,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.7
   - apiVersion: v2
     appVersion: 0b28a49
-    created: "2024-01-03T09:31:45.562907417Z"
+    created: "2024-01-03T10:24:56.001978067Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5bdecfc72906f36fdddc8e0ae820a524c7506225fd6041763cb97122bd8c6277
     name: ara
@@ -263,7 +273,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.6
   - apiVersion: v2
     appVersion: "91860e1"
-    created: "2024-01-03T09:31:45.56261254Z"
+    created: "2024-01-03T10:24:56.001671784Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5fb5117f99437be0ea4377c10e5fe68647e1c7e2b938d92fb3e323b7c3625ee4
     name: ara
@@ -273,7 +283,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.5
   - apiVersion: v2
     appVersion: a8cce7e
-    created: "2024-01-03T09:31:45.562294229Z"
+    created: "2024-01-03T10:24:56.001377864Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 0e0ee4babca0910e606c4769dc863f321ee971ca657381e89e3c46e91f725af6
     name: ara
@@ -283,7 +293,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.4
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.561675531Z"
+    created: "2024-01-03T10:24:56.000750652Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: de34534817431987a3ad5589f7f3a2ca0ac1fee78c5b8886153918b4e45f8bcf
     name: ara
@@ -293,7 +303,7 @@ entries:
     version: 0.5.0
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.56137811Z"
+    created: "2024-01-03T10:24:56.000197387Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 285ea3c73616ccc556020ac243ddeedb6c7d0f58fb3c6c3dbbbb2bc8502cf452
     name: ara
@@ -303,7 +313,7 @@ entries:
     version: 0.4.2
   - apiVersion: v2
     appVersion: a5055fb
-    created: "2024-01-03T09:31:45.561082421Z"
+    created: "2024-01-03T10:24:55.999664531Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a650d149fb23ff6a31db44a8fe6d5ea91ddf1c1204a515313afc2a049bd7367c
     name: ara
@@ -313,7 +323,7 @@ entries:
     version: 0.4.2-dev.0.update-wip-readme.5
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.56078506Z"
+    created: "2024-01-03T10:24:55.998890216Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 6cc8f792c5e9aa2289ed5dd0537cd00b9b3128cfe973ac0d048fcbc3795937e7
     name: ara
@@ -323,7 +333,7 @@ entries:
     version: 0.4.2-dev.0.main.4
   - apiVersion: v2
     appVersion: 86b767f
-    created: "2024-01-03T09:31:45.560481507Z"
+    created: "2024-01-03T10:24:55.997944668Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 16c0cba277ce2122c48a40540f7ceff7c2f0945f770bcf5a85d5664ca85eda37
     name: ara
@@ -333,7 +343,7 @@ entries:
     version: 0.4.2-dev.0.main.3
   - apiVersion: v2
     appVersion: bc64228
-    created: "2024-01-03T09:31:45.560142286Z"
+    created: "2024-01-03T10:24:55.997521086Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: e896337bd5edaf7dbdc513d5964959808b6ee02e7170d0aabbb2c0b82c4ed85f
     name: ara
@@ -343,7 +353,7 @@ entries:
     version: 0.4.2-dev.0.main.2
   - apiVersion: v2
     appVersion: fc2957b
-    created: "2024-01-03T09:31:45.559538561Z"
+    created: "2024-01-03T10:24:55.997238277Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a19a48bb8f511ddbc1162348a5f3cfd9384ad619789cbc974b18b721f7da55dc
     name: ara
@@ -353,7 +363,7 @@ entries:
     version: 0.4.2-dev.0.main.1
   - apiVersion: v2
     appVersion: 0f0e5a3
-    created: "2024-01-03T09:31:45.557931607Z"
+    created: "2024-01-03T10:24:55.9963464Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 19ea3880795b56bba3b4520bf39f71c09a9b2cebe1e7d967c614ab76ac7ab942
     name: ara
@@ -363,7 +373,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.31
   - apiVersion: v2
     appVersion: 6a584f5
-    created: "2024-01-03T09:31:45.557638434Z"
+    created: "2024-01-03T10:24:55.995995503Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a6f0f077ec1d18a323720ead333d3a605db1407015b6761e759a85cea1dd2a8d
     name: ara
@@ -373,7 +383,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.30
   - apiVersion: v2
     appVersion: c057a81
-    created: "2024-01-03T09:31:45.557341243Z"
+    created: "2024-01-03T10:24:55.995684232Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5680f84f49cd1ab190fd4d646c640238d743fa9c5121798ae80ebc1395e8afbd
     name: ara
@@ -383,7 +393,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.23
   - apiVersion: v2
     appVersion: 31da27b
-    created: "2024-01-03T09:31:45.557048831Z"
+    created: "2024-01-03T10:24:55.995395281Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 485613a2ec4286ab3ab680ec8d55efe66d36ee25e4274a645a8e452f79ceb122
     name: ara
@@ -393,7 +403,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.21
   - apiVersion: v2
     appVersion: 30142b7
-    created: "2024-01-03T09:31:45.556757581Z"
+    created: "2024-01-03T10:24:55.9950896Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: b59e7a907c37c2b8afde3bdd733fbab5a33a7da485a8bd5386ae61ad896f12dd
     name: ara
@@ -403,7 +413,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.13
   - apiVersion: v2
     appVersion: 417134e
-    created: "2024-01-03T09:31:45.556459738Z"
+    created: "2024-01-03T10:24:55.994767337Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 563fc7225d1ff0d33b74bd1d3c73c24a0f5854ecc98b8fc58258f648cf2e9a66
     name: ara
@@ -413,7 +423,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.12
   - apiVersion: v2
     appVersion: a2aa6f7
-    created: "2024-01-03T09:31:45.558220232Z"
+    created: "2024-01-03T10:24:55.996663763Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8cd6f4f1a2338cb5fe7436d12f5d85b9ca681edb0fe06c86747cac7f320aa005
     name: ara
@@ -423,7 +433,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan.12
   - apiVersion: v2
     appVersion: c036f74
-    created: "2024-01-03T09:31:45.558866332Z"
+    created: "2024-01-03T10:24:55.996952132Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 4c6c6d063ba19c9a0cd8cb644cc495f57f76eb998f2cbf993e784ff412d3fa73
     name: ara
@@ -433,7 +443,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan.8
   - apiVersion: v2
     appVersion: e5b6403
-    created: "2024-01-03T09:31:45.55468087Z"
+    created: "2024-01-03T10:24:55.993037853Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 69b7610e239a5c5ba1d751b842082dc63ccb536dacc02b0ade2be9f9931dc29d
     name: ara
@@ -443,7 +453,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.10
   - apiVersion: v2
     appVersion: 21168b8
-    created: "2024-01-03T09:31:45.556163049Z"
+    created: "2024-01-03T10:24:55.994482845Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f265f09be6592fea392a253b7cc100272b6bdff5b40192ef19a4108d64352c63
     name: ara
@@ -453,7 +463,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.9
   - apiVersion: v2
     appVersion: baa4848
-    created: "2024-01-03T09:31:45.555866599Z"
+    created: "2024-01-03T10:24:55.99419658Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 13fc07aefd9418594428c70ff4bbc1e90557f55bf744c8d17f68462f5e0e702d
     name: ara
@@ -463,7 +473,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.7
   - apiVersion: v2
     appVersion: c0334a9
-    created: "2024-01-03T09:31:45.555573485Z"
+    created: "2024-01-03T10:24:55.993904965Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a90bdc76652a6d5d7951be85634f43bd9108cdefd7f9eeec577cda14c4bd3d05
     name: ara
@@ -473,7 +483,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.6
   - apiVersion: v2
     appVersion: 3f59026
-    created: "2024-01-03T09:31:45.555276785Z"
+    created: "2024-01-03T10:24:55.99361883Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a78b6b59f24894e5b23d9c87ecdd693a6f5a6003bf3310bc51065875b69d0be6
     name: ara
@@ -483,7 +493,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.5
   - apiVersion: v2
     appVersion: 22900f7
-    created: "2024-01-03T09:31:45.554983091Z"
+    created: "2024-01-03T10:24:55.993326583Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8044b7c1e2e679357fbef96c49121771f215ce660ffa09364746928f83343d74
     name: ara
@@ -493,7 +503,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.4
   - apiVersion: v2
     appVersion: e8e17f8
-    created: "2024-01-03T09:31:45.552417928Z"
+    created: "2024-01-03T10:24:55.990482425Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a2db800383303ceeecb94717e875c79c0a6cc4129ea346c78b7426e078f96cd8
     name: ara
@@ -503,7 +513,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.10
   - apiVersion: v2
     appVersion: 73cc702
-    created: "2024-01-03T09:31:45.554372328Z"
+    created: "2024-01-03T10:24:55.992747561Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f113c2525eacb1f1b3131b2ba9c992818660f238ed1be158d7b6eb53abee2980
     name: ara
@@ -513,7 +523,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.9
   - apiVersion: v2
     appVersion: 2f3c7c1
-    created: "2024-01-03T09:31:45.554009192Z"
+    created: "2024-01-03T10:24:55.992443522Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 40652c2bda68fbc71c0d1fe29f0b7ca3226e785e5e58419d07e965646d75e899
     name: ara
@@ -523,7 +533,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.7
   - apiVersion: v2
     appVersion: b040e7e
-    created: "2024-01-03T09:31:45.553706751Z"
+    created: "2024-01-03T10:24:55.992130757Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 625d853c5bd74ab349919e656b9c171da07f8236421d8eb8873a27e30a2f9659
     name: ara
@@ -533,7 +543,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.6
   - apiVersion: v2
     appVersion: f684e7f
-    created: "2024-01-03T09:31:45.553370817Z"
+    created: "2024-01-03T10:24:55.991792896Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: cb0997ebd7a5d48c96522823c0aaf2aff526d9fd0492fd4bcbbbc85f518bb726
     name: ara
@@ -543,7 +553,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.5
   - apiVersion: v2
     appVersion: 7cd64e7
-    created: "2024-01-03T09:31:45.553066753Z"
+    created: "2024-01-03T10:24:55.991395362Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5ba18303ac674a08808f8baca7b0c3846f7c92d3db0f160f73d9773d5e2227a9
     name: ara
@@ -553,7 +563,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.3
   - apiVersion: v2
     appVersion: eab1f52
-    created: "2024-01-03T09:31:45.552759824Z"
+    created: "2024-01-03T10:24:55.990953316Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: fc972c14df5207001b39d917fdb5152c4808b0e0474c338c1b3d632d2e7f6ff9
     name: ara
@@ -563,7 +573,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.2
   - apiVersion: v2
     appVersion: 3d47d1c
-    created: "2024-01-03T09:31:45.552040996Z"
+    created: "2024-01-03T10:24:55.989633584Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: df8f5f9166048f8108d5adb8207ebaf2b4b7fd7d2b09b1d42e2264f0d9151d96
     name: ara
@@ -573,7 +583,7 @@ entries:
     version: 0.4.2-dev.0.feature-integration-tests.5
   - apiVersion: v2
     appVersion: 4f27a67
-    created: "2024-01-03T09:31:45.551228992Z"
+    created: "2024-01-03T10:24:55.989040225Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: cce4b1a90ce7e9eee844192eff9f0475ab5f8948f3e0094f0c82952f54566c93
     name: ara
@@ -583,7 +593,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.6
   - apiVersion: v2
     appVersion: 4c11258
-    created: "2024-01-03T09:31:45.550421878Z"
+    created: "2024-01-03T10:24:55.988751254Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3d248e402b3c0e1753ccdeb44cc2684eb830f5c278db13cda873891019d2e97b
     name: ara
@@ -593,7 +603,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.5
   - apiVersion: v2
     appVersion: afa40da
-    created: "2024-01-03T09:31:45.550087637Z"
+    created: "2024-01-03T10:24:55.988463396Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 62b6a406023c014815805e6f5c9ab250ab8b5990b1fb0612e6595e2f3c7e2838
     name: ara
@@ -603,7 +613,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.4
   - apiVersion: v2
     appVersion: 6a50498
-    created: "2024-01-03T09:31:45.547728744Z"
+    created: "2024-01-03T10:24:55.986066013Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 787178847c45a286b66752b56059d3e0a248847ee1aa6d0754c6b020ff0f3cae
     name: ara
@@ -613,7 +623,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.19
   - apiVersion: v2
     appVersion: "7753307"
-    created: "2024-01-03T09:31:45.547424169Z"
+    created: "2024-01-03T10:24:55.985768277Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a88c9ef6e55222ee8f1c9ab262dde5249a1cf70bd780e345fb4e5b958fd09337
     name: ara
@@ -623,7 +633,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.18
   - apiVersion: v2
     appVersion: 666dd58
-    created: "2024-01-03T09:31:45.547060663Z"
+    created: "2024-01-03T10:24:55.985473245Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3f5f177828fb5208c7bedd6dc3c47b30b365bca725eb47f99801ba7e2d7b8297
     name: ara
@@ -633,7 +643,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.17
   - apiVersion: v2
     appVersion: 5d27f6c
-    created: "2024-01-03T09:31:45.54674122Z"
+    created: "2024-01-03T10:24:55.985171752Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a431eeb6b4d029f1234345509594ef5a5d38844890f8060b4af614cb93be9d81
     name: ara
@@ -643,7 +653,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.15
   - apiVersion: v2
     appVersion: 0a1b3e2
-    created: "2024-01-03T09:31:45.546441093Z"
+    created: "2024-01-03T10:24:55.984882651Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: c5a1d1bb5d5b8085fafff68fc1873da3c58375bfbc4cd1c229be8e4204b9c084
     name: ara
@@ -653,7 +663,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.13
   - apiVersion: v2
     appVersion: 25fa291
-    created: "2024-01-03T09:31:45.546103195Z"
+    created: "2024-01-03T10:24:55.984579754Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 386a38f03bf923a650637cf53295bce185a01c201f72b99a4e3ac86096ab663f
     name: ara
@@ -663,7 +673,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.12
   - apiVersion: v2
     appVersion: 1a84f68
-    created: "2024-01-03T09:31:45.545801996Z"
+    created: "2024-01-03T10:24:55.984270506Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 61f8fa03ad8596c37b8616f13eb1498a5fdf22d660dbce06bc43055af713d0ce
     name: ara
@@ -673,7 +683,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.10
   - apiVersion: v2
     appVersion: "66984e5"
-    created: "2024-01-03T09:31:45.549795215Z"
+    created: "2024-01-03T10:24:55.988168876Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 7ffedff1410bed5303dd5b080c080e4d2ea3009e6a6ee8606664183aa2cad579
     name: ara
@@ -683,7 +693,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.9
   - apiVersion: v2
     appVersion: "60567e2"
-    created: "2024-01-03T09:31:45.549502141Z"
+    created: "2024-01-03T10:24:55.987876398Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 12aab6434af27a0accfb5480e1193028a1175d94351fdc767849baf5cacbc67b
     name: ara
@@ -693,7 +703,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.7
   - apiVersion: v2
     appVersion: 6adefb9
-    created: "2024-01-03T09:31:45.549214609Z"
+    created: "2024-01-03T10:24:55.987550209Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: c372db6b51f5612a50f59203e41a7ad393e2a5fb35afd140756e12fa146949f2
     name: ara
@@ -703,7 +713,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.6
   - apiVersion: v2
     appVersion: 142f8c6
-    created: "2024-01-03T09:31:45.548922678Z"
+    created: "2024-01-03T10:24:55.987260968Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: bf6e0986d170cc9d242d4642af7f6371c8c22f4eed6931d185388c45f85e592f
     name: ara
@@ -713,7 +723,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.5
   - apiVersion: v2
     appVersion: f5ae3fa
-    created: "2024-01-03T09:31:45.548632069Z"
+    created: "2024-01-03T10:24:55.986933135Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f05ab883e345c7c6b1f7c06a61ba75501ddf46e754d30ccd257ceb1bf3258f66
     name: ara
@@ -723,7 +733,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.4
   - apiVersion: v2
     appVersion: c5f89fe
-    created: "2024-01-03T09:31:45.548315Z"
+    created: "2024-01-03T10:24:55.986647791Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 6959ab6fc1d42f1b0f76b50af77b5850e491fd758edc1cb913b233a068c7cd75
     name: ara
@@ -733,7 +743,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.3
   - apiVersion: v2
     appVersion: feedf7c
-    created: "2024-01-03T09:31:45.548022308Z"
+    created: "2024-01-03T10:24:55.986360875Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3f68d349087a218fb3cc1f747ce8e93fa6cd3ecf51fa9760074843e68f5959e1
     name: ara
@@ -743,7 +753,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.2
   - apiVersion: v2
     appVersion: db77444
-    created: "2024-01-03T09:31:45.545507781Z"
+    created: "2024-01-03T10:24:55.983959555Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 5a70f4c17e4ab405044d7648778a47af120f5cf2276770a6523226ed35784452
     name: ara
@@ -753,7 +763,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: 73cc195
-    created: "2024-01-03T09:31:45.545218084Z"
+    created: "2024-01-03T10:24:55.983377286Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f9d0179ebc6df990037b05e19d5c6b88fce19c248491faeef4cba149cd9b371d
     name: ara
@@ -763,7 +773,7 @@ entries:
     version: 0.4.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 2aaf058
-    created: "2024-01-03T09:31:45.544917947Z"
+    created: "2024-01-03T10:24:55.982410432Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1fd726b08739446b75af70562f8a9f1fdb41370af5c6fe1d3a8661f3fd5e2457
     name: ara
@@ -773,7 +783,7 @@ entries:
     version: 0.4.1-dev.0.fix-pod-index-error.3
   - apiVersion: v2
     appVersion: 3ed048d
-    created: "2024-01-03T09:31:45.544623632Z"
+    created: "2024-01-03T10:24:55.981951764Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a57654d1a165bc3e0410fe50a665e9ab83c397f02bc5175ae22ff3f739add7b4
     name: ara
@@ -783,7 +793,7 @@ entries:
     version: 0.4.1-dev.0.fix-helm-set-string.2
   - apiVersion: v2
     appVersion: "9043301"
-    created: "2024-01-03T09:31:45.544322523Z"
+    created: "2024-01-03T10:24:55.981668575Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 7b9702dec3f00d767c6e670ec4ca9321f613ea231d4a209d8762cad7995ca289
     name: ara
@@ -793,7 +803,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 126d1bd
-    created: "2024-01-03T09:31:45.544020132Z"
+    created: "2024-01-03T10:24:55.981388101Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3ba5bf2d668df220083aaac1d540c02243d34116d1068862617b52c50acf6d53
     name: ara
@@ -803,7 +813,7 @@ entries:
     version: 0.3.1-dev.0.main.3
   - apiVersion: v2
     appVersion: dba3681
-    created: "2024-01-03T09:31:45.543700449Z"
+    created: "2024-01-03T10:24:55.981108678Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8a01cdd82a64aecc7fb50a1257aadaa060fb635658980a7dc3354ad69cdc9cae
     name: ara
@@ -813,7 +823,7 @@ entries:
     version: 0.3.1-dev.0.main.2
   - apiVersion: v2
     appVersion: 3b55e28
-    created: "2024-01-03T09:31:45.543149837Z"
+    created: "2024-01-03T10:24:55.980828324Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8227fd79ceaeb58c5f9a334eca23b47ca47bcd077696350c44fb978c517f9ee1
     name: ara
@@ -823,7 +833,7 @@ entries:
     version: 0.3.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 5f75012
-    created: "2024-01-03T09:31:45.542500861Z"
+    created: "2024-01-03T10:24:55.980543321Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1f0a0ff387f1a0ef6fbb13dfe882719c8cad7a191e492063cfaed767c04470df
     name: ara
@@ -833,7 +843,7 @@ entries:
     version: 0.3.1-dev.0.fix-cluster-restore.2
   - apiVersion: v2
     appVersion: 2ffd4c8
-    created: "2024-01-03T09:31:45.541863458Z"
+    created: "2024-01-03T10:24:55.980289476Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 9cb74b90293604d5892a2e0c00dc62530ddc40539971095bd7882a408cf3bdbd
     name: ara
@@ -843,7 +853,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.8
   - apiVersion: v2
     appVersion: "0029712"
-    created: "2024-01-03T09:31:45.541558252Z"
+    created: "2024-01-03T10:24:55.979996198Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2c22af1d63105aae58b218f2f2ceb16ec489e70b2432c319f71804390afa1bfe
     name: ara
@@ -853,7 +863,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.6
   - apiVersion: v2
     appVersion: 71580d7
-    created: "2024-01-03T09:31:45.541266451Z"
+    created: "2024-01-03T10:24:55.979703681Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: fdc85d91764cc337a2d9642925ba5697b7cbde52d1a8b7781f22e99c7d139d0f
     name: ara
@@ -863,7 +873,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.5
   - apiVersion: v2
     appVersion: 382ae7e
-    created: "2024-01-03T09:31:45.540970342Z"
+    created: "2024-01-03T10:24:55.979407688Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 22e552930d94b6bfbc7da6969fc571f9b046ef2ecb21bdce3757b0c9f47fef9e
     name: ara
@@ -873,7 +883,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.9
   - apiVersion: v2
     appVersion: f820dac
-    created: "2024-01-03T09:31:45.540673602Z"
+    created: "2024-01-03T10:24:55.97907724Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: c10149626cdc3f7c72eb5aa02ced156eb99211ea01dfc4a44be281a906ef01a2
     name: ara
@@ -883,7 +893,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.7
   - apiVersion: v2
     appVersion: ef9ab4e
-    created: "2024-01-03T09:31:45.540376501Z"
+    created: "2024-01-03T10:24:55.978726905Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 251ae7dd0c180d5d5913eb93d82ff45b32b919af37cf41a5bf819452022f372f
     name: ara
@@ -893,7 +903,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.6
   - apiVersion: v2
     appVersion: 92c9197
-    created: "2024-01-03T09:31:45.540076244Z"
+    created: "2024-01-03T10:24:55.97844086Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3e9d4c1fb6acb0057e50742a6593e7a7803d3e3ad5ccf4f242249008d369126d
     name: ara
@@ -903,7 +913,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.5
   - apiVersion: v2
     appVersion: f9ba8d0
-    created: "2024-01-03T09:31:45.539783611Z"
+    created: "2024-01-03T10:24:55.978152641Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 939d468dc215a97078bba04807e1726a6a0839d0dd94c30ca79ea59b27d4f793
     name: ara
@@ -913,7 +923,7 @@ entries:
     version: 0.3.1-dev.0.feature-functional-test-artefacts.11
   - apiVersion: v2
     appVersion: ba381f0
-    created: "2024-01-03T09:31:45.539488344Z"
+    created: "2024-01-03T10:24:55.977858771Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: b96be39c75192af66604c29afa60f278da3733c62e7e287c495f1005e07688f3
     name: ara
@@ -923,7 +933,7 @@ entries:
     version: 0.3.1-dev.0.feature-functional-test-artefacts.10
   - apiVersion: v2
     appVersion: 3a02612
-    created: "2024-01-03T09:31:45.539188848Z"
+    created: "2024-01-03T10:24:55.977556747Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f3b09d22084e1a9c75704c47191e79fd83466724a0b9350293442ed8caeb27f9
     name: ara
@@ -933,7 +943,7 @@ entries:
     version: 0.3.1-dev.0.feature-cluster-id-from-extra-vars.2
   - apiVersion: v2
     appVersion: edfd76d
-    created: "2024-01-03T09:31:45.538926112Z"
+    created: "2024-01-03T10:24:55.977287643Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8f2f5a858113c6bc9ca1045e359f91eb53e98b197c821ad816236334bf2ea338
     name: ara
@@ -943,7 +953,7 @@ entries:
     version: 0.3.1-dev.0.feature-ara-persistence.2
   - apiVersion: v2
     appVersion: fb411bb
-    created: "2024-01-03T09:31:45.538624763Z"
+    created: "2024-01-03T10:24:55.976992431Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 23ab1489cf1edc21a2cbe4d2da477f8e387dd40d831c859aadc8f1dae07f6b9c
     name: ara
@@ -953,7 +963,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: fb411bb
-    created: "2024-01-03T09:31:45.537567467Z"
+    created: "2024-01-03T10:24:55.975918704Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: fadad5909f43d1a22d02549e252dcc78a9b152504bbbcadba2afa3b592cc1735
     name: ara
@@ -963,7 +973,7 @@ entries:
     version: 0.2.3-dev.0.main.15
   - apiVersion: v2
     appVersion: 214da17
-    created: "2024-01-03T09:31:45.537308959Z"
+    created: "2024-01-03T10:24:55.975615086Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 01c1cd2715e738e6be3aa5c272753cc816ec57c49419ff723e735708e832e0c9
     name: ara
@@ -973,7 +983,7 @@ entries:
     version: 0.2.3-dev.0.main.14
   - apiVersion: v2
     appVersion: d2af3dd
-    created: "2024-01-03T09:31:45.537051012Z"
+    created: "2024-01-03T10:24:55.974992548Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2572f8cb516711b5f65fa18bbf022b0b2ef60f69ad3703361121187f2ca3365e
     name: ara
@@ -983,7 +993,7 @@ entries:
     version: 0.2.3-dev.0.main.13
   - apiVersion: v2
     appVersion: 706ac2a
-    created: "2024-01-03T09:31:45.536781173Z"
+    created: "2024-01-03T10:24:55.974406964Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 80cab5807f6c4b6c2d6ec9d8fddf928b830a5f78cd7edaeb76205dcf06d19482
     name: ara
@@ -993,7 +1003,7 @@ entries:
     version: 0.2.3-dev.0.main.12
   - apiVersion: v2
     appVersion: 5fa8581
-    created: "2024-01-03T09:31:45.536380406Z"
+    created: "2024-01-03T10:24:55.973867094Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1cb29f02f70c10bc2b2889d9441bffbdad36372c544ed1a49601504dd78fdb08
     name: ara
@@ -1003,7 +1013,7 @@ entries:
     version: 0.2.3-dev.0.main.11
   - apiVersion: v2
     appVersion: 4f002fd
-    created: "2024-01-03T09:31:45.535812657Z"
+    created: "2024-01-03T10:24:55.973625021Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2f09a4fba34e9df16d4e6bbbcb78ce4ebc271552c4e416caa9e14ce24a7d254e
     name: ara
@@ -1013,7 +1023,7 @@ entries:
     version: 0.2.3-dev.0.main.10
   - apiVersion: v2
     appVersion: 1650c4c
-    created: "2024-01-03T09:31:45.538369181Z"
+    created: "2024-01-03T10:24:55.976735401Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3234e402990627d1eb8eaae47d729e5a42ae6d1f97607d0b83456a929408f27d
     name: ara
@@ -1023,7 +1033,7 @@ entries:
     version: 0.2.3-dev.0.main.9
   - apiVersion: v2
     appVersion: d706414
-    created: "2024-01-03T09:31:45.538074214Z"
+    created: "2024-01-03T10:24:55.976467741Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a6a1248f639b46072331bee4f450fd49c0c2e5b5ec91bf7352c46635e8d27fda
     name: ara
@@ -1033,7 +1043,7 @@ entries:
     version: 0.2.3-dev.0.main.8
   - apiVersion: v2
     appVersion: e9bfe9f
-    created: "2024-01-03T09:31:45.537820355Z"
+    created: "2024-01-03T10:24:55.976199379Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ebf2637b7593cd8f596424efa2876f011d6c7d8c4218fe0507bf6354f5d2f4c4
     name: ara
@@ -1043,7 +1053,7 @@ entries:
     version: 0.2.3-dev.0.main.7
   - apiVersion: v2
     appVersion: d0800e3
-    created: "2024-01-03T09:31:45.535032624Z"
+    created: "2024-01-03T10:24:55.973377459Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ae468f69855a54616ae38232e18e7d5080bd14574064b4f26dacea61ed5f79e2
     name: ara
@@ -1053,7 +1063,7 @@ entries:
     version: 0.2.3-dev.0.head.21
   - apiVersion: v2
     appVersion: 8914c59
-    created: "2024-01-03T09:31:45.534764759Z"
+    created: "2024-01-03T10:24:55.973109527Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 352318b266c323dabe016bc0d0d090218aa433d73ae6e7c51b79ee59d141c02d
     name: ara
@@ -1063,7 +1073,7 @@ entries:
     version: 0.2.3-dev.0.fix-version-err-message.12
   - apiVersion: v2
     appVersion: b0662c2
-    created: "2024-01-03T09:31:45.534508766Z"
+    created: "2024-01-03T10:24:55.972859831Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1fb638e2dfb08f2b7d820ad4487ad362769eb9b7c851ee4232c7b49b679eeb31
     name: ara
@@ -1073,7 +1083,7 @@ entries:
     version: 0.2.3-dev.0.fix-parse-outputs-on-error.14
   - apiVersion: v2
     appVersion: df7f78b
-    created: "2024-01-03T09:31:45.534194753Z"
+    created: "2024-01-03T10:24:55.972591018Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 8d4f404b6806bf093da9e1a37a5c0d3e542898f245f89e62d8d977074f211d07
     name: ara
@@ -1083,7 +1093,7 @@ entries:
     version: 0.2.3-dev.0.fix-outputs-on-error.15
   - apiVersion: v2
     appVersion: f9f9299
-    created: "2024-01-03T09:31:45.53391774Z"
+    created: "2024-01-03T10:24:55.972340209Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: bd6081adaef583f6d17b010990b1393805e3ee8319d36f503cdbab4fb7714e79
     name: ara
@@ -1093,7 +1103,7 @@ entries:
     version: 0.2.3-dev.0.fix-new-update-job-not-created.8
   - apiVersion: v2
     appVersion: 0ddba7f
-    created: "2024-01-03T09:31:45.533633583Z"
+    created: "2024-01-03T10:24:55.972080944Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 19e82ad9e429beea99f20076fa1140106b4d51655a8eba49ddd9c8e28dd13575
     name: ara
@@ -1103,7 +1113,7 @@ entries:
     version: 0.2.3-dev.0.fix-git-safe-directory.14
   - apiVersion: v2
     appVersion: e07c2c3
-    created: "2024-01-03T09:31:45.533322235Z"
+    created: "2024-01-03T10:24:55.971810158Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: fa6d626bc207b98b72202d13363ca6f99f7cfa783c2e7ef6bf778b334cc77e52
     name: ara
@@ -1113,7 +1123,7 @@ entries:
     version: 0.2.3-dev.0.fix-events-no-job.8
   - apiVersion: v2
     appVersion: 8971cf2
-    created: "2024-01-03T09:31:45.533020175Z"
+    created: "2024-01-03T10:24:55.971547297Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: fc8ed973292a3b4545efc22ada946abdd26b1ae0e79704911fa76878c6e7287c
     name: ara
@@ -1123,7 +1133,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.27
   - apiVersion: v2
     appVersion: 3d4498d
-    created: "2024-01-03T09:31:45.532692477Z"
+    created: "2024-01-03T10:24:55.971293702Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 0efe062c7c8f8364c94e06f35d9d6ea759e69d957b029572d92e161fab881130
     name: ara
@@ -1133,7 +1143,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.26
   - apiVersion: v2
     appVersion: fb5ae9b
-    created: "2024-01-03T09:31:45.532404714Z"
+    created: "2024-01-03T10:24:55.970973864Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a32c69a7c8d0eab4a858b05927121cd912e00307e091c8d3d825266dad86e0d5
     name: ara
@@ -1143,7 +1153,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.23
   - apiVersion: v2
     appVersion: 8b7660f
-    created: "2024-01-03T09:31:45.532081654Z"
+    created: "2024-01-03T10:24:55.970725179Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3edb1192bc5ed7a0998240c2bac275d8aa47f1e8a540feaa24bf67b919d4b130
     name: ara
@@ -1153,7 +1163,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.22
   - apiVersion: v2
     appVersion: dc1226e
-    created: "2024-01-03T09:31:45.531813858Z"
+    created: "2024-01-03T10:24:55.97046355Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: cfe3b958ac072809848c60f774bba38dcda9192dda8fd295f997f20b3edfea3e
     name: ara
@@ -1163,7 +1173,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.20
   - apiVersion: v2
     appVersion: 991cb99
-    created: "2024-01-03T09:31:45.531537156Z"
+    created: "2024-01-03T10:24:55.970189899Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: c4d4b6a9e428a72ea0b690c96f3f816068b60d9f910134b60bdac5321f688b16
     name: ara
@@ -1173,7 +1183,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.19
   - apiVersion: v2
     appVersion: 4b48b9c
-    created: "2024-01-03T09:31:45.531279369Z"
+    created: "2024-01-03T10:24:55.969922378Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: cf8854b44abd99fda011f4b637e94f52f4110ab30a55ffd82891b6fb258e5fcf
     name: ara
@@ -1183,7 +1193,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.18
   - apiVersion: v2
     appVersion: 3cd5eb4
-    created: "2024-01-03T09:31:45.531004611Z"
+    created: "2024-01-03T10:24:55.969654017Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 1e271f40ecfe667e026a8d7bb061b39e3550e1be7300ea13133df4b668d481ef
     name: ara
@@ -1193,7 +1203,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.17
   - apiVersion: v2
     appVersion: b940baf
-    created: "2024-01-03T09:31:45.530728589Z"
+    created: "2024-01-03T10:24:55.969384362Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 706ee56934247905c8432d5fa1b0ae4077d6c52312e719c25d9f8c0442d8ed9c
     name: ara
@@ -1203,7 +1213,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.14
   - apiVersion: v2
     appVersion: f860c0b
-    created: "2024-01-03T09:31:45.530462006Z"
+    created: "2024-01-03T10:24:55.969103958Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ae37e5af1925c356cc7ce4a65866a7a789e991eca9be1b8e92914a1a40570f01
     name: ara
@@ -1213,7 +1223,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.6
   - apiVersion: v2
     appVersion: 1b86ac4
-    created: "2024-01-03T09:31:45.530154446Z"
+    created: "2024-01-03T10:24:55.96882137Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2f76a2ee400005b3c56cf5cbb2f0b01d506853da0d479f9573e0583ced97e9d5
     name: ara
@@ -1223,7 +1233,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.5
   - apiVersion: v2
     appVersion: 4fd76df
-    created: "2024-01-03T09:31:45.529859999Z"
+    created: "2024-01-03T10:24:55.968536607Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 885c8931d44cc34637ba2aaf0e29755c697a9e35a08bc514b3549b27a6dc5735
     name: ara
@@ -1233,7 +1243,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.4
   - apiVersion: v2
     appVersion: 8b04a99
-    created: "2024-01-03T09:31:45.529578498Z"
+    created: "2024-01-03T10:24:55.968221899Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: d41746c67c9eb92203609faf4be0a56f8650749beeaed34ced6b948f2999b0ca
     name: ara
@@ -1243,7 +1253,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.3
   - apiVersion: v2
     appVersion: 1056be1
-    created: "2024-01-03T09:31:45.529281668Z"
+    created: "2024-01-03T10:24:55.967389636Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: edd7ba0faa622c51083cdf2595dc641bc9e3b072b3b02a46127d3a9a1f677684
     name: ara
@@ -1253,7 +1263,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.2
   - apiVersion: v2
     appVersion: 30e92bd
-    created: "2024-01-03T09:31:45.529004384Z"
+    created: "2024-01-03T10:24:55.966689918Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 3aee22168f3809d35ca6ad6bdf18d5c020f61b496d896b2e99491c242b76b573
     name: ara
@@ -1263,7 +1273,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.1
   - apiVersion: v2
     appVersion: 75cda67
-    created: "2024-01-03T09:31:45.528696763Z"
+    created: "2024-01-03T10:24:55.966424221Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a6b0055bd3b3d866728063f945ba2e919d671af051c5f9faf6ec6b3b6adc49a5
     name: ara
@@ -1273,7 +1283,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.31
   - apiVersion: v2
     appVersion: 152a357
-    created: "2024-01-03T09:31:45.528035977Z"
+    created: "2024-01-03T10:24:55.966164706Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 4165f412bc15f9b04824055406f07c2539b8ef401ca80168c7946059f8fe70a3
     name: ara
@@ -1283,7 +1293,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.28
   - apiVersion: v2
     appVersion: 6471f55
-    created: "2024-01-03T09:31:45.527265423Z"
+    created: "2024-01-03T10:24:55.965908667Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 6198f607c3ca0b070eeca8a8914e1346cd34967b0cf141ca4dfe9edf4031aceb
     name: ara
@@ -1293,7 +1303,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.27
   - apiVersion: v2
     appVersion: cf30d7d
-    created: "2024-01-03T09:31:45.527007726Z"
+    created: "2024-01-03T10:24:55.965650544Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 324cf6110f422437cc6a1b7b6b6602f6974bebf97d9f135d59d4484855285173
     name: ara
@@ -1303,7 +1313,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.18
   - apiVersion: v2
     appVersion: cda12e2
-    created: "2024-01-03T09:31:45.526467516Z"
+    created: "2024-01-03T10:24:55.965117558Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 514350939a8859d9b134daa5b9b19603e9a62bbdab375c4445ce7ed7e13c06ed
     name: ara
@@ -1313,7 +1323,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.28
   - apiVersion: v2
     appVersion: c449631
-    created: "2024-01-03T09:31:45.525912969Z"
+    created: "2024-01-03T10:24:55.964858413Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: d57090ecdde0a4c47efc40712f5c15a9ad3a2da46a076479069afea67e0082ae
     name: ara
@@ -1323,7 +1333,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.26
   - apiVersion: v2
     appVersion: e775c9d
-    created: "2024-01-03T09:31:45.525563249Z"
+    created: "2024-01-03T10:24:55.964597265Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: b6187d8fd234e3a73793f21e9f3891800672ff4111c1c1a0d446ce7c4cecee9a
     name: ara
@@ -1333,7 +1343,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.25
   - apiVersion: v2
     appVersion: df1ad7d
-    created: "2024-01-03T09:31:45.52520885Z"
+    created: "2024-01-03T10:24:55.964329004Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 0f76591488b8e94904bcb6a58cbf461611bb178f646cab8aac2fa0b8c2b67919
     name: ara
@@ -1343,7 +1353,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.24
   - apiVersion: v2
     appVersion: a09bc03
-    created: "2024-01-03T09:31:45.524902432Z"
+    created: "2024-01-03T10:24:55.964055121Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: ca6bc34c07b397b05ec003a4f9050f4d1bdc14b4657854011ead185187d1a970
     name: ara
@@ -1353,7 +1363,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.23
   - apiVersion: v2
     appVersion: 14ed4f1
-    created: "2024-01-03T09:31:45.52461002Z"
+    created: "2024-01-03T10:24:55.963777372Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 772728f12a04cbc5b19ff7caec94386e52dfba368fb0b3ba3cb19fc1e32f8630
     name: ara
@@ -1363,7 +1373,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.22
   - apiVersion: v2
     appVersion: d0800e3
-    created: "2024-01-03T09:31:45.52427676Z"
+    created: "2024-01-03T10:24:55.963497539Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 2ffa3b2cb42ce66e6ba2aec35090e9aacb89588f3ddb5eae0a6aefb47f0415af
     name: ara
@@ -1373,7 +1383,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.21
   - apiVersion: v2
     appVersion: 0c0d5c7
-    created: "2024-01-03T09:31:45.523952929Z"
+    created: "2024-01-03T10:24:55.96320406Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a263a73a0d4bff568d8c10f3ee14fe4cb1c1e6d80c1d707a41fef599614d9d25
     name: ara
@@ -1383,7 +1393,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.18
   - apiVersion: v2
     appVersion: e8222a4
-    created: "2024-01-03T09:31:45.523647973Z"
+    created: "2024-01-03T10:24:55.962889231Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: cd6b86ca4bc9213bf41def8d0002d9d84eb5ac319bf54c12b50dd784d715f0f6
     name: ara
@@ -1393,7 +1403,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.17
   - apiVersion: v2
     appVersion: 990e3d4
-    created: "2024-01-03T09:31:45.523331306Z"
+    created: "2024-01-03T10:24:55.962590332Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: 126e226d348706cd099b407d8111b8be0e0bd9ebe4e2dc7dd552dbaf24fef6b9
     name: ara
@@ -1403,7 +1413,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.16
   - apiVersion: v2
     appVersion: 32dbb60
-    created: "2024-01-03T09:31:45.522974612Z"
+    created: "2024-01-03T10:24:55.962312583Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: a5136d21e2ae0f4700b30f9260b9bd5acf29974fbb3e976ad83ded21fe666a55
     name: ara
@@ -1413,7 +1423,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.14
   - apiVersion: v2
     appVersion: c2e0319
-    created: "2024-01-03T09:31:45.522663865Z"
+    created: "2024-01-03T10:24:55.962031758Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: f2045d789220a3ea6e9b8c586ab64ab348f45fbe08358e3cc8a6ee06f829b1c0
     name: ara
@@ -1423,7 +1433,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.13
   - apiVersion: v2
     appVersion: f410058
-    created: "2024-01-03T09:31:45.522342128Z"
+    created: "2024-01-03T10:24:55.961719734Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: de06b9a8604513ba2aef18079e8ba5c06514e90973e3bf9ec56416f7ec447c52
     name: ara
@@ -1433,7 +1443,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.12
   - apiVersion: v2
     appVersion: 15fa287
-    created: "2024-01-03T09:31:45.526749058Z"
+    created: "2024-01-03T10:24:55.965376773Z"
     description: Helm chart for deploying ARA on Kubernetes
     digest: d416dd1b9d04e57e9d4a9a5618d3c8da69af20e00d033a9edf05a225e8b0643c
     name: ara
@@ -1444,7 +1454,7 @@ entries:
   azimuth-caas-operator:
   - apiVersion: v2
     appVersion: 6084d61
-    created: "2024-01-03T09:31:45.713899407Z"
+    created: "2024-01-03T10:24:56.147874404Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1463,7 +1473,7 @@ entries:
     version: 0.8.1-dev.0.update-logging-ui-meta.3
   - apiVersion: v2
     appVersion: "2075835"
-    created: "2024-01-03T09:31:45.711124997Z"
+    created: "2024-01-03T10:24:56.146180607Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1481,8 +1491,27 @@ entries:
     - azimuth-caas-operator-0.8.1-dev.0.update-logging-ui-meta.2.tgz
     version: 0.8.1-dev.0.update-logging-ui-meta.2
   - apiVersion: v2
+    appVersion: dac1dea
+    created: "2024-01-03T10:24:56.144531473Z"
+    dependencies:
+    - name: ara
+      repository: file://../ara
+      version: '>=0-0'
+    - alias: metrics
+      condition: metrics.enabled
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.15.2
+    description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
+    digest: fc8545a1f89a999c26d7bb642cdc214ce98e3f7260a54e6891ca954f049e9885
+    name: azimuth-caas-operator
+    type: application
+    urls:
+    - azimuth-caas-operator-0.8.1-dev.0.main.1.tgz
+    version: 0.8.1-dev.0.main.1
+  - apiVersion: v2
     appVersion: b863a7c
-    created: "2024-01-03T09:31:45.709386334Z"
+    created: "2024-01-03T10:24:56.142829982Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1501,7 +1530,7 @@ entries:
     version: 0.8.0
   - apiVersion: v2
     appVersion: b863a7c
-    created: "2024-01-03T09:31:45.707684411Z"
+    created: "2024-01-03T10:24:56.141127498Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1520,7 +1549,7 @@ entries:
     version: 0.7.1-dev.0.main.1
   - apiVersion: v2
     appVersion: fd0c1cd
-    created: "2024-01-03T09:31:45.70594126Z"
+    created: "2024-01-03T10:24:56.138322217Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1539,7 +1568,7 @@ entries:
     version: 0.7.1-dev.0.feature-tilt-component.4
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.704199492Z"
+    created: "2024-01-03T10:24:56.136675338Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1558,7 +1587,7 @@ entries:
     version: 0.7.0
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.701344775Z"
+    created: "2024-01-03T10:24:56.134990768Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1577,7 +1606,7 @@ entries:
     version: 0.7.0-rc.1
   - apiVersion: v2
     appVersion: 2edcbc0
-    created: "2024-01-03T09:31:45.699661437Z"
+    created: "2024-01-03T10:24:56.133338719Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1596,7 +1625,7 @@ entries:
     version: 0.6.1-dev.0.main.2
   - apiVersion: v2
     appVersion: 7ea93c6
-    created: "2024-01-03T09:31:45.697938995Z"
+    created: "2024-01-03T10:24:56.131655692Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1615,7 +1644,7 @@ entries:
     version: 0.6.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 05cbaa7
-    created: "2024-01-03T09:31:45.696253203Z"
+    created: "2024-01-03T10:24:56.129056578Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1634,7 +1663,7 @@ entries:
     version: 0.6.1-dev.0.feature-integration-tests.3
   - apiVersion: v2
     appVersion: 27e50e5
-    created: "2024-01-03T09:31:45.694541912Z"
+    created: "2024-01-03T10:24:56.127341922Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1648,7 +1677,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 27e50e5
-    created: "2024-01-03T09:31:45.693954664Z"
+    created: "2024-01-03T10:24:56.126819455Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1662,7 +1691,7 @@ entries:
     version: 0.5.1-dev.0.main.21
   - apiVersion: v2
     appVersion: a20fee0
-    created: "2024-01-03T09:31:45.693116188Z"
+    created: "2024-01-03T10:24:56.126324139Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1676,7 +1705,7 @@ entries:
     version: 0.5.1-dev.0.main.1
   - apiVersion: v2
     appVersion: a00cc8c
-    created: "2024-01-03T09:31:45.691915772Z"
+    created: "2024-01-03T10:24:56.1258324Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1690,7 +1719,7 @@ entries:
     version: 0.5.1-dev.0.fix-missing-create-job.2
   - apiVersion: v2
     appVersion: 0540b03
-    created: "2024-01-03T09:31:45.690872262Z"
+    created: "2024-01-03T10:24:56.124830576Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1704,7 +1733,7 @@ entries:
     version: 0.5.1-dev.0.feature-integration-tests.25
   - apiVersion: v2
     appVersion: 76d3b99
-    created: "2024-01-03T09:31:45.6913961Z"
+    created: "2024-01-03T10:24:56.12533503Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1718,7 +1747,7 @@ entries:
     version: 0.5.1-dev.0.feature-integration-tests.4
   - apiVersion: v2
     appVersion: 8d02145
-    created: "2024-01-03T09:31:45.690327453Z"
+    created: "2024-01-03T10:24:56.124320743Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1732,7 +1761,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.21
   - apiVersion: v2
     appVersion: c31ada7
-    created: "2024-01-03T09:31:45.689783215Z"
+    created: "2024-01-03T10:24:56.123816059Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1746,7 +1775,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.20
   - apiVersion: v2
     appVersion: 22761de
-    created: "2024-01-03T09:31:45.689259457Z"
+    created: "2024-01-03T10:24:56.123299173Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1760,7 +1789,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.19
   - apiVersion: v2
     appVersion: 418885f
-    created: "2024-01-03T09:31:45.688728444Z"
+    created: "2024-01-03T10:24:56.122767278Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1774,7 +1803,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.17
   - apiVersion: v2
     appVersion: 93ce184
-    created: "2024-01-03T09:31:45.688193915Z"
+    created: "2024-01-03T10:24:56.122256072Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1788,7 +1817,7 @@ entries:
     version: 0.5.1-dev.0.feat-inventory.16
   - apiVersion: v2
     appVersion: 926b822
-    created: "2024-01-03T09:31:45.676145188Z"
+    created: "2024-01-03T10:24:56.109885586Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1807,7 +1836,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.30
   - apiVersion: v2
     appVersion: e8102d8
-    created: "2024-01-03T09:31:45.687657602Z"
+    created: "2024-01-03T10:24:56.12172016Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1826,7 +1855,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.9
   - apiVersion: v2
     appVersion: 3b25509
-    created: "2024-01-03T09:31:45.685936393Z"
+    created: "2024-01-03T10:24:56.118993015Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1845,7 +1874,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.8
   - apiVersion: v2
     appVersion: 73d32fd
-    created: "2024-01-03T09:31:45.684187702Z"
+    created: "2024-01-03T10:24:56.117298617Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1864,7 +1893,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.7
   - apiVersion: v2
     appVersion: 0b28a49
-    created: "2024-01-03T09:31:45.681232142Z"
+    created: "2024-01-03T10:24:56.115624797Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1883,7 +1912,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.6
   - apiVersion: v2
     appVersion: "91860e1"
-    created: "2024-01-03T09:31:45.679544746Z"
+    created: "2024-01-03T10:24:56.113917795Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1902,7 +1931,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.5
   - apiVersion: v2
     appVersion: a8cce7e
-    created: "2024-01-03T09:31:45.677835179Z"
+    created: "2024-01-03T10:24:56.112233897Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1921,7 +1950,7 @@ entries:
     version: 0.5.1-dev.0.add-metrics.4
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.674341092Z"
+    created: "2024-01-03T10:24:56.108130564Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1935,7 +1964,7 @@ entries:
     version: 0.5.0
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.673736371Z"
+    created: "2024-01-03T10:24:56.107638915Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1949,7 +1978,7 @@ entries:
     version: 0.4.2
   - apiVersion: v2
     appVersion: a5055fb
-    created: "2024-01-03T09:31:45.672904383Z"
+    created: "2024-01-03T10:24:56.107140884Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1963,7 +1992,7 @@ entries:
     version: 0.4.2-dev.0.update-wip-readme.5
   - apiVersion: v2
     appVersion: 28d7d3f
-    created: "2024-01-03T09:31:45.671729174Z"
+    created: "2024-01-03T10:24:56.10660923Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1977,7 +2006,7 @@ entries:
     version: 0.4.2-dev.0.main.4
   - apiVersion: v2
     appVersion: 86b767f
-    created: "2024-01-03T09:31:45.671218029Z"
+    created: "2024-01-03T10:24:56.106115647Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -1991,7 +2020,7 @@ entries:
     version: 0.4.2-dev.0.main.3
   - apiVersion: v2
     appVersion: bc64228
-    created: "2024-01-03T09:31:45.670689541Z"
+    created: "2024-01-03T10:24:56.105616714Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2005,7 +2034,7 @@ entries:
     version: 0.4.2-dev.0.main.2
   - apiVersion: v2
     appVersion: fc2957b
-    created: "2024-01-03T09:31:45.670131898Z"
+    created: "2024-01-03T10:24:56.105108323Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2019,7 +2048,7 @@ entries:
     version: 0.4.2-dev.0.main.1
   - apiVersion: v2
     appVersion: 0f0e5a3
-    created: "2024-01-03T09:31:45.668590899Z"
+    created: "2024-01-03T10:24:56.10359294Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2033,7 +2062,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.31
   - apiVersion: v2
     appVersion: 6a584f5
-    created: "2024-01-03T09:31:45.668071028Z"
+    created: "2024-01-03T10:24:56.103073358Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2047,7 +2076,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.30
   - apiVersion: v2
     appVersion: c057a81
-    created: "2024-01-03T09:31:45.667548832Z"
+    created: "2024-01-03T10:24:56.102504194Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2061,7 +2090,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.23
   - apiVersion: v2
     appVersion: 31da27b
-    created: "2024-01-03T09:31:45.667026656Z"
+    created: "2024-01-03T10:24:56.10131658Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2075,7 +2104,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.21
   - apiVersion: v2
     appVersion: 30142b7
-    created: "2024-01-03T09:31:45.666500473Z"
+    created: "2024-01-03T10:24:56.100569543Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2089,7 +2118,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.13
   - apiVersion: v2
     appVersion: 417134e
-    created: "2024-01-03T09:31:45.665914787Z"
+    created: "2024-01-03T10:24:56.100071682Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2103,7 +2132,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan-v2.12
   - apiVersion: v2
     appVersion: a2aa6f7
-    created: "2024-01-03T09:31:45.66911039Z"
+    created: "2024-01-03T10:24:56.104098996Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2117,7 +2146,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan.12
   - apiVersion: v2
     appVersion: c036f74
-    created: "2024-01-03T09:31:45.669621846Z"
+    created: "2024-01-03T10:24:56.10460371Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2131,7 +2160,7 @@ entries:
     version: 0.4.2-dev.0.feature-scan.8
   - apiVersion: v2
     appVersion: e5b6403
-    created: "2024-01-03T09:31:45.661565561Z"
+    created: "2024-01-03T10:24:56.09698461Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2145,7 +2174,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.10
   - apiVersion: v2
     appVersion: 21168b8
-    created: "2024-01-03T09:31:45.665370209Z"
+    created: "2024-01-03T10:24:56.099571066Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2159,7 +2188,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.9
   - apiVersion: v2
     appVersion: baa4848
-    created: "2024-01-03T09:31:45.66449957Z"
+    created: "2024-01-03T10:24:56.099061774Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2173,7 +2202,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.7
   - apiVersion: v2
     appVersion: c0334a9
-    created: "2024-01-03T09:31:45.6631803Z"
+    created: "2024-01-03T10:24:56.098525791Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2187,7 +2216,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.6
   - apiVersion: v2
     appVersion: 3f59026
-    created: "2024-01-03T09:31:45.662648205Z"
+    created: "2024-01-03T10:24:56.097996752Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2201,7 +2230,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.5
   - apiVersion: v2
     appVersion: 22900f7
-    created: "2024-01-03T09:31:45.662083419Z"
+    created: "2024-01-03T10:24:56.097497068Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2215,7 +2244,7 @@ entries:
     version: 0.4.2-dev.0.feature-minimal-image.4
   - apiVersion: v2
     appVersion: e8e17f8
-    created: "2024-01-03T09:31:45.657875685Z"
+    created: "2024-01-03T10:24:56.092302886Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2229,7 +2258,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.10
   - apiVersion: v2
     appVersion: 73cc702
-    created: "2024-01-03T09:31:45.661049577Z"
+    created: "2024-01-03T10:24:56.096474336Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2243,7 +2272,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.9
   - apiVersion: v2
     appVersion: 2f3c7c1
-    created: "2024-01-03T09:31:45.660521741Z"
+    created: "2024-01-03T10:24:56.095967067Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2257,7 +2286,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.7
   - apiVersion: v2
     appVersion: b040e7e
-    created: "2024-01-03T09:31:45.659992291Z"
+    created: "2024-01-03T10:24:56.095448728Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2271,7 +2300,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.6
   - apiVersion: v2
     appVersion: f684e7f
-    created: "2024-01-03T09:31:45.659470225Z"
+    created: "2024-01-03T10:24:56.094872611Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2285,7 +2314,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.5
   - apiVersion: v2
     appVersion: 7cd64e7
-    created: "2024-01-03T09:31:45.658958018Z"
+    created: "2024-01-03T10:24:56.094323193Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2299,7 +2328,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.3
   - apiVersion: v2
     appVersion: eab1f52
-    created: "2024-01-03T09:31:45.658433298Z"
+    created: "2024-01-03T10:24:56.093154909Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2313,7 +2342,7 @@ entries:
     version: 0.4.2-dev.0.feature-migrate-to-pydantic2.2
   - apiVersion: v2
     appVersion: 3d47d1c
-    created: "2024-01-03T09:31:45.65735392Z"
+    created: "2024-01-03T10:24:56.091798974Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2327,7 +2356,7 @@ entries:
     version: 0.4.2-dev.0.feature-integration-tests.5
   - apiVersion: v2
     appVersion: 4f27a67
-    created: "2024-01-03T09:31:45.656830351Z"
+    created: "2024-01-03T10:24:56.091293368Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2341,7 +2370,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.6
   - apiVersion: v2
     appVersion: 4c11258
-    created: "2024-01-03T09:31:45.656303296Z"
+    created: "2024-01-03T10:24:56.090755232Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2355,7 +2384,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.5
   - apiVersion: v2
     appVersion: afa40da
-    created: "2024-01-03T09:31:45.655759239Z"
+    created: "2024-01-03T10:24:56.090257932Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2369,7 +2398,7 @@ entries:
     version: 0.4.2-dev.0.feature-improve-logs-around-outputs.4
   - apiVersion: v2
     appVersion: 6a50498
-    created: "2024-01-03T09:31:45.650320742Z"
+    created: "2024-01-03T10:24:56.086136216Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2383,7 +2412,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.19
   - apiVersion: v2
     appVersion: "7753307"
-    created: "2024-01-03T09:31:45.649777827Z"
+    created: "2024-01-03T10:24:56.08536118Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2397,7 +2426,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.18
   - apiVersion: v2
     appVersion: 666dd58
-    created: "2024-01-03T09:31:45.649262063Z"
+    created: "2024-01-03T10:24:56.084208315Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2411,7 +2440,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.17
   - apiVersion: v2
     appVersion: 5d27f6c
-    created: "2024-01-03T09:31:45.648740689Z"
+    created: "2024-01-03T10:24:56.08370317Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2425,7 +2454,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.15
   - apiVersion: v2
     appVersion: 0a1b3e2
-    created: "2024-01-03T09:31:45.648213023Z"
+    created: "2024-01-03T10:24:56.083178078Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2439,7 +2468,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.13
   - apiVersion: v2
     appVersion: 25fa291
-    created: "2024-01-03T09:31:45.647684004Z"
+    created: "2024-01-03T10:24:56.082625705Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2453,7 +2482,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.12
   - apiVersion: v2
     appVersion: 1a84f68
-    created: "2024-01-03T09:31:45.647127824Z"
+    created: "2024-01-03T10:24:56.082100533Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2467,7 +2496,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.10
   - apiVersion: v2
     appVersion: "66984e5"
-    created: "2024-01-03T09:31:45.6547641Z"
+    created: "2024-01-03T10:24:56.089755704Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2481,7 +2510,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.9
   - apiVersion: v2
     appVersion: "60567e2"
-    created: "2024-01-03T09:31:45.653509903Z"
+    created: "2024-01-03T10:24:56.089257432Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2495,7 +2524,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.7
   - apiVersion: v2
     appVersion: 6adefb9
-    created: "2024-01-03T09:31:45.65294208Z"
+    created: "2024-01-03T10:24:56.08875902Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2509,7 +2538,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.6
   - apiVersion: v2
     appVersion: 142f8c6
-    created: "2024-01-03T09:31:45.652400709Z"
+    created: "2024-01-03T10:24:56.088237244Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2523,7 +2552,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.5
   - apiVersion: v2
     appVersion: f5ae3fa
-    created: "2024-01-03T09:31:45.651888551Z"
+    created: "2024-01-03T10:24:56.087732831Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2537,7 +2566,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.4
   - apiVersion: v2
     appVersion: c5f89fe
-    created: "2024-01-03T09:31:45.651375823Z"
+    created: "2024-01-03T10:24:56.087210054Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2551,7 +2580,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.3
   - apiVersion: v2
     appVersion: feedf7c
-    created: "2024-01-03T09:31:45.650859769Z"
+    created: "2024-01-03T10:24:56.086663832Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2565,7 +2594,7 @@ entries:
     version: 0.4.2-dev.0.feat-inventory.2
   - apiVersion: v2
     appVersion: db77444
-    created: "2024-01-03T09:31:45.645830081Z"
+    created: "2024-01-03T10:24:56.081595409Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2579,7 +2608,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: 73cc195
-    created: "2024-01-03T09:31:45.645039238Z"
+    created: "2024-01-03T10:24:56.081099301Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2593,7 +2622,7 @@ entries:
     version: 0.4.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 2aaf058
-    created: "2024-01-03T09:31:45.644517423Z"
+    created: "2024-01-03T10:24:56.08060144Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2607,7 +2636,7 @@ entries:
     version: 0.4.1-dev.0.fix-pod-index-error.3
   - apiVersion: v2
     appVersion: 3ed048d
-    created: "2024-01-03T09:31:45.643962064Z"
+    created: "2024-01-03T10:24:56.080101325Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2621,7 +2650,7 @@ entries:
     version: 0.4.1-dev.0.fix-helm-set-string.2
   - apiVersion: v2
     appVersion: "9043301"
-    created: "2024-01-03T09:31:45.643425792Z"
+    created: "2024-01-03T10:24:56.079589287Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2635,7 +2664,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: 126d1bd
-    created: "2024-01-03T09:31:45.642911481Z"
+    created: "2024-01-03T10:24:56.079077791Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2649,7 +2678,7 @@ entries:
     version: 0.3.1-dev.0.main.3
   - apiVersion: v2
     appVersion: dba3681
-    created: "2024-01-03T09:31:45.642388103Z"
+    created: "2024-01-03T10:24:56.078536689Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2663,7 +2692,7 @@ entries:
     version: 0.3.1-dev.0.main.2
   - apiVersion: v2
     appVersion: 3b55e28
-    created: "2024-01-03T09:31:45.641823106Z"
+    created: "2024-01-03T10:24:56.077999746Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2677,7 +2706,7 @@ entries:
     version: 0.3.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 5f75012
-    created: "2024-01-03T09:31:45.641309557Z"
+    created: "2024-01-03T10:24:56.077482198Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2691,7 +2720,7 @@ entries:
     version: 0.3.1-dev.0.fix-cluster-restore.2
   - apiVersion: v2
     appVersion: 2ffd4c8
-    created: "2024-01-03T09:31:45.64082918Z"
+    created: "2024-01-03T10:24:56.076975099Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2705,7 +2734,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.8
   - apiVersion: v2
     appVersion: "0029712"
-    created: "2024-01-03T09:31:45.640306243Z"
+    created: "2024-01-03T10:24:56.076031582Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2719,7 +2748,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.6
   - apiVersion: v2
     appVersion: 71580d7
-    created: "2024-01-03T09:31:45.6397857Z"
+    created: "2024-01-03T10:24:56.074943127Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2733,7 +2762,7 @@ entries:
     version: 0.3.1-dev.0.feature-status-subresource.5
   - apiVersion: v2
     appVersion: 382ae7e
-    created: "2024-01-03T09:31:45.639247534Z"
+    created: "2024-01-03T10:24:56.074442521Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2747,7 +2776,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.9
   - apiVersion: v2
     appVersion: f820dac
-    created: "2024-01-03T09:31:45.638688789Z"
+    created: "2024-01-03T10:24:56.073924532Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2761,7 +2790,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.7
   - apiVersion: v2
     appVersion: ef9ab4e
-    created: "2024-01-03T09:31:45.637620007Z"
+    created: "2024-01-03T10:24:56.073428925Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2775,7 +2804,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.6
   - apiVersion: v2
     appVersion: 92c9197
-    created: "2024-01-03T09:31:45.636590503Z"
+    created: "2024-01-03T10:24:56.072926526Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2789,7 +2818,7 @@ entries:
     version: 0.3.1-dev.0.feature-persist-cluster-id.5
   - apiVersion: v2
     appVersion: f9ba8d0
-    created: "2024-01-03T09:31:45.636078617Z"
+    created: "2024-01-03T10:24:56.072428775Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2803,7 +2832,7 @@ entries:
     version: 0.3.1-dev.0.feature-functional-test-artefacts.11
   - apiVersion: v2
     appVersion: ba381f0
-    created: "2024-01-03T09:31:45.635554096Z"
+    created: "2024-01-03T10:24:56.071926506Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2817,7 +2846,7 @@ entries:
     version: 0.3.1-dev.0.feature-functional-test-artefacts.10
   - apiVersion: v2
     appVersion: 3a02612
-    created: "2024-01-03T09:31:45.635030908Z"
+    created: "2024-01-03T10:24:56.071417785Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2831,7 +2860,7 @@ entries:
     version: 0.3.1-dev.0.feature-cluster-id-from-extra-vars.2
   - apiVersion: v2
     appVersion: edfd76d
-    created: "2024-01-03T09:31:45.634542847Z"
+    created: "2024-01-03T10:24:56.070899937Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2845,7 +2874,7 @@ entries:
     version: 0.3.1-dev.0.feature-ara-persistence.2
   - apiVersion: v2
     appVersion: fb411bb
-    created: "2024-01-03T09:31:45.633901716Z"
+    created: "2024-01-03T10:24:56.070385795Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2859,7 +2888,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: fb411bb
-    created: "2024-01-03T09:31:45.6320444Z"
+    created: "2024-01-03T10:24:56.067305129Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2873,7 +2902,7 @@ entries:
     version: 0.2.3-dev.0.main.15
   - apiVersion: v2
     appVersion: 214da17
-    created: "2024-01-03T09:31:45.631569143Z"
+    created: "2024-01-03T10:24:56.066819982Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2887,7 +2916,7 @@ entries:
     version: 0.2.3-dev.0.main.14
   - apiVersion: v2
     appVersion: d2af3dd
-    created: "2024-01-03T09:31:45.631096911Z"
+    created: "2024-01-03T10:24:56.066361745Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2901,7 +2930,7 @@ entries:
     version: 0.2.3-dev.0.main.13
   - apiVersion: v2
     appVersion: 706ac2a
-    created: "2024-01-03T09:31:45.630620091Z"
+    created: "2024-01-03T10:24:56.065903858Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2915,7 +2944,7 @@ entries:
     version: 0.2.3-dev.0.main.12
   - apiVersion: v2
     appVersion: 5fa8581
-    created: "2024-01-03T09:31:45.63010054Z"
+    created: "2024-01-03T10:24:56.065447495Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2929,7 +2958,7 @@ entries:
     version: 0.2.3-dev.0.main.11
   - apiVersion: v2
     appVersion: 4f002fd
-    created: "2024-01-03T09:31:45.629540333Z"
+    created: "2024-01-03T10:24:56.064997013Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2943,7 +2972,7 @@ entries:
     version: 0.2.3-dev.0.main.10
   - apiVersion: v2
     appVersion: 1650c4c
-    created: "2024-01-03T09:31:45.633444493Z"
+    created: "2024-01-03T10:24:56.069901961Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2957,7 +2986,7 @@ entries:
     version: 0.2.3-dev.0.main.9
   - apiVersion: v2
     appVersion: d706414
-    created: "2024-01-03T09:31:45.632980718Z"
+    created: "2024-01-03T10:24:56.06942038Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2971,7 +3000,7 @@ entries:
     version: 0.2.3-dev.0.main.8
   - apiVersion: v2
     appVersion: e9bfe9f
-    created: "2024-01-03T09:31:45.632516521Z"
+    created: "2024-01-03T10:24:56.068529338Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2985,7 +3014,7 @@ entries:
     version: 0.2.3-dev.0.main.7
   - apiVersion: v2
     appVersion: d0800e3
-    created: "2024-01-03T09:31:45.628238919Z"
+    created: "2024-01-03T10:24:56.064544176Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -2999,7 +3028,7 @@ entries:
     version: 0.2.3-dev.0.head.21
   - apiVersion: v2
     appVersion: 8914c59
-    created: "2024-01-03T09:31:45.62758287Z"
+    created: "2024-01-03T10:24:56.064090688Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3013,7 +3042,7 @@ entries:
     version: 0.2.3-dev.0.fix-version-err-message.12
   - apiVersion: v2
     appVersion: b0662c2
-    created: "2024-01-03T09:31:45.627101622Z"
+    created: "2024-01-03T10:24:56.063630849Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3027,7 +3056,7 @@ entries:
     version: 0.2.3-dev.0.fix-parse-outputs-on-error.14
   - apiVersion: v2
     appVersion: df7f78b
-    created: "2024-01-03T09:31:45.626590347Z"
+    created: "2024-01-03T10:24:56.063164096Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3041,7 +3070,7 @@ entries:
     version: 0.2.3-dev.0.fix-outputs-on-error.15
   - apiVersion: v2
     appVersion: f9f9299
-    created: "2024-01-03T09:31:45.62596711Z"
+    created: "2024-01-03T10:24:56.062661767Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3055,7 +3084,7 @@ entries:
     version: 0.2.3-dev.0.fix-new-update-job-not-created.8
   - apiVersion: v2
     appVersion: 0ddba7f
-    created: "2024-01-03T09:31:45.625497784Z"
+    created: "2024-01-03T10:24:56.062204001Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3069,7 +3098,7 @@ entries:
     version: 0.2.3-dev.0.fix-git-safe-directory.14
   - apiVersion: v2
     appVersion: e07c2c3
-    created: "2024-01-03T09:31:45.625021685Z"
+    created: "2024-01-03T10:24:56.061739813Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3083,7 +3112,7 @@ entries:
     version: 0.2.3-dev.0.fix-events-no-job.8
   - apiVersion: v2
     appVersion: 8971cf2
-    created: "2024-01-03T09:31:45.624548752Z"
+    created: "2024-01-03T10:24:56.061277087Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3097,7 +3126,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.27
   - apiVersion: v2
     appVersion: 3d4498d
-    created: "2024-01-03T09:31:45.624073665Z"
+    created: "2024-01-03T10:24:56.060807319Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3111,7 +3140,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.26
   - apiVersion: v2
     appVersion: fb5ae9b
-    created: "2024-01-03T09:31:45.623575505Z"
+    created: "2024-01-03T10:24:56.060316431Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3125,7 +3154,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.23
   - apiVersion: v2
     appVersion: 8b7660f
-    created: "2024-01-03T09:31:45.623095939Z"
+    created: "2024-01-03T10:24:56.059649334Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3139,7 +3168,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.22
   - apiVersion: v2
     appVersion: dc1226e
-    created: "2024-01-03T09:31:45.622611735Z"
+    created: "2024-01-03T10:24:56.058444481Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3153,7 +3182,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.20
   - apiVersion: v2
     appVersion: 991cb99
-    created: "2024-01-03T09:31:45.622075172Z"
+    created: "2024-01-03T10:24:56.057959063Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3167,7 +3196,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.19
   - apiVersion: v2
     appVersion: 4b48b9c
-    created: "2024-01-03T09:31:45.621371263Z"
+    created: "2024-01-03T10:24:56.057498753Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3181,7 +3210,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.18
   - apiVersion: v2
     appVersion: 3cd5eb4
-    created: "2024-01-03T09:31:45.62008512Z"
+    created: "2024-01-03T10:24:56.057035396Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3195,7 +3224,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.17
   - apiVersion: v2
     appVersion: b940baf
-    created: "2024-01-03T09:31:45.619610464Z"
+    created: "2024-01-03T10:24:56.056578582Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3209,7 +3238,7 @@ entries:
     version: 0.2.3-dev.0.fix-auto-retry-delete.14
   - apiVersion: v2
     appVersion: f860c0b
-    created: "2024-01-03T09:31:45.619137431Z"
+    created: "2024-01-03T10:24:56.056123792Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3223,7 +3252,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.6
   - apiVersion: v2
     appVersion: 1b86ac4
-    created: "2024-01-03T09:31:45.61866034Z"
+    created: "2024-01-03T10:24:56.055664653Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3237,7 +3266,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.5
   - apiVersion: v2
     appVersion: 4fd76df
-    created: "2024-01-03T09:31:45.618136201Z"
+    created: "2024-01-03T10:24:56.055198031Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3251,7 +3280,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.4
   - apiVersion: v2
     appVersion: 8b04a99
-    created: "2024-01-03T09:31:45.61766449Z"
+    created: "2024-01-03T10:24:56.054679481Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3265,7 +3294,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.3
   - apiVersion: v2
     appVersion: 1056be1
-    created: "2024-01-03T09:31:45.617194553Z"
+    created: "2024-01-03T10:24:56.054214492Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3279,7 +3308,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.2
   - apiVersion: v2
     appVersion: 30e92bd
-    created: "2024-01-03T09:31:45.616721309Z"
+    created: "2024-01-03T10:24:56.053746988Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3293,7 +3322,7 @@ entries:
     version: 0.2.3-dev.0.feature-release-prep.1
   - apiVersion: v2
     appVersion: 75cda67
-    created: "2024-01-03T09:31:45.616250911Z"
+    created: "2024-01-03T10:24:56.053278572Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3307,7 +3336,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.31
   - apiVersion: v2
     appVersion: 152a357
-    created: "2024-01-03T09:31:45.615772788Z"
+    created: "2024-01-03T10:24:56.05278039Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3321,7 +3350,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.28
   - apiVersion: v2
     appVersion: 6471f55
-    created: "2024-01-03T09:31:45.615289907Z"
+    created: "2024-01-03T10:24:56.0519832Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3335,7 +3364,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.27
   - apiVersion: v2
     appVersion: cf30d7d
-    created: "2024-01-03T09:31:45.614811193Z"
+    created: "2024-01-03T10:24:56.05080655Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3349,7 +3378,7 @@ entries:
     version: 0.2.3-dev.0.feature-functional-test-artefacts.18
   - apiVersion: v2
     appVersion: cda12e2
-    created: "2024-01-03T09:31:45.613714793Z"
+    created: "2024-01-03T10:24:56.049887972Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3363,7 +3392,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.28
   - apiVersion: v2
     appVersion: c449631
-    created: "2024-01-03T09:31:45.613197377Z"
+    created: "2024-01-03T10:24:56.049427972Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3377,7 +3406,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.26
   - apiVersion: v2
     appVersion: e775c9d
-    created: "2024-01-03T09:31:45.612077539Z"
+    created: "2024-01-03T10:24:56.048965577Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3391,7 +3420,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.25
   - apiVersion: v2
     appVersion: df1ad7d
-    created: "2024-01-03T09:31:45.611320791Z"
+    created: "2024-01-03T10:24:56.048500938Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3405,7 +3434,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.24
   - apiVersion: v2
     appVersion: a09bc03
-    created: "2024-01-03T09:31:45.610831307Z"
+    created: "2024-01-03T10:24:56.04794004Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3419,7 +3448,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.23
   - apiVersion: v2
     appVersion: 14ed4f1
-    created: "2024-01-03T09:31:45.610318809Z"
+    created: "2024-01-03T10:24:56.04747467Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3433,7 +3462,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.22
   - apiVersion: v2
     appVersion: d0800e3
-    created: "2024-01-03T09:31:45.60980542Z"
+    created: "2024-01-03T10:24:56.046965768Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3447,7 +3476,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.21
   - apiVersion: v2
     appVersion: 0c0d5c7
-    created: "2024-01-03T09:31:45.609330433Z"
+    created: "2024-01-03T10:24:56.046505317Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3461,7 +3490,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.18
   - apiVersion: v2
     appVersion: e8222a4
-    created: "2024-01-03T09:31:45.608853924Z"
+    created: "2024-01-03T10:24:56.046040869Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3475,7 +3504,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.17
   - apiVersion: v2
     appVersion: 990e3d4
-    created: "2024-01-03T09:31:45.608383926Z"
+    created: "2024-01-03T10:24:56.045578424Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3489,7 +3518,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.16
   - apiVersion: v2
     appVersion: 32dbb60
-    created: "2024-01-03T09:31:45.607910593Z"
+    created: "2024-01-03T10:24:56.045112342Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3503,7 +3532,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.14
   - apiVersion: v2
     appVersion: c2e0319
-    created: "2024-01-03T09:31:45.607429845Z"
+    created: "2024-01-03T10:24:56.044637434Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3517,7 +3546,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.13
   - apiVersion: v2
     appVersion: f410058
-    created: "2024-01-03T09:31:45.606944539Z"
+    created: "2024-01-03T10:24:56.044100611Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3531,7 +3560,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.12
   - apiVersion: v2
     appVersion: 15fa287
-    created: "2024-01-03T09:31:45.614254352Z"
+    created: "2024-01-03T10:24:56.05034707Z"
     dependencies:
     - name: ara
       repository: file://../ara
@@ -3545,7 +3574,7 @@ entries:
     version: 0.2.3-dev.0.feature-deploy-keys.8
   - apiVersion: v2
     appVersion: "0653141"
-    created: "2024-01-03T09:31:45.606357471Z"
+    created: "2024-01-03T10:24:56.04263489Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 68f58a268ab7c380b9cef4dcc065762cb3cc3ba0e5f01acc5c9d8d750c57597a
     name: azimuth-caas-operator
@@ -3555,7 +3584,7 @@ entries:
     version: 0.2.2
   - apiVersion: v2
     appVersion: e54e828
-    created: "2024-01-03T09:31:45.606072542Z"
+    created: "2024-01-03T10:24:56.042390513Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 839e666f5f11a7a36e8b57e8e35c0ce2575faa65154c9419166ca59579e28d41
     name: azimuth-caas-operator
@@ -3565,7 +3594,7 @@ entries:
     version: 0.2.2-dev.0.report-error-reason.4
   - apiVersion: v2
     appVersion: 5a67a72
-    created: "2024-01-03T09:31:45.605818393Z"
+    created: "2024-01-03T10:24:56.042126069Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6502c73c92a382433b98a38d2c84bb26e86895c946c1202b4be652a45be002dd
     name: azimuth-caas-operator
@@ -3575,7 +3604,7 @@ entries:
     version: 0.2.2-dev.0.report-error-reason.3
   - apiVersion: v2
     appVersion: f9087a2
-    created: "2024-01-03T09:31:45.605560686Z"
+    created: "2024-01-03T10:24:56.041883605Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b089e8493c9142b07a285723c4dfde9b4ec8143c682f30f6675eb0059f8fa1e8
     name: azimuth-caas-operator
@@ -3585,7 +3614,7 @@ entries:
     version: 0.2.2-dev.0.report-error-reason.2
   - apiVersion: v2
     appVersion: 3e4b40b
-    created: "2024-01-03T09:31:45.605295636Z"
+    created: "2024-01-03T10:24:56.04164001Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cfd776ca9992e4b9e3e796fe2c57733b88bde6ec3c7b919055bc4378c8c839a9
     name: azimuth-caas-operator
@@ -3595,7 +3624,7 @@ entries:
     version: 0.2.2-dev.0.report-error-reason.1
   - apiVersion: v2
     appVersion: 3e4b40b
-    created: "2024-01-03T09:31:45.604987334Z"
+    created: "2024-01-03T10:24:56.041396745Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 2e488f9114c3b99c3b67cdfe2f338b5f10b508fdb761f0cb3691776f769aa7af
     name: azimuth-caas-operator
@@ -3605,7 +3634,7 @@ entries:
     version: 0.2.2-dev.0.main.1
   - apiVersion: v2
     appVersion: c4a73a9
-    created: "2024-01-03T09:31:45.604373766Z"
+    created: "2024-01-03T10:24:56.041153971Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 770663d31b907aeaeef6c5bc71bc042708d8c3a06f827f0b5a93f2d554c99ec4
     name: azimuth-caas-operator
@@ -3615,7 +3644,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.7
   - apiVersion: v2
     appVersion: 09f7a0b
-    created: "2024-01-03T09:31:45.603846751Z"
+    created: "2024-01-03T10:24:56.040909544Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 980eae0d3ddf8183bc357a967dab45d7c0b1630dd3323f2436943df856f16091
     name: azimuth-caas-operator
@@ -3625,7 +3654,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.6
   - apiVersion: v2
     appVersion: a149868
-    created: "2024-01-03T09:31:45.603270352Z"
+    created: "2024-01-03T10:24:56.040664385Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 2144d86c761e7b9b823f4e8809875584e224c642850e33a0589de12e4c54c332
     name: azimuth-caas-operator
@@ -3635,7 +3664,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.5
   - apiVersion: v2
     appVersion: d4edcd6
-    created: "2024-01-03T09:31:45.603018717Z"
+    created: "2024-01-03T10:24:56.040420209Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 92d81bd29b1360e0149ef1172b38a21510147d2c6128a12ef123c3beeb4c0db1
     name: azimuth-caas-operator
@@ -3645,7 +3674,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.4
   - apiVersion: v2
     appVersion: 614696c
-    created: "2024-01-03T09:31:45.602768595Z"
+    created: "2024-01-03T10:24:56.040171824Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 11c593c76c2d22dd748eb8685d5e60ae87f89a81c841592b763ab55d066db7d5
     name: azimuth-caas-operator
@@ -3655,7 +3684,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.3
   - apiVersion: v2
     appVersion: "762e289"
-    created: "2024-01-03T09:31:45.602507893Z"
+    created: "2024-01-03T10:24:56.039926626Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: dc1c74f6ee1beeba0157306ba8ca725f8d12ade945efe8ef857fadaff02422d4
     name: azimuth-caas-operator
@@ -3665,7 +3694,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.2
   - apiVersion: v2
     appVersion: "661e118"
-    created: "2024-01-03T09:31:45.602219428Z"
+    created: "2024-01-03T10:24:56.039680897Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: adf8f183d547ac4374abd21470333e6542355ff1586007dbee5ba25f164c7530
     name: azimuth-caas-operator
@@ -3675,7 +3704,7 @@ entries:
     version: 0.2.2-dev.0.bug-keep-app-cred-on-error.1
   - apiVersion: v2
     appVersion: 03498de
-    created: "2024-01-03T09:31:45.601965048Z"
+    created: "2024-01-03T10:24:56.039431611Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 61002170f3df1fa11657efed912f04e39b90b71c359a3b18296547aba3a46f49
     name: azimuth-caas-operator
@@ -3685,7 +3714,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 69f2b08
-    created: "2024-01-03T09:31:45.601714274Z"
+    created: "2024-01-03T10:24:56.039184168Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 70b676e6b58385d1c7e17da338053649db3f68e73d2502d6fe7768e2dc06da3b
     name: azimuth-caas-operator
@@ -3695,7 +3724,7 @@ entries:
     version: 0.2.1-dev.0.older-terraform.3
   - apiVersion: v2
     appVersion: 7edbb9c
-    created: "2024-01-03T09:31:45.601456237Z"
+    created: "2024-01-03T10:24:56.038904855Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cd96a180dde15efbe49e80099b18167bf693bdb42fcca3ce10cbcc4557849a9d
     name: azimuth-caas-operator
@@ -3705,7 +3734,7 @@ entries:
     version: 0.2.1-dev.0.main.1
   - apiVersion: v2
     appVersion: 7680ca0
-    created: "2024-01-03T09:31:45.601205494Z"
+    created: "2024-01-03T10:24:56.038659877Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 45e018b348825962feeef657862eaa9070182aac890642ef52c75bd3773b911f
     name: azimuth-caas-operator
@@ -3715,7 +3744,7 @@ entries:
     version: 0.2.1-dev.0.configure-ssh-key.1
   - apiVersion: v2
     appVersion: 59ff624
-    created: "2024-01-03T09:31:45.598870045Z"
+    created: "2024-01-03T10:24:56.035765903Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9ac2cb7f7c5bbdcc5032cf8c94ded69e649d367b576f3b35ec78caa1ad7d7ac5
     name: azimuth-caas-operator
@@ -3725,7 +3754,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.12
   - apiVersion: v2
     appVersion: 5816d52
-    created: "2024-01-03T09:31:45.59860776Z"
+    created: "2024-01-03T10:24:56.035154459Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5dcbb8111cdc93a042306bcb2101b04141ca7b3f515721e1caae76d7fae5e0ab
     name: azimuth-caas-operator
@@ -3735,7 +3764,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.11
   - apiVersion: v2
     appVersion: d6fc851
-    created: "2024-01-03T09:31:45.598323453Z"
+    created: "2024-01-03T10:24:56.034873995Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: c89c0647241682817bc74ac3454640c8769e30b13c311a77c45f8bcec78e316f
     name: azimuth-caas-operator
@@ -3745,7 +3774,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.10
   - apiVersion: v2
     appVersion: efedb2b
-    created: "2024-01-03T09:31:45.600950723Z"
+    created: "2024-01-03T10:24:56.038412104Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 07b28b12b18d39d7e053030927faceac7d5e7a18ca07237d8ee97a1d98f720ee
     name: azimuth-caas-operator
@@ -3755,7 +3784,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.9
   - apiVersion: v2
     appVersion: f0b3fe9
-    created: "2024-01-03T09:31:45.600684821Z"
+    created: "2024-01-03T10:24:56.038162598Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9429e8e43fd8222b63336ead6c6ee606d9885719a6e86317cb3c17208b00ac4a
     name: azimuth-caas-operator
@@ -3765,7 +3794,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.8
   - apiVersion: v2
     appVersion: daef0b3
-    created: "2024-01-03T09:31:45.600416344Z"
+    created: "2024-01-03T10:24:56.03788066Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 3c0b3ad9a6a6ca465b16f3435c3d9d8d63d28712e1060154c19409b4be04ee43
     name: azimuth-caas-operator
@@ -3775,7 +3804,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.7
   - apiVersion: v2
     appVersion: 5ad4845
-    created: "2024-01-03T09:31:45.600158517Z"
+    created: "2024-01-03T10:24:56.037636925Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 91e7fcf6be2d64b7776e2022f82aceb81eecaafe73eeefe2e6cbd108f2001407
     name: azimuth-caas-operator
@@ -3785,7 +3814,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.6
   - apiVersion: v2
     appVersion: 8ba4854
-    created: "2024-01-03T09:31:45.59990047Z"
+    created: "2024-01-03T10:24:56.037390234Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6f8768899880c9bd9a894b7169d7c39efd241b10bf37f378a6aac54f0570b04a
     name: azimuth-caas-operator
@@ -3795,7 +3824,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.5
   - apiVersion: v2
     appVersion: 213742c
-    created: "2024-01-03T09:31:45.599645028Z"
+    created: "2024-01-03T10:24:56.037139986Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 80d9060a44772bc286b51f7c06aa1ccf52c598fbac90ce20f752c51bf1b3dd83
     name: azimuth-caas-operator
@@ -3805,7 +3834,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.4
   - apiVersion: v2
     appVersion: 0235c0a
-    created: "2024-01-03T09:31:45.599387962Z"
+    created: "2024-01-03T10:24:56.036873067Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b127c274c132a4d41e48f010786cf04e60f9bb2810c444eeda70054c3d5752e3
     name: azimuth-caas-operator
@@ -3815,7 +3844,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.3
   - apiVersion: v2
     appVersion: c370b10
-    created: "2024-01-03T09:31:45.599128102Z"
+    created: "2024-01-03T10:24:56.036282869Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b0b54e94abaac98b231985771a7169d0c0a7a5ac673f99013bad3e4cf6f28c02
     name: azimuth-caas-operator
@@ -3825,7 +3854,7 @@ entries:
     version: 0.2.1-dev.0.bugfix-stop-silent-failures.2
   - apiVersion: v2
     appVersion: 844790f
-    created: "2024-01-03T09:31:45.59802515Z"
+    created: "2024-01-03T10:24:56.034627634Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 0fa06dd114eb40ee021b31fbc8af07f5c724fb622b5a3cf5012e705671b6204b
     name: azimuth-caas-operator
@@ -3835,7 +3864,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 055c448
-    created: "2024-01-03T09:31:45.597729772Z"
+    created: "2024-01-03T10:24:56.034387335Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: aef6359b7ac1e652499cc9cd45a8b78baebea58450a427d76c178e46a9bb2be0
     name: azimuth-caas-operator
@@ -3845,7 +3874,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.22
   - apiVersion: v2
     appVersion: 8635fd0
-    created: "2024-01-03T09:31:45.597400891Z"
+    created: "2024-01-03T10:24:56.034145132Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 16201b45b773f3fed2caaa76b441bb7945fbeb6263844d5d4ddcda2d4e615f57
     name: azimuth-caas-operator
@@ -3855,7 +3884,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.21
   - apiVersion: v2
     appVersion: 706ee70
-    created: "2024-01-03T09:31:45.596702155Z"
+    created: "2024-01-03T10:24:56.033902849Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9752e47ef360ef12318dd2420915ba8bff9626b1d5460a46847dda18109a4214
     name: azimuth-caas-operator
@@ -3865,7 +3894,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.20
   - apiVersion: v2
     appVersion: d644e9f
-    created: "2024-01-03T09:31:45.596189387Z"
+    created: "2024-01-03T10:24:56.033656759Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cd09c3b991a3cb15bdc113452f4ff14ec9dbfe2bf57abdd7411a0fb899b652fd
     name: azimuth-caas-operator
@@ -3875,7 +3904,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.19
   - apiVersion: v2
     appVersion: 8f883f0
-    created: "2024-01-03T09:31:45.595564517Z"
+    created: "2024-01-03T10:24:56.033410068Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 60d355a09e13d3e432b883e6b544663e104740b2967004bef6ed29e82a42a46b
     name: azimuth-caas-operator
@@ -3885,7 +3914,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.14
   - apiVersion: v2
     appVersion: 4bfcfa5
-    created: "2024-01-03T09:31:45.595307743Z"
+    created: "2024-01-03T10:24:56.03316517Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: fafc1b203c1179930befe98ae456aa9077d3fb674f335ea52f87aedd46785225
     name: azimuth-caas-operator
@@ -3895,7 +3924,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.13
   - apiVersion: v2
     appVersion: 50f3091
-    created: "2024-01-03T09:31:45.595053984Z"
+    created: "2024-01-03T10:24:56.032918459Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 69abc304579eb4a03385406c8ccaf777c3b3d0a30691b34495e04821eca6c900
     name: azimuth-caas-operator
@@ -3905,7 +3934,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.12
   - apiVersion: v2
     appVersion: 015832a
-    created: "2024-01-03T09:31:45.594801016Z"
+    created: "2024-01-03T10:24:56.032658723Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 3eb44c226329677ecd630941ce109553a9cdbf59cea4b0844b1d9ebb67719c32
     name: azimuth-caas-operator
@@ -3915,7 +3944,7 @@ entries:
     version: 0.1.3-dev.0.update-jobs.11
   - apiVersion: v2
     appVersion: b135347
-    created: "2024-01-03T09:31:45.592973045Z"
+    created: "2024-01-03T10:24:56.030882763Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: aef607162c0ed53d9a9b9abd6e9f7ad0f3edf3d6a5e1aed25994f89fa8ce57ba
     name: azimuth-caas-operator
@@ -3925,7 +3954,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.10
   - apiVersion: v2
     appVersion: 723dbf5
-    created: "2024-01-03T09:31:45.594547698Z"
+    created: "2024-01-03T10:24:56.032414466Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9cd40269aa5b6119344cc61c9b234e5201b27a5531cf7379dd9af93529bfbf6b
     name: azimuth-caas-operator
@@ -3935,7 +3964,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.8
   - apiVersion: v2
     appVersion: "0749523"
-    created: "2024-01-03T09:31:45.59425749Z"
+    created: "2024-01-03T10:24:56.032160652Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: c14e44aabed354b4caa9c062494035c263036446d338b7ea625b9525bc6e14c9
     name: azimuth-caas-operator
@@ -3945,7 +3974,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.6
   - apiVersion: v2
     appVersion: 8f75a4f
-    created: "2024-01-03T09:31:45.59400296Z"
+    created: "2024-01-03T10:24:56.031914261Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 1df72e212fc2cc10a0411e88e2a4f754111fd08f8b850413fbff4d9eb5583f5c
     name: azimuth-caas-operator
@@ -3955,7 +3984,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.5
   - apiVersion: v2
     appVersion: 1ebc610
-    created: "2024-01-03T09:31:45.593745103Z"
+    created: "2024-01-03T10:24:56.031666027Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: d2a583bb06c710439dd582daf9793e5b286d25fcfba82d837476b8a5fdfc190a
     name: azimuth-caas-operator
@@ -3965,7 +3994,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.4
   - apiVersion: v2
     appVersion: b768d93
-    created: "2024-01-03T09:31:45.593475574Z"
+    created: "2024-01-03T10:24:56.031420428Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: f1fa020996d53acdba243c4d192385af3acb052f78ccf837095a8d8127441ffd
     name: azimuth-caas-operator
@@ -3975,7 +4004,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.3
   - apiVersion: v2
     appVersion: 578d0ab
-    created: "2024-01-03T09:31:45.593224851Z"
+    created: "2024-01-03T10:24:56.031169198Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 26b205845be63bf9c4a21838d7a9fcac83673c9b7e486325b13aa80c1b9f9a13
     name: azimuth-caas-operator
@@ -3985,7 +4014,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.2
   - apiVersion: v2
     appVersion: 072234c
-    created: "2024-01-03T09:31:45.592717573Z"
+    created: "2024-01-03T10:24:56.030622516Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 33efe723df6c449a29651c5199233c056dd44b33b94007069581b9f1f488b74d
     name: azimuth-caas-operator
@@ -3995,7 +4024,7 @@ entries:
     version: 0.1.3-dev.0.update-clustertype.1
   - apiVersion: v2
     appVersion: b45ea3d
-    created: "2024-01-03T09:31:45.592460598Z"
+    created: "2024-01-03T10:24:56.030336992Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: ab24e537cbe9527458eb2f00f2a6bb8df49f080d5e9a41337f7e67ad8fed4bdc
     name: azimuth-caas-operator
@@ -4005,7 +4034,7 @@ entries:
     version: 0.1.3-dev.0.main.15
   - apiVersion: v2
     appVersion: 015832a
-    created: "2024-01-03T09:31:45.592209233Z"
+    created: "2024-01-03T10:24:56.029953134Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 0be02ba9cad19356368817e0dac0ebee8fa79e0f70ff90bd0a1f000f9c160e17
     name: azimuth-caas-operator
@@ -4015,7 +4044,7 @@ entries:
     version: 0.1.3-dev.0.main.11
   - apiVersion: v2
     appVersion: 9cb997b
-    created: "2024-01-03T09:31:45.591959371Z"
+    created: "2024-01-03T10:24:56.029366371Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9c3a52a79e4c329d5d6f22edc3a76f942f100727ea19aee2eace2a5b0065709b
     name: azimuth-caas-operator
@@ -4025,7 +4054,7 @@ entries:
     version: 0.1.3-dev.0.delete-app-cred.14
   - apiVersion: v2
     appVersion: f66eabf
-    created: "2024-01-03T09:31:45.591702386Z"
+    created: "2024-01-03T10:24:56.028687942Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5c612f99532bd39f229dd738605b405307919627f21a155eca949ed68b0954e8
     name: azimuth-caas-operator
@@ -4035,7 +4064,7 @@ entries:
     version: 0.1.3-dev.0.delete-app-cred.13
   - apiVersion: v2
     appVersion: 4b5c99c
-    created: "2024-01-03T09:31:45.591444319Z"
+    created: "2024-01-03T10:24:56.028433476Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 586fd35e9d3d3e6c5e8c8a0b43e87f9a8a0369c7836eb3b802f788106f732b87
     name: azimuth-caas-operator
@@ -4045,7 +4074,7 @@ entries:
     version: 0.1.3-dev.0.delete-app-cred.12
   - apiVersion: v2
     appVersion: 079483c
-    created: "2024-01-03T09:31:45.591177065Z"
+    created: "2024-01-03T10:24:56.028187075Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 43b08d9cb5637dd9c23638f45a76b8e5e47a456169c7e8e4ab3109a6b328bf52
     name: azimuth-caas-operator
@@ -4055,7 +4084,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: 54640eb
-    created: "2024-01-03T09:31:45.590906334Z"
+    created: "2024-01-03T10:24:56.0279224Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 92e9c3b6d850437a2f4de4c9677ac4c15fda2534f04b1109ffc4c5c91a223eb6
     name: azimuth-caas-operator
@@ -4065,7 +4094,7 @@ entries:
     version: 0.1.2-dev.0.python10.4
   - apiVersion: v2
     appVersion: 8d21e1f
-    created: "2024-01-03T09:31:45.59066611Z"
+    created: "2024-01-03T10:24:56.027692531Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6b3a64cbcfd618a6dfe1b80c4caaafe42e37abf75ea0b0507f2dcae16b3b8582
     name: azimuth-caas-operator
@@ -4075,7 +4104,7 @@ entries:
     version: 0.1.2-dev.0.python10.3
   - apiVersion: v2
     appVersion: 793489c
-    created: "2024-01-03T09:31:45.590416769Z"
+    created: "2024-01-03T10:24:56.027458593Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: d3dc295db1ca6383dcbb05d1a9f8dfd6b63abbd817b9818cbbdee2a604074850
     name: azimuth-caas-operator
@@ -4085,7 +4114,7 @@ entries:
     version: 0.1.2-dev.0.main.5
   - apiVersion: v2
     appVersion: 41ce01b
-    created: "2024-01-03T09:31:45.590118466Z"
+    created: "2024-01-03T10:24:56.027222211Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: fb3da5549ef4859dbc7d7b01b011d28168ad84688766e272f362c24bdd82293c
     name: azimuth-caas-operator
@@ -4095,7 +4124,7 @@ entries:
     version: 0.1.2-dev.0.main.2
   - apiVersion: v2
     appVersion: 3791c6a
-    created: "2024-01-03T09:31:45.587898901Z"
+    created: "2024-01-03T10:24:56.026017859Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cd04a8a81a97dd6b5b62272d06dc455da689dc14c2227762e273b6f7e790db3e
     name: azimuth-caas-operator
@@ -4105,7 +4134,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.19
   - apiVersion: v2
     appVersion: e379dcc
-    created: "2024-01-03T09:31:45.587644611Z"
+    created: "2024-01-03T10:24:56.025771168Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 51294e6a5f46a5634001336c4e2ff6cbdacdf6390c81bb2690d6b00aca378254
     name: azimuth-caas-operator
@@ -4115,7 +4144,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.18
   - apiVersion: v2
     appVersion: f2247b0
-    created: "2024-01-03T09:31:45.587388998Z"
+    created: "2024-01-03T10:24:56.025525088Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: e071ce9c93dc7e49575bab1fdeae8e241f8138c00a42e70ab783a182e3ba50d3
     name: azimuth-caas-operator
@@ -4125,7 +4154,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.17
   - apiVersion: v2
     appVersion: 407f849
-    created: "2024-01-03T09:31:45.587124228Z"
+    created: "2024-01-03T10:24:56.025283286Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 80a661a9a258caa079b562eaf375b14b920ffca34d90c89b8e541501dcc7fdf5
     name: azimuth-caas-operator
@@ -4135,7 +4164,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.16
   - apiVersion: v2
     appVersion: 06edd35
-    created: "2024-01-03T09:31:45.586868926Z"
+    created: "2024-01-03T10:24:56.025037997Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 385e07cd3d05bd2eb031ba4ba21a84afef6a33b92c83ce08ad428c923edc8dba
     name: azimuth-caas-operator
@@ -4145,7 +4174,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.15
   - apiVersion: v2
     appVersion: d372fef
-    created: "2024-01-03T09:31:45.586607873Z"
+    created: "2024-01-03T10:24:56.024790585Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9933ab6cb9081bbf8d3744ab21c28a00a0c79d68a98cfcee227dcbcc8b7cd8d1
     name: azimuth-caas-operator
@@ -4155,7 +4184,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.14
   - apiVersion: v2
     appVersion: 7afb6c7
-    created: "2024-01-03T09:31:45.586328286Z"
+    created: "2024-01-03T10:24:56.02454738Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: d660238c7b8ce8884c871309a33446c2da111e5330751643938ab2fc1b3bd5b6
     name: azimuth-caas-operator
@@ -4165,7 +4194,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.13
   - apiVersion: v2
     appVersion: 5a27579
-    created: "2024-01-03T09:31:45.586061212Z"
+    created: "2024-01-03T10:24:56.024314354Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 053bd4f781d124f13beb8237323e121eb31e3a438692950e0bee5a04c784ea60
     name: azimuth-caas-operator
@@ -4175,7 +4204,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.12
   - apiVersion: v2
     appVersion: 58e675b
-    created: "2024-01-03T09:31:45.585813604Z"
+    created: "2024-01-03T10:24:56.024083082Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b489c559e80c0985dcf8521ada58d1b9912b7a966add7df7a1e7f5ae32bb12c8
     name: azimuth-caas-operator
@@ -4185,7 +4214,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.11
   - apiVersion: v2
     appVersion: 139607e
-    created: "2024-01-03T09:31:45.585568271Z"
+    created: "2024-01-03T10:24:56.023845157Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 9db20bb838da9bd7ba3c0378c6a58034b6e5588e839e51b123e04af7a7ee9c51
     name: azimuth-caas-operator
@@ -4195,7 +4224,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.10
   - apiVersion: v2
     appVersion: 180a059
-    created: "2024-01-03T09:31:45.589844248Z"
+    created: "2024-01-03T10:24:56.026936267Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 4541c1132983e40079cbec514d49742dce8c215a0614bf079d502d31fde23882
     name: azimuth-caas-operator
@@ -4205,7 +4234,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.9
   - apiVersion: v2
     appVersion: 078d838
-    created: "2024-01-03T09:31:45.589289526Z"
+    created: "2024-01-03T10:24:56.026705475Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 59103b9a686d53a03a67c223d0e7972353dc60dd569edd438ba90ca9c66efa77
     name: azimuth-caas-operator
@@ -4215,7 +4244,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.8
   - apiVersion: v2
     appVersion: 308b592
-    created: "2024-01-03T09:31:45.588812887Z"
+    created: "2024-01-03T10:24:56.026475134Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 30d83bba79ffb86315bbe2741f49d909774983882f5d4a0ca87d88a8bee59de6
     name: azimuth-caas-operator
@@ -4225,7 +4254,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.4
   - apiVersion: v2
     appVersion: 405b4e3
-    created: "2024-01-03T09:31:45.588137561Z"
+    created: "2024-01-03T10:24:56.026247078Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: e16e35a29f1c9e53d3b331f369ded0f9e5eb935b1ad54a29a95ff7b5f10af91c
     name: azimuth-caas-operator
@@ -4235,7 +4264,7 @@ entries:
     version: 0.1.2-dev.0.fixup-extravars.3
   - apiVersion: v2
     appVersion: 6c37e54
-    created: "2024-01-03T09:31:45.585328628Z"
+    created: "2024-01-03T10:24:56.023609797Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: d245a3985992da0d73d4cc141b1629177cb939c1c875d5974dc1c3aca9ea6a03
     name: azimuth-caas-operator
@@ -4245,7 +4274,7 @@ entries:
     version: 0.1.2-dev.0.configure-namespaces.1
   - apiVersion: v2
     appVersion: 0d54f2f
-    created: "2024-01-03T09:31:45.585087393Z"
+    created: "2024-01-03T10:24:56.023372774Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 547f05c54b72c68a416c4a78493885102696792773f7478d6864bcddf1425315
     name: azimuth-caas-operator
@@ -4255,7 +4284,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 4dc0fbf
-    created: "2024-01-03T09:31:45.583352868Z"
+    created: "2024-01-03T10:24:56.020852472Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 2f83a68c9c5d7e74194690a369b6d98320c93ca7e3af107bf13e567bb41fd15a
     name: azimuth-caas-operator
@@ -4265,7 +4294,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.15
   - apiVersion: v2
     appVersion: b81ddc5
-    created: "2024-01-03T09:31:45.583096715Z"
+    created: "2024-01-03T10:24:56.02062187Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 954235dc4285190c23d100291daa20ee1bf8f33b80709364edabaa7f602750f9
     name: azimuth-caas-operator
@@ -4275,7 +4304,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.14
   - apiVersion: v2
     appVersion: 992206f
-    created: "2024-01-03T09:31:45.582854788Z"
+    created: "2024-01-03T10:24:56.020384416Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: afff3341f13fa29d0ad1ad444c8cfe8c45f82f5df616962cfc1a4906d5a4c474
     name: azimuth-caas-operator
@@ -4285,7 +4314,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.13
   - apiVersion: v2
     appVersion: 2db4714
-    created: "2024-01-03T09:31:45.582583616Z"
+    created: "2024-01-03T10:24:56.020160197Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6fef67c7e362819c0a2f1aba5f2063374d69dfcf969b4c12eeb78486c07b5e14
     name: azimuth-caas-operator
@@ -4295,7 +4324,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.12
   - apiVersion: v2
     appVersion: 85c1b4b
-    created: "2024-01-03T09:31:45.581957544Z"
+    created: "2024-01-03T10:24:56.019936008Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 073e94fd0a10f99a66dd27b0c1506f8bf4cd4aa64411161d00e37fdade39bfb1
     name: azimuth-caas-operator
@@ -4305,7 +4334,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.11
   - apiVersion: v2
     appVersion: c48d54a
-    created: "2024-01-03T09:31:45.581345466Z"
+    created: "2024-01-03T10:24:56.019709584Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: a5bca09d01dabe961954e406e6567416e27316995661288324a501f226357061
     name: azimuth-caas-operator
@@ -4315,7 +4344,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.10
   - apiVersion: v2
     appVersion: 64c36df
-    created: "2024-01-03T09:31:45.584851658Z"
+    created: "2024-01-03T10:24:56.023138315Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5c554308718eb0ecc750b0b4db03ae9b5a9f25300742f18df68ecb1e133b2e4d
     name: azimuth-caas-operator
@@ -4325,7 +4354,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.9
   - apiVersion: v2
     appVersion: d0c3395
-    created: "2024-01-03T09:31:45.584615672Z"
+    created: "2024-01-03T10:24:56.022870465Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: f05b891bc4cde27af9c45984600264db66dd24af30f01c285c2176257bef8303
     name: azimuth-caas-operator
@@ -4335,7 +4364,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.8
   - apiVersion: v2
     appVersion: 52a1ce9
-    created: "2024-01-03T09:31:45.584367053Z"
+    created: "2024-01-03T10:24:56.022614556Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: f3d5a1318206c33f09e69be45f0108d52b04c1d96ba09a63b4a3df4264052b73
     name: azimuth-caas-operator
@@ -4345,7 +4374,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.7
   - apiVersion: v2
     appVersion: e4029fb
-    created: "2024-01-03T09:31:45.584119275Z"
+    created: "2024-01-03T10:24:56.022118108Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6a1fad8bfeb8995b6fdb95301c79286c1a80c1fbf1c20fd4379163039f73ce08
     name: azimuth-caas-operator
@@ -4355,7 +4384,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.6
   - apiVersion: v2
     appVersion: 672f710
-    created: "2024-01-03T09:31:45.583869774Z"
+    created: "2024-01-03T10:24:56.021650734Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: fdd495aae89bc5aab884d395f7c1f40abc7be59d398efc0d6d8d908715e8e5ad
     name: azimuth-caas-operator
@@ -4365,7 +4394,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.5
   - apiVersion: v2
     appVersion: 0c701b2
-    created: "2024-01-03T09:31:45.583590757Z"
+    created: "2024-01-03T10:24:56.021090517Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 20fcb3d7e4132d77d462530f2d4e0d58bc0106c1fb6c3ad54292009c744eefd1
     name: azimuth-caas-operator
@@ -4375,7 +4404,7 @@ entries:
     version: 0.1.1-dev.0.record-clustertype.4
   - apiVersion: v2
     appVersion: 0d54f2f
-    created: "2024-01-03T09:31:45.580427483Z"
+    created: "2024-01-03T10:24:56.019253261Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: ee103bedb11650ecff3d172b1e45563af760dc0fef27f3f36506b559ce99fdd2
     name: azimuth-caas-operator
@@ -4385,7 +4414,7 @@ entries:
     version: 0.1.1-dev.0.main.25
   - apiVersion: v2
     appVersion: 5d4484e
-    created: "2024-01-03T09:31:45.58019303Z"
+    created: "2024-01-03T10:24:56.018982806Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 33136cd5563716f58324321effc254e3be1e414192c1a7e07b9192c5807423e0
     name: azimuth-caas-operator
@@ -4395,7 +4424,7 @@ entries:
     version: 0.1.1-dev.0.main.16
   - apiVersion: v2
     appVersion: 52f4591
-    created: "2024-01-03T09:31:45.580850171Z"
+    created: "2024-01-03T10:24:56.019483472Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 7e6c54103ac4c3a7386648e6bde3b61619a833990cb302764848250413b4bf79
     name: azimuth-caas-operator
@@ -4405,7 +4434,7 @@ entries:
     version: 0.1.1-dev.0.main.3
   - apiVersion: v2
     appVersion: a99545d
-    created: "2024-01-03T09:31:45.57995996Z"
+    created: "2024-01-03T10:24:56.018755931Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: e6fb3812253afa909371eba4008ab64765a9ae938d8b03dd4a591f3d2f84a185
     name: azimuth-caas-operator
@@ -4415,7 +4444,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.24
   - apiVersion: v2
     appVersion: e235ba6
-    created: "2024-01-03T09:31:45.579723854Z"
+    created: "2024-01-03T10:24:56.018529067Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b77ff025c3f81300cb516dd84d1b9e2578d1a7fdb0e33b5edb12eb17dc47776c
     name: azimuth-caas-operator
@@ -4425,7 +4454,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.23
   - apiVersion: v2
     appVersion: b66c324
-    created: "2024-01-03T09:31:45.579487007Z"
+    created: "2024-01-03T10:24:56.018302373Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: a2af9a63b3efd8f480866ae2f5d27efc138c3de206ff77761fe7761be2aa9496
     name: azimuth-caas-operator
@@ -4435,7 +4464,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.22
   - apiVersion: v2
     appVersion: 6460a9a
-    created: "2024-01-03T09:31:45.57925522Z"
+    created: "2024-01-03T10:24:56.018073055Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5e0c6844bbdfe4c06702f8dae86530b754886d71a4c2d56f78af18592d2a8d64
     name: azimuth-caas-operator
@@ -4445,7 +4474,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.21
   - apiVersion: v2
     appVersion: d977b04
-    created: "2024-01-03T09:31:45.579023603Z"
+    created: "2024-01-03T10:24:56.01781418Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 519c5443e60294595c4b18ceaa99d8be2b88f876a76c8aa99a359693ac9d3c13
     name: azimuth-caas-operator
@@ -4455,7 +4484,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.20
   - apiVersion: v2
     appVersion: 24825d1
-    created: "2024-01-03T09:31:45.578788649Z"
+    created: "2024-01-03T10:24:56.017588949Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: ba247b980f137807635e857e4b67c018d1f4c18dc1f368c22ed6ae3cb02f6e12
     name: azimuth-caas-operator
@@ -4465,7 +4494,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.19
   - apiVersion: v2
     appVersion: 19d6c3e
-    created: "2024-01-03T09:31:45.578548035Z"
+    created: "2024-01-03T10:24:56.01735947Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: e8ff854dd9fde63068b9fb730fe607486608d7ad4bbee23b3c49e52f580e27b8
     name: azimuth-caas-operator
@@ -4475,7 +4504,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.18
   - apiVersion: v2
     appVersion: 8c2502e
-    created: "2024-01-03T09:31:45.57824356Z"
+    created: "2024-01-03T10:24:56.01712953Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 3c68a3c340e0a4f243bf2d8f091052cdd68c004ef947bd0f381254f5d2ff2e22
     name: azimuth-caas-operator
@@ -4485,7 +4514,7 @@ entries:
     version: 0.1.1-dev.0.lifetime.17
   - apiVersion: v2
     appVersion: 38ed2b3
-    created: "2024-01-03T09:31:45.578009057Z"
+    created: "2024-01-03T10:24:56.016886055Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 23f03f8dc94a46af6cebe916b9d4ad4942feea1d53c3444bc5abb547d8eadfc9
     name: azimuth-caas-operator
@@ -4495,7 +4524,7 @@ entries:
     version: 0.1.0
   - apiVersion: v2
     appVersion: 8b32066
-    created: "2024-01-03T09:31:45.577775156Z"
+    created: "2024-01-03T10:24:56.016648691Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: caff7bd114eca03882d7d5a8d0f21cad359dc0e6d917d3810a428a4732c3fada
     name: azimuth-caas-operator
@@ -4505,7 +4534,7 @@ entries:
     version: 0.1.0-dev.0.update-ipum-example.130
   - apiVersion: v2
     appVersion: 38ed2b3
-    created: "2024-01-03T09:31:45.57753922Z"
+    created: "2024-01-03T10:24:56.016402841Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5dd040d211063511791cf9907f369cb47b29a0e23060704705bdb5cac6c85b47
     name: azimuth-caas-operator
@@ -4515,7 +4544,7 @@ entries:
     version: 0.1.0-dev.0.main.128
   - apiVersion: v2
     appVersion: f05b67e
-    created: "2024-01-03T09:31:45.577304267Z"
+    created: "2024-01-03T10:24:56.01614511Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: b0900f72daf328237a27d3096c54da79ee3ce369a92a59ca064b62c7139e2b5e
     name: azimuth-caas-operator
@@ -4525,7 +4554,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.127
   - apiVersion: v2
     appVersion: 2ac6b92
-    created: "2024-01-03T09:31:45.577069894Z"
+    created: "2024-01-03T10:24:56.015678407Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 7c2baa3d79c80857d797f3d55f01694384037927a2d6ee9177d8e4e50bb72228
     name: azimuth-caas-operator
@@ -4535,7 +4564,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.126
   - apiVersion: v2
     appVersion: ddf0d67
-    created: "2024-01-03T09:31:45.576837004Z"
+    created: "2024-01-03T10:24:56.014979917Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 25944c04f9235b0f8fbf664063a85ac8e65d40536a008c0cfef9ff694bf2662d
     name: azimuth-caas-operator
@@ -4545,7 +4574,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.125
   - apiVersion: v2
     appVersion: 7f3c2bd
-    created: "2024-01-03T09:31:45.576599516Z"
+    created: "2024-01-03T10:24:56.014486665Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 2b6f2eb5c2da10b945b453fd8b36d0ede9fc09700886eeb7974dde8e763c9b56
     name: azimuth-caas-operator
@@ -4555,7 +4584,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.124
   - apiVersion: v2
     appVersion: 9b55189
-    created: "2024-01-03T09:31:45.57636298Z"
+    created: "2024-01-03T10:24:56.014074605Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: c5d2338785601f97121c1049cfec0752280975fba337728541deed87446112e2
     name: azimuth-caas-operator
@@ -4565,7 +4594,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.123
   - apiVersion: v2
     appVersion: "9058121"
-    created: "2024-01-03T09:31:45.576126974Z"
+    created: "2024-01-03T10:24:56.01385279Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: db41f5354783905662229a1760ad179f2d3540b2efddf1eb7ad91f9cce499cfa
     name: azimuth-caas-operator
@@ -4575,7 +4604,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.122
   - apiVersion: v2
     appVersion: b5c8b70
-    created: "2024-01-03T09:31:45.575889446Z"
+    created: "2024-01-03T10:24:56.013631426Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 6bd5122a5827a3299464b5e665aae7cf42de0bef462042efb57c8118923122c1
     name: azimuth-caas-operator
@@ -4585,7 +4614,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.120
   - apiVersion: v2
     appVersion: 17808a8
-    created: "2024-01-03T09:31:45.575665573Z"
+    created: "2024-01-03T10:24:56.013424589Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 5ed32ae273b50942a91b83dc120651b273c77544f3352f1826d9c193516c56cb
     name: azimuth-caas-operator
@@ -4595,7 +4624,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.119
   - apiVersion: v2
     appVersion: 4bd1052
-    created: "2024-01-03T09:31:45.57543612Z"
+    created: "2024-01-03T10:24:56.013210138Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 02918ed7fc0c7d361cc5e98ae9ae87c358e61f886288c547a29671a39138da94
     name: azimuth-caas-operator
@@ -4605,7 +4634,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.118
   - apiVersion: v2
     appVersion: 1fbd1bd
-    created: "2024-01-03T09:31:45.57519762Z"
+    created: "2024-01-03T10:24:56.01300237Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: e54ab5f6d8514b15812fabcd551ce00daaeb2e8aaafcfd59349d0106241a7bc4
     name: azimuth-caas-operator
@@ -4615,7 +4644,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.117
   - apiVersion: v2
     appVersion: "2564999"
-    created: "2024-01-03T09:31:45.574918172Z"
+    created: "2024-01-03T10:24:56.012793379Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 8a4aa5afb1e3486323de6a70555b38371350330bea1a1e50add83518e5f173a6
     name: azimuth-caas-operator
@@ -4625,7 +4654,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.116
   - apiVersion: v2
     appVersion: 68bc68d
-    created: "2024-01-03T09:31:45.57440463Z"
+    created: "2024-01-03T10:24:56.012584849Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 8592589cedd94e376db645856485511c66781ce451e970fa254ff30a31454377
     name: azimuth-caas-operator
@@ -4635,7 +4664,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.115
   - apiVersion: v2
     appVersion: e305198
-    created: "2024-01-03T09:31:45.573936446Z"
+    created: "2024-01-03T10:24:56.012373073Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: cffc051cbfce2404c6aee982a74cecf5f7267c0edfacd9a6661caad82c8a61f7
     name: azimuth-caas-operator
@@ -4645,7 +4674,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.114
   - apiVersion: v2
     appVersion: 5eeff93
-    created: "2024-01-03T09:31:45.573428327Z"
+    created: "2024-01-03T10:24:56.01216246Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: ac6246833ae69d45db7979d61a1f63cb20ac2c2b94937433a76ac530daf7e4d5
     name: azimuth-caas-operator
@@ -4655,7 +4684,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.113
   - apiVersion: v2
     appVersion: 6bbc3d6
-    created: "2024-01-03T09:31:45.57311215Z"
+    created: "2024-01-03T10:24:56.011950233Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 0978d960a91b08fc47bda052041fce1e190a26baf9228cdf3db53d0e90f94b5c
     name: azimuth-caas-operator
@@ -4665,7 +4694,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.110
   - apiVersion: v2
     appVersion: e3995d2
-    created: "2024-01-03T09:31:45.572893126Z"
+    created: "2024-01-03T10:24:56.011738908Z"
     description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
     digest: 90cd14908e4b2176ab3713114ae7dd8aa76bd67bdd60d1afc8ab09aa5a011275
     name: azimuth-caas-operator
@@ -4675,7 +4704,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.109
   - apiVersion: v2
     appVersion: "7149609"
-    created: "2024-01-03T09:31:45.572671989Z"
+    created: "2024-01-03T10:24:56.011525489Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 77aaf66eb746ae5f2b0fb26bfa7e1bdecb04463a7b59d400ea72de351bd726a6
     name: azimuth-caas-operator
@@ -4685,7 +4714,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.108
   - apiVersion: v2
     appVersion: b697418
-    created: "2024-01-03T09:31:45.57243968Z"
+    created: "2024-01-03T10:24:56.011297111Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: d6b9517a9ff31af131643eb8c50e1a36689254d069f796e305991126b022b0d2
     name: azimuth-caas-operator
@@ -4695,7 +4724,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.107
   - apiVersion: v2
     appVersion: 14fc8e1
-    created: "2024-01-03T09:31:45.572207001Z"
+    created: "2024-01-03T10:24:56.011051843Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 82f553cef6cb7959d0b2a08b85d84480e918a05df3a740302f617302bb2378bc
     name: azimuth-caas-operator
@@ -4705,7 +4734,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.106
   - apiVersion: v2
     appVersion: fc6eb8f
-    created: "2024-01-03T09:31:45.571970204Z"
+    created: "2024-01-03T10:24:56.010797648Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 238d9ffd6218d8fed83dc9464116fefd85878ce97a3538332d9c863fe5204bf4
     name: azimuth-caas-operator
@@ -4715,7 +4744,7 @@ entries:
     version: 0.1.0-dev.0.add-helm.105
   - apiVersion: v2
     appVersion: bfe6d54
-    created: "2024-01-03T09:31:45.571728948Z"
+    created: "2024-01-03T10:24:56.010567207Z"
     description: Helm chart for deploying the azimuth-caas operator.
     digest: 44b4afa4d48c5cb0a8251c1d85f09beaec7574bba83234874d16130f1e0a0804
     name: azimuth-caas-operator
@@ -4723,4 +4752,4 @@ entries:
     urls:
     - azimuth-caas-operator-0.1.0-dev.0.add-helm.104.tgz
     version: 0.1.0-dev.0.add-helm.104
-generated: "2024-01-03T09:31:45.521840681Z"
+generated: "2024-01-03T10:24:55.961290642Z"

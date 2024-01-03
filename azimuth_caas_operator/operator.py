@@ -55,9 +55,8 @@ async def _update_cluster_type(client, name, namespace, status):
 async def _fetch_text_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            LOG.info(f"Got HTTP{response.status}/{response.reason} from {response.url}")
-            if response.ok:
-                return await response.text()
+            response.raise_for_status()
+            return await response.text()
 
 
 # TODO(johngarbutt): move to utils.cluster_type

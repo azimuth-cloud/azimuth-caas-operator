@@ -153,10 +153,6 @@ def get_job(
     defines_inventory = "ANSIBLE_INVENTORY" in dict(cluster_type_spec.envVars)
     # for ANSIBLE_INVENTORY in envvars to work, there must be no inventory/ directory
 
-    job_timeout = 1200 # in seconds
-    if "job_timeout" in cluster_type_spec.extraVars.keys():
-        job_timeout = cluster_type_spec["job_timeout"]
-
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -298,8 +294,8 @@ spec:
           defaultMode: 256
           optional: true
   backoffLimit: {1 if remove else 0}
-  # timeout after 20 mins
-  activeDeadlineSeconds: {job_timeout}"""  # noqa
+  # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
+  activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa
     return yaml.safe_load(job_yaml)
 
 

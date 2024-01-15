@@ -55,6 +55,7 @@ async def _update_cluster_type(client, name, namespace, status):
 async def _fetch_text_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
+            response.raise_for_status()
             return await response.text()
 
 
@@ -83,6 +84,8 @@ async def _fetch_ui_meta_from_url(url):
         raw["iconUrl"] = raw.get("icon_url", "")
         services.append(cluster_type_crd.ClusterServiceSpec(**raw))
     ui_meta["services"] = services
+
+    LOG.debug("Parsed UI Meta: %s", ui_meta)
 
     return cluster_type_crd.ClusterUiMeta(**ui_meta)
 

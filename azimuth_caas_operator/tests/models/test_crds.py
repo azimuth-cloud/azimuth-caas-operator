@@ -104,107 +104,11 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "uiMeta": {
-                    "nullable": true,
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "label": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "logo": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "requiresSshKey": {
-                        "nullable": true,
-                        "type": "boolean"
-                      },
-                      "parameters": {
-                        "items": {
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "label": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "nullable": true,
-                              "type": "string"
-                            },
-                            "kind": {
-                              "type": "string"
-                            },
-                            "options": {
-                              "additionalProperties": {
-                                "x-kubernetes-preserve-unknown-fields": true
-                              },
-                              "type": "object",
-                              "x-kubernetes-preserve-unknown-fields": true
-                            },
-                            "immutable": {
-                              "nullable": true,
-                              "type": "boolean"
-                            },
-                            "required": {
-                              "nullable": true,
-                              "type": "boolean"
-                            },
-                            "default": {
-                              "nullable": true,
-                              "x-kubernetes-preserve-unknown-fields": true
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "label",
-                            "kind"
-                          ],
-                          "type": "object"
-                        },
-                        "type": "array"
-                      },
-                      "services": {
-                        "items": {
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "label": {
-                              "type": "string"
-                            },
-                            "iconUrl": {
-                              "nullable": true,
-                              "type": "string"
-                            },
-                            "when": {
-                              "nullable": true,
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "label"
-                          ],
-                          "type": "object"
-                        },
-                        "type": "array"
-                      },
-                      "usageTemplate": {
-                        "nullable": true,
-                        "type": "string"
-                      }
+                    "additionalProperties": {
+                      "x-kubernetes-preserve-unknown-fields": true
                     },
-                    "required": [
-                      "name",
-                      "label"
-                    ],
-                    "type": "object"
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
                   },
                   "uiMetaUrl": {
                     "format": "uri",

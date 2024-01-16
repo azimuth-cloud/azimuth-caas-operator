@@ -52,42 +52,11 @@ async def _update_cluster_type(client, name, namespace, status):
 
 
 # TODO(johngarbutt): move to utils.cluster_type
-async def _fetch_text_from_url(url):
+async def _fetch_ui_meta_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             response.raise_for_status()
-            return await response.text()
-
-
-# TODO(johngarbutt): move to utils.cluster_type
-async def _fetch_ui_meta_from_url(url):
-    raw_yaml_str = await _fetch_text_from_url(url)
-    ui_meta = yaml.safe_load(raw_yaml_str)
-    # check its a dict at the top level?
-    ui_meta.setdefault("requiresSshKey", False)
-    ui_meta.setdefault("description", "")
-    ui_meta.setdefault("logo", "")
-    ui_meta["usageTemplate"] = ui_meta.get("usage_template", "")
-
-    raw_parameters = ui_meta.get("parameters", [])
-    params = []
-    for raw in raw_parameters:
-        raw.setdefault("immutable", True)  # is this correct?
-        raw.setdefault("required", True)
-        cluster_param = cluster_type_crd.ClusterParameter(**raw)
-        params.append(cluster_param)
-    ui_meta["parameters"] = params
-
-    raw_services = ui_meta.get("services", [])
-    services = []
-    for raw in raw_services:
-        raw["iconUrl"] = raw.get("icon_url", "")
-        services.append(cluster_type_crd.ClusterServiceSpec(**raw))
-    ui_meta["services"] = services
-
-    LOG.debug("Parsed UI Meta: %s", ui_meta)
-
-    return cluster_type_crd.ClusterUiMeta(**ui_meta)
+            return yaml.safe_load(await response.text())
 
 
 @kopf.on.create(registry.API_GROUP, "clustertypes")

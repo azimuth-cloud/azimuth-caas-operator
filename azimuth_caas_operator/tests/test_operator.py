@@ -32,7 +32,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
     @mock.patch.object(operator, "_update_cluster_type")
     @mock.patch.object(operator, "_fetch_ui_meta_from_url")
     async def test_cluster_type_create_success(self, mock_fetch, mock_update):
-        fake_meta = None
+        fake_meta = {}
         mock_fetch.return_value = fake_meta
 
         # TODO(johngarbutt): probably need to actually fetch the ui meta!
@@ -414,9 +414,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
-    @mock.patch.object(operator, "_fetch_text_from_url")
-    async def test_fetch_ui_meta_from_url_success(self, mock_fetch):
-        mock_fetch.return_value = """
+    @mock.patch("aiohttp.ClientSession.get")
+    async def test_fetch_ui_meta_from_url_success(self, mock_get):
+        mock_response = mock.MagicMock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.text = mock.AsyncMock()
+        mock_response.text.return_value = """
 name: "quicktest"
 label: "Quick Test"
 description: Very quick test
@@ -453,46 +456,47 @@ services:
     icon_url: https://icon2
 """  # noqa
 
+        mock_get.return_value.__aenter__.return_value = mock_response
+
         result = await operator._fetch_ui_meta_from_url("url")
         self.assertEqual(
-            cluster_type_crd.ClusterUiMeta(
-                name="quicktest",
-                label="Quick Test",
-                description="Very quick test",
-                logo="https://logo1",
-                requiresSshKey=False,
-                parameters=[
-                    cluster_type_crd.ClusterParameter(
-                        name="appliance_lifetime_hrs",
-                        label="Select appliance lifetime (hrs)",
-                        description="The appliance will be deleted after this time",
-                        immutable=True,
-                        kind="choice",
-                        default=12,
-                        options=dict(choices=[1, 8, 12]),
-                        required=True,
-                    ),
-                    cluster_type_crd.ClusterParameter(
-                        name="cluster_volume_size",
-                        label="Data volume size (GB)",
-                        description="The data volume will be available at `/data`.",
-                        immutable=True,
-                        kind="integer",
-                        default=10,
-                        required=True,
-                    ),
+            {
+                "name": "quicktest",
+                "label": "Quick Test",
+                "description": "Very quick test",
+                "logo": "https://logo1",
+                "requires_ssh_key": False,
+                "parameters": [
+                    {
+                        "name": "appliance_lifetime_hrs",
+                        "label": "Select appliance lifetime (hrs)",
+                        "description": "The appliance will be deleted after this time",
+                        "immutable": True,
+                        "kind": "choice",
+                        "default": 12,
+                        "options": {
+                            "choices": [1, 8, 12],
+                        },
+                    },
+                    {
+                        "name": "cluster_volume_size",
+                        "label": "Data volume size (GB)",
+                        "description": "The data volume will be available at `/data`.",
+                        "kind": "integer",
+                        "default": 10,
+                        "immutable": True,
+                    },
                 ],
-                usageTemplate=(
+                "usage_template": (
                     "available using the [Monitoring service]({{ monitoring.url }})."
                 ),
-                services=[
-                    cluster_type_crd.ClusterServiceSpec(
-                        name="webconsole",
-                        label="Web console",
-                        # note the change from icon_url
-                        iconUrl="https://icon2",
-                    )
+                "services": [
+                    {
+                        "name": "webconsole",
+                        "label": "Web console",
+                        "icon_url": "https://icon2",
+                    },
                 ],
-            ),
+            },
             result,
         )

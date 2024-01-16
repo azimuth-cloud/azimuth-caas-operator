@@ -294,8 +294,8 @@ spec:
           defaultMode: 256
           optional: true
   backoffLimit: {1 if remove else 0}
-  # timeout after 20 mins
-  activeDeadlineSeconds: 1200"""  # noqa
+  # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
+  activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa
     return yaml.safe_load(job_yaml)
 
 

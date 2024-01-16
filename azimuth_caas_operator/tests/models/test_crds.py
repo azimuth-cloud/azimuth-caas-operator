@@ -58,6 +58,9 @@ class TestModels(base.TestCase):
                   "playbook": {
                     "type": "string"
                   },
+                  "jobTimeout": {
+                    "type": "integer"
+                  },
                   "extraVars": {
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
@@ -263,6 +266,9 @@ class TestModels(base.TestCase):
                       },
                       "playbook": {
                         "type": "string"
+                      },
+                      "jobTimeout": {
+                        "type": "integer"
                       },
                       "extraVars": {
                         "additionalProperties": {

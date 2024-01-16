@@ -26,6 +26,9 @@ class ClusterTypeSpec(schema.BaseModel):
     gitVersion: str
     # Playbook is contained in the above git repo
     playbook: str
+    # The timeout (in seconds) to apply to the kubernetes job resource
+    # which creates, updates and deletes the cluster instances
+    jobTimeout: int = pydantic.Field(default=1200)
     # Option to add cloud specific details, like the image
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     # Option to define cluster-type specific details, like inventory

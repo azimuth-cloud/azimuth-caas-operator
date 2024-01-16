@@ -59,7 +59,6 @@ class TestModels(base.TestCase):
                     "type": "string"
                   },
                   "jobTimeout": {
-                    "nullable": true,
                     "type": "integer"
                   },
                   "extraVars": {
@@ -269,7 +268,6 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "jobTimeout": {
-                        "nullable": true,
                         "type": "integer"
                       },
                       "extraVars": {

@@ -34,6 +34,10 @@ class ClusterStatus(schema.BaseModel):
         default_factory=dict
     )
     error: schema.Optional[str] = None
+    createdByUsername: schema.Optional[str] = None
+    createdByUserId: schema.Optional[str] = None
+    updatedByUsername: schema.Optional[str] = None
+    updatedByUserId: schema.Optional[str] = None
 
 
 class ClusterSpec(schema.BaseModel):

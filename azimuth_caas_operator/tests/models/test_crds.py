@@ -329,6 +329,22 @@ class TestModels(base.TestCase):
                   "error": {
                     "nullable": true,
                     "type": "string"
+                  },
+                  "createdByUsername": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "createdByUserId": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "updatedByUsername": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "updatedByUserId": {
+                    "nullable": true,
+                    "type": "string"
                   }
                 },
                 "type": "object"

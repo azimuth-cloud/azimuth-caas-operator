@@ -222,6 +222,22 @@ class TestModels(base.TestCase):
                     },
                     "type": "object",
                     "x-kubernetes-preserve-unknown-fields": true
+                  },
+                  "createdByUsername": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "createdByUserId": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "updatedByUsername": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "updatedByUserId": {
+                    "nullable": true,
+                    "type": "string"
                   }
                 },
                 "required": [

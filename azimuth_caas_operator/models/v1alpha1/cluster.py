@@ -42,6 +42,10 @@ class ClusterSpec(schema.BaseModel):
     cloudCredentialsSecretName: str = pydantic.Field(min_length=1)
     # partially described by the cluster type ui-meta
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
+    createdByUsername: schema.Optional[str] = None
+    createdByUserId: schema.Optional[str] = None
+    updatedByUsername: schema.Optional[str] = None
+    updatedByUserId: schema.Optional[str] = None
 
 
 class Cluster(

@@ -78,6 +78,11 @@ async def cluster_type_updated(body, name, namespace, labels, **kwargs):
         LOG.info("No update of uimeta needed.")
     else:
         LOG.info("Updating UI Meta.")
+        if cluster_type.status.phase != cluster_type_crd.ClusterTypePhase.PENDING:
+            # make cluster type unavailable while we update it
+            cluster_type.status.phase = cluster_type_crd.ClusterTypePhase.PENDING
+            await _update_cluster_type(K8S_CLIENT, name, namespace, cluster_type.status)
+
         ui_meta_obj = await _fetch_ui_meta_from_url(cluster_type.spec.uiMetaUrl)
         cluster_type.status = cluster_type_crd.ClusterTypeStatus(
             phase=cluster_type_crd.ClusterTypePhase.AVAILABLE,

@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from azimuth_caas_operator.models import registry
@@ -30,12 +31,12 @@ async def get_cluster_type_info(
 
     cluster_version = cluster_type_raw.metadata.resourceVersion
     if cluster_version != cluster.spec.clusterTypeVersion:
-        # TODO(johngarbutt): move the cluster to the error state?
-        LOG.error(
+        # has been seen with a race in updating clusters
+        # and users creating a cluster
+        LOG.warning(
             f"Requested {cluster.spec.clusterTypeVersion} "
             f"but we found {cluster_version}"
         )
-        raise RuntimeError("User must specify the current cluster version!")
 
     await _cache_client_type(client, cluster, cluster_type_raw.spec, cluster_version)
     return cluster_type.spec
@@ -45,12 +46,22 @@ async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version
     cluster_resource = await client.api(registry.API_VERSION).resource(
         "clusters/status"
     )
+    patchedTimestamp = None
+    # if we have an existing version, add a patched timestamp
+    if cluster.status.clusterTypeVersion:
+        now = datetime.datetime.utcnow()
+        patchedTimestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     await cluster_resource.patch(
         cluster.metadata.name,
         dict(
+            # always update to latest available
+            # otherwise we race cluster type updates
+            clusterTypeVersion=cluster_version,
             status=dict(
                 clusterTypeVersion=cluster_version,
                 clusterTypeSpec=cluster_type_spec,
+                patchedTimestamp=patchedTimestamp,
             ),
         ),
         namespace=cluster.metadata.namespace,

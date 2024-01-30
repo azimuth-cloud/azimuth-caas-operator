@@ -22,7 +22,7 @@ spec:
             severity: warning
         - alert: AzimuthCaasClusterTypeNotReady
           expr: >-
-            sum(azimuth_caas_clustertypes_phase{phase!="Ready"}) by(cluster_namespace, cluster_name) > 0
+            sum(azimuth_caas_clustertypes_phase{phase!="Available"}) by(cluster_namespace, cluster_name) > 0
           for: 1h
           annotations:
             description: >-

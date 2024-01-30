@@ -54,7 +54,9 @@ async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version
     if cluster_version != cluster.spec.clusterTypeVersion:
         cluster_resource = await client.api(registry.API_VERSION).resource("clusters")
         await cluster_resource.patch(
-            cluster.metadata.name, dict(clusterTypeVersion=cluster_version)
+            cluster.metadata.name,
+            dict(clusterTypeVersion=cluster_version),
+            namespace=cluster.metadata.namespace,
         )
 
     cluster_status_resource = await client.api(registry.API_VERSION).resource(

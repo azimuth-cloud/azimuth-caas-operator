@@ -482,7 +482,7 @@
           "refId": "A"
         }
       ],
-      "title": "Ready apps",
+      "title": "Ready clusters",
       "type": "stat"
     },
     {
@@ -551,7 +551,7 @@
           "refId": "A"
         }
       ],
-      "title": "Failed apps",
+      "title": "Failed clusters",
       "type": "stat"
     },
     {
@@ -630,7 +630,7 @@
           "refId": "A"
         }
       ],
-      "title": "Cluster Templates",
+      "title": "Cluster Types",
       "type": "stat"
     },
     {
@@ -724,7 +724,7 @@
           "refId": "B"
         }
       ],
-      "title": "Apps by template",
+      "title": "Clusters by cluster type",
       "type": "timeseries"
     },
     {

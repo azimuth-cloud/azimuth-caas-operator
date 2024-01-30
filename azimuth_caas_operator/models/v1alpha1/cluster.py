@@ -30,6 +30,9 @@ class ClusterStatus(schema.BaseModel):
     updatedTimestamp: schema.Optional[datetime.datetime] = pydantic.Field(
         None, description="The timestamp at which the resource was updated."
     )
+    patchedTimestamp: schema.Optional[datetime.datetime] = pydantic.Field(
+        None, description="The timestamp at which version was last changed."
+    )
     outputs: schema.Optional[schema.Dict[str, schema.Any]] = pydantic.Field(
         default_factory=dict
     )

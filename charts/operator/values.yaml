@@ -45,7 +45,7 @@ metrics:
   enabled: false
   # Configuration for the dashboard
   dashboard:
-    enabled: false
+    enabled: true
     labels:
       grafana_dashboard: "1"
   prometheus:

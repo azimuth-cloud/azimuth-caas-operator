@@ -21,7 +21,7 @@
       }
     ]
   },
-  "editable": true,
+  "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": 41,
@@ -1162,7 +1162,7 @@
   "timepicker": {},
   "timezone": "utc",
   "title": "Azimuth / CaaS Clusters",
-  "uid": "1qBY6ro4a",
+  "uid": "1qBY6ro4b",
   "version": 10,
   "weekStart": ""
 }

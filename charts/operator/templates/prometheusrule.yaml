@@ -1,0 +1,35 @@
+{{- if and .Values.metrics.enabled .Values.metrics.prometheus.rules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "azimuth-caas-operator.fullname" . }}
+  labels: {{ include "azimuth-caas-operator.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: azimuth-caas-operator.rules
+      rules:
+        - alert: AzimuthCaasClusterNotReady
+          expr: >-
+            sum(azimuth_caas_clusters_phase{phase!="Ready"}) by(cluster_namespace, cluster_name) > 0
+          for: 1h
+          annotations:
+            description: >-
+              CaaS cluster
+              {{ "{{" }} $labels.cluster_namespace {{ "}}" }}/{{ "{{" }} $labels.cluster_name {{ "}}" }}
+              has been in a non-ready state for longer than one hour.
+            summary: CaaS cluster has been in a non-ready state for more than one hour.
+          labels:
+            severity: warning
+        - alert: AzimuthCaasClusterTypeNotReady
+          expr: >-
+            sum(azimuth_caas_clustertypes_phase{phase!="Ready"}) by(cluster_namespace, cluster_name) > 0
+          for: 1h
+          annotations:
+            description: >-
+              CaaS cluster template
+              {{ "{{" }} $labels.cluster_name {{ "}}" }}
+              has been in a non-ready state for longer than one hour.
+            summary: CaaS cluster type has been in a non-ready state for more than one hour.
+          labels:
+            severity: warning
+{{- end }}

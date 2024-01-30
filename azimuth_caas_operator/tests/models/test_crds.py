@@ -334,6 +334,12 @@ class TestModels(base.TestCase):
                     "nullable": true,
                     "type": "string"
                   },
+                  "patchedTimestamp": {
+                    "description": "The timestamp at which version was last changed.",
+                    "format": "date-time",
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "outputs": {
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true

@@ -45,7 +45,7 @@ metrics:
   enabled: false
   # Configuration for the dashboard
   dashboard:
-    enabled: false
+    enabled: true
     labels:
       grafana_dashboard: "1"
   prometheus:
@@ -63,8 +63,8 @@ metrics:
       - apiGroups:
           - caas.azimuth.stackhpc.com
         resources:
-          - clusters
-          - clustertypes
+          - cluster
+          - clustertype
         verbs:
           - list
           - watch
@@ -81,7 +81,7 @@ metrics:
           - groupVersionKind:
               group: caas.azimuth.stackhpc.com
               version: v1alpha1
-              kind: Clusters
+              kind: Cluster
             metricNamePrefix: azimuth_caas_clusters
             labelsFromPath:
               cluster_namespace: [metadata, namespace]
@@ -100,7 +100,7 @@ metrics:
           - groupVersionKind:
               group: caas.azimuth.stackhpc.com
               version: v1alpha1
-              kind: ClusterTypes
+              kind: ClusterType
             metricNamePrefix: azimuth_caas_clustertypes
             labelsFromPath:
               cluster_type_namespace: [metadata, namespace]

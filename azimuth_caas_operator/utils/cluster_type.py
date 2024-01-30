@@ -43,21 +43,26 @@ async def get_cluster_type_info(
 
 
 async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version):
-    cluster_resource = await client.api(registry.API_VERSION).resource(
-        "clusters/status"
-    )
     patchedTimestamp = None
     # if we have an existing version, add a patched timestamp
     if cluster.status.clusterTypeVersion:
         now = datetime.datetime.utcnow()
         patchedTimestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    await cluster_resource.patch(
+    # if we didn't use the requested version,
+    # update that to match
+    if cluster_version != cluster.spec.clusterTypeVersion:
+        cluster_resource = await client.api(registry.API_VERSION).resource("clusters")
+        await cluster_resource.patch(
+            cluster.metadata.name, dict(clusterTypeVersion=cluster_version)
+        )
+
+    cluster_status_resource = await client.api(registry.API_VERSION).resource(
+        "clusters/status"
+    )
+    await cluster_status_resource.patch(
         cluster.metadata.name,
         dict(
-            # always update to latest available
-            # otherwise we race cluster type updates
-            clusterTypeVersion=cluster_version,
             status=dict(
                 clusterTypeVersion=cluster_version,
                 clusterTypeSpec=cluster_type_spec,

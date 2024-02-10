@@ -23,6 +23,7 @@ options:
 additional_build_steps:
   prepend_base:
     # Give the user with UID 1000 a name
+    - RUN microdnf install shadow-utils -y
     - |
         RUN groupadd --gid 1000 runner && \
         useradd \

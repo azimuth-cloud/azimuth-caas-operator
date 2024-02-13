@@ -7,6 +7,11 @@ jobs:
   build_push_operator_image:
     name: Build and push operator image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # needed for signing the images with GitHub OIDC Token
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -38,10 +43,15 @@ jobs:
           push: true
           tags: ${{ steps.image-meta.outputs.tags }}
           labels: ${{ steps.image-meta.outputs.labels }}
+          sign_image: true
 
   build_push_ansible_runner_image:
     name: Build and push ansible runner image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # needed for signing the images with GitHub OIDC Token
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -83,6 +93,7 @@ jobs:
           push: true
           tags: ${{ steps.image-meta.outputs.tags }}
           labels: ${{ steps.image-meta.outputs.labels }}
+          sign_image: true
 
   mirror_ara_image:
     name: Mirror and tag the latest ARA image

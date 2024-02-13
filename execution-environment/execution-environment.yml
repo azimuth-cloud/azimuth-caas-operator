@@ -5,15 +5,15 @@ version: 3
 
 images:
   base_image:
-    name: rockylinux:9-minimal
+    name: registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 dependencies:
   python_interpreter:
     package_system: python3
   ansible_core:
-    package_pip: ansible-core==2.15.1
+    package_pip: ansible-core==2.15.9
   ansible_runner:
-    package_pip: ansible-runner==2.3.3
+    package_pip: ansible-runner==2.3.4
   python: requirements.txt
   system: bindep.txt
 
@@ -23,6 +23,7 @@ options:
 additional_build_steps:
   prepend_base:
     # Give the user with UID 1000 a name
+    - RUN microdnf install shadow-utils -y
     - |
         RUN groupadd --gid 1000 runner && \
         useradd \
@@ -38,3 +39,4 @@ additional_build_steps:
     # We don't want these in the final container - only the builder
     # It is required to build the wheel for netifaces
     - RUN microdnf install gcc python3-devel -y
+    - RUN microdnf upgrade --refresh --best --nodocs --noplugins --setopt=install_weak_deps=0 -y

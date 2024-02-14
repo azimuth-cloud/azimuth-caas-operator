@@ -436,11 +436,15 @@ async def get_job_error_message(client, job):
         # that has an outputs key in its result object
         if event_details["event"] == "runner_on_failed":
             event_data = event_details.get("event_data", {})
+            task = event_data.get("task", "Unknown Task")
+
+            msg = "<message hidden for security reasons>"
             result = event_data.get("res", {})
-            no_log = result.pop("_ansible_no_log", False)
-            if result and not no_log:
-                return result.get("msg", json.dumps(result, indent=2))
-            return None
+            no_log = result.get("_ansible_no_log") == "true"
+            if result and not no_log and "msg" in result:
+                msg = result["msg"]
+
+            return f"Task:'{task}' Error:\n{msg}"
 
 
 async def _get_most_recent_pod_for_job(client, job_name, namespace):

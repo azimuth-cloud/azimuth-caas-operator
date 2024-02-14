@@ -63,8 +63,8 @@ metrics:
       - apiGroups:
           - caas.azimuth.stackhpc.com
         resources:
-          - clusters
-          - clustertypes
+          - cluster
+          - clustertype
         verbs:
           - list
           - watch

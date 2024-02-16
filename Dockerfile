@@ -50,4 +50,12 @@ ENV PYTHONUNBUFFERED 1
 # By default, run the operator using kopf
 USER $APP_UID
 ENTRYPOINT ["tini", "-g", "--"]
-CMD ["kopf", "run", "--module", "azimuth_caas_operator.operator", "--all-namespaces"]
+CMD [ \
+    "/venv/bin/kopf", \
+    "run", \
+    "--module", \
+    "azimuth_caas_operator.operator", \
+    "--all-namespaces", \
+    "--liveness", \
+    "http://0.0.0.0:8000/healthz" \
+]

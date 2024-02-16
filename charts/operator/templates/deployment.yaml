@@ -33,6 +33,10 @@ spec:
               value: {{ quote .Values.config.ansibleRunnerImage.repository }}
             - name: ANSIBLE_RUNNER_IMAGE_TAG
               value: {{ default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag | quote }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
           resources: {{ toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: tmp

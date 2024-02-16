@@ -36,7 +36,7 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push image
-        uses: stackhpc/github-actions/docker-multiarch-build-push@master
+        uses: stackhpc/github-actions/docker-multiarch-build-push@add-sarif-catagory
         with:
           cache-key: azimuth-caas-operator
           context: .
@@ -87,7 +87,7 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push image
-        uses: stackhpc/github-actions/docker-multiarch-build-push@master
+        uses: stackhpc/github-actions/docker-multiarch-build-push@add-sarif-catagory
         with:
           cache-key: azimuth-caas-operator-ee
           context: ./ee-context/

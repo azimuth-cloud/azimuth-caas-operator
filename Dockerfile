@@ -51,7 +51,7 @@ ENV PYTHONUNBUFFERED 1
 USER $APP_UID
 ENTRYPOINT ["tini", "-g", "--"]
 CMD [ \
-    "/venv/bin/kopf", \
+    "kopf", \
     "run", \
     "--module", \
     "azimuth_caas_operator.operator", \

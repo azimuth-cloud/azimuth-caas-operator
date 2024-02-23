@@ -131,6 +131,11 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
 
+    # If cluster reconciliation is paused, don't do anything else
+    if cluster.spec.paused:
+        LOG.info(f"Cluster {name} in {namespace} is paused - no action taken")
+        return
+
     # Check for an existing create job
     create_job = await ansible_runner.get_create_job_for_cluster(
         K8S_CLIENT, name, namespace
@@ -216,6 +221,11 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # If cluster reconciliation is paused, don't do anything else
+    if cluster.spec.paused:
+        LOG.info(f"Cluster {name} in {namespace} is paused - no action taken")
+        return
 
     # Fail if create is still in progress
     # Note that we don't care if create worked.
@@ -312,6 +322,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # If cluster reconciliation is paused, don't do anything else
+    if cluster.spec.paused:
+        LOG.info(f"Cluster {name} in {namespace} is paused - no action taken")
+        return
 
     # Check for any pending jobs
     # and fail if we are still running a create job

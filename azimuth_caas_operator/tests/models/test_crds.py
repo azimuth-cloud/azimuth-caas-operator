@@ -238,6 +238,9 @@ class TestModels(base.TestCase):
                   "updatedByUserId": {
                     "nullable": true,
                     "type": "string"
+                  },
+                  "paused": {
+                    "type": "boolean"
                   }
                 },
                 "required": [

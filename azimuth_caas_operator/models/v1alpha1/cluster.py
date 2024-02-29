@@ -49,6 +49,7 @@ class ClusterSpec(schema.BaseModel):
     createdByUserId: schema.Optional[str] = None
     updatedByUsername: schema.Optional[str] = None
     updatedByUserId: schema.Optional[str] = None
+    paused: bool = False
 
 
 class Cluster(

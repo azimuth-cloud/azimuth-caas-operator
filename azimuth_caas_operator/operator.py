@@ -358,7 +358,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             # let kopf remove finalizer and complete the cluster delete
             return
 
-        else:
+        if cluster.status.phase != cluster_crd.ClusterPhase.FAILED:
             error = "Failed to delete platform. Please contact Azimuth operators."
             reason = await ansible_runner.get_job_error_message(K8S_CLIENT, delete_job)
             if reason:
@@ -371,13 +371,13 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
                 cluster_crd.ClusterPhase.FAILED,
                 error=error,
             )
-            # TODO(johngarbutt): how does a user retry the delete, eek!
-            LOG.error(
-                f"Delete job failed for {name} in {namespace} because: {reason} "
-                "Please fix the problem, "
-                "then delete all failed jobs to trigger a new delete job."
-            )
-            raise RuntimeError(f"Failed to delete {name} in {namespace}")
+        # TODO(johngarbutt): how does a user retry the delete, eek!
+        LOG.error(
+            f"Delete job failed for {name} in {namespace} because: {reason} "
+            "Please fix the problem, "
+            "then delete all failed jobs to trigger a new delete job."
+        )
+        raise RuntimeError(f"Failed to delete {name} in {namespace}")
 
     # delete job not yet created, lets create one
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)

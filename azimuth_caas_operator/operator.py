@@ -371,7 +371,12 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
                 cluster_crd.ClusterPhase.FAILED,
                 error=error,
             )
-        # TODO(johngarbutt): how does a user retry the delete, eek!
+        else:
+            # we already failed last time,
+            # so unlabel the job this time, so we trigger a retry next time
+            await ansible_runner.unlabel_job(K8S_CLIENT, delete_job)
+            # TODO(johngarbutt): should we set ttlSecondsAfterFinished on delete jobs?
+
         LOG.error(
             f"Delete job failed for {name} in {namespace} because: {reason} "
             "Please fix the problem, "

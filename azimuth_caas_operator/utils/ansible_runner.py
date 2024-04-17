@@ -2,15 +2,15 @@ import base64
 import json
 import logging
 import os
-
 import yaml
-from cryptography.hazmat.primitives import serialization
+
 from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives import serialization
+
 from easykube import ApiError
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
-from azimuth_caas_operator.models.v1alpha1 import \
-    cluster_type as cluster_type_crd
+from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 from azimuth_caas_operator.utils import image as image_utils
 from azimuth_caas_operator.utils import k8s

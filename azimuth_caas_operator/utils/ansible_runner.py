@@ -15,7 +15,6 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 from azimuth_caas_operator.utils import image as image_utils
 from azimuth_caas_operator.utils import k8s
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -415,7 +414,7 @@ async def _get_job_outputs(client, job):
         if event_details["event"] == "runner_on_ok":
             event_data = event_details["event_data"]
             task_action = event_data["task_action"]
-            if task_action == "debug":
+            if task_action in {"debug", "ansible.builtin.debug"}:
                 debug_result = event_data.get("res", {})
                 outputs = debug_result.get("outputs", {})
                 if isinstance(outputs, dict):

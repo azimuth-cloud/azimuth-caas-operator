@@ -295,8 +295,14 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         self, mock_pod_names, mock_get_lines, mock_log
     ):
         mock_pod_names.return_value = "pod1"
-        fake_event = dict(event_data=dict(task="stuff"))
-        mock_get_lines.return_value = ["foo", "bar", json.dumps(fake_event)]
+        fake_event = dict(event="event_name", event_data=dict(task="stuff"))
+        not_event = dict(data=dict(one="two"))
+        mock_get_lines.return_value = [
+            "foo",
+            "bar",
+            json.dumps(not_event),
+            json.dumps(fake_event),
+        ]
 
         event = await ansible_runner._get_ansible_runner_events("client", "job", "ns")
 

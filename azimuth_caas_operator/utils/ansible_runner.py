@@ -250,7 +250,7 @@ spec:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
-{'''
+{f'''
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
@@ -407,7 +407,6 @@ async def _get_job_outputs(client, job):
         client, job.metadata.name, job.metadata.namespace
     )
     events.reverse()
-    debug_result = None
     for event_details in events:
         # look for the last debug action
         # that has an outputs key in its result object
@@ -488,9 +487,11 @@ async def _get_ansible_runner_events(client, job_name, namespace):
     for line in log_lines:
         try:
             json_log = json.loads(line)
-            json_events.append(json_log)
         except json.decoder.JSONDecodeError:
             LOG.warning("failed to decode log, most likely not ansible json output.")
+        else:
+            if "event" in json_log:
+                json_events.append(json_log)
     return json_events
 
 

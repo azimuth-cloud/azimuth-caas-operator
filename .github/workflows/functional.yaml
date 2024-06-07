@@ -20,6 +20,26 @@ jobs:
     - name: Create k8s Kind Cluster
       uses: helm/kind-action@v1.9.0
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Python packages
+      run: |
+        set -e
+        python -m pip install --upgrade pip
+        python -m pip install --no-deps -r ./requirements.txt
+        python -m pip install --no-deps -e .
+
+    - name: Generate CRDs
+      run: |
+        kcr_generate \
+          azimuth_caas_operator.models \
+          caas.azimuth.stackhpc.com \
+          ./charts/operator/files/crds \
+          --category azimuth
+
     - name: Run test
       timeout-minutes: 10
       run: tools/functional_test.sh

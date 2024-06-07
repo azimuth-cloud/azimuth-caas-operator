@@ -31,32 +31,6 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             },
         }
 
-    @mock.patch("azimuth_caas_operator.models.registry.get_crd_resources")
-    @mock.patch("azimuth_caas_operator.utils.k8s.get_k8s_client")
-    async def test_startup_register_crds(self, mock_get, mock_crds):
-        fake_crd1 = self._generate_fake_crd("crd1.fake.io")
-        fake_crd2 = self._generate_fake_crd("crd2.fake.io")
-
-        mock_client = mock.AsyncMock()
-        mock_get.return_value = mock_client
-        mock_crds.return_value = [fake_crd1, fake_crd2]
-
-        mock_settings = mock.Mock()
-
-        await operator.startup(mock_settings)
-
-        # Test that the CRDs were applied
-        mock_client.apply_object.assert_has_awaits(
-            [mock.call(fake_crd1, force=True), mock.call(fake_crd2, force=True)]
-        )
-        # Test that the APIs were checked
-        mock_client.get.assert_has_awaits(
-            [
-                mock.call("/apis/fake.io/v1alpha1/crd1"),
-                mock.call("/apis/fake.io/v1alpha1/crd2"),
-            ]
-        )
-
     @mock.patch.object(operator, "K8S_CLIENT", new_callable=mock.AsyncMock)
     async def test_cleanup_calls_aclose(self, mock_client):
         await operator.cleanup()

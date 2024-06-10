@@ -9,9 +9,8 @@ from .models import registry
 
 
 class Metric:
-    """
-    Class for formatting info and guage metrics for Kubernetes objects.
-    """
+    """Represents a metric."""
+
     # The name of the metric
     name = None
     # The type of the metric - info or guage
@@ -30,29 +29,22 @@ class Metric:
         self._objs.append(obj)
 
     def labels(self, obj):
-        """
-        The labels for the given object.
-        """
+        """The labels for the given object."""
         raise NotImplementedError
 
     def value(self, obj):
-        """
-        The value for the given object.
-        """
+        """The value for the given object."""
         return 1
 
     def records(self):
-        """
-        Returns the records for the metric, i.e. a list of (labels, value) tuples.
-        """
+        """Returns the records for the metric, i.e. a list of (labels, value) tuples."""
         for obj in self._objs:
             yield self.labels(obj), self.value(obj)
 
 
 class ClusterTypePhase(Metric):
-    """
-    Metric for the phase of a cluster type.
-    """
+    """Metric for the phase of a cluster type."""
+
     name = "azimuth_caas_clustertypes_phase"
     description = "Cluster type phase"
     resource = "clustertypes"
@@ -66,9 +58,8 @@ class ClusterTypePhase(Metric):
 
 
 class ClusterPhase(Metric):
-    """
-    Metric for the phase of a cluster.
-    """
+    """Metric for the phase of a cluster."""
+
     name = "azimuth_caas_clusters_phase"
     description = "Cluster phase"
     resource = "clusters"
@@ -84,16 +75,12 @@ class ClusterPhase(Metric):
 
 
 def escape(content):
-    """
-    Escape the given content for use in metric output.
-    """
-    return content.replace('\\', r'\\').replace('\n', r'\n').replace('"', r'\"')
+    """Escape the given content for use in metric output."""
+    return content.replace("\\", r"\\").replace("\n", r"\n").replace('"', r"\"")
 
 
 def render_openmetrics(*metrics):
-    """
-    Renders the metrics using OpenMetrics text format and returns (content type, content).
-    """
+    """Renders the metrics using OpenMetrics text format."""
     output = []
     for metric in metrics:
         output.append(f"# TYPE {metric.name} {metric.type}\n")
@@ -103,10 +90,7 @@ def render_openmetrics(*metrics):
         for labels, value in metric.records():
             if labels:
                 labelstr = "{{{0}}}".format(
-                    ",".join([
-                        f'{k}="{escape(v)}"'
-                        for k, v in sorted(labels.items())
-                    ])
+                    ",".join([f'{k}="{escape(v)}"' for k, v in sorted(labels.items())])
                 )
             else:
                 labelstr = ""
@@ -115,14 +99,12 @@ def render_openmetrics(*metrics):
 
     return (
         "application/openmetrics-text; version=1.0.0; charset=utf-8",
-        "".join(output).encode("utf-8")
+        "".join(output).encode("utf-8"),
     )
 
 
 async def metrics_handler(ekclient, request):
-    """
-    Produce metrics for the operator.
-    """
+    """Produce metrics for the operator."""
     ekapi = ekclient.api(registry.API_VERSION)
 
     cluster_type_phase_metric = ClusterTypePhase()
@@ -133,26 +115,26 @@ async def metrics_handler(ekclient, request):
         cluster_type_phase_metric.add_obj(cluster_type)
 
     clusters = await ekapi.resource("clusters")
-    async for cluster in clusters.list(all_namespaces = True):
+    async for cluster in clusters.list(all_namespaces=True):
         cluster_phase_metric.add_obj(cluster)
 
-    content_type, content = render_openmetrics(cluster_type_phase_metric, cluster_phase_metric)
-    return web.Response(headers = { "Content-Type": content_type }, body = content)
+    content_type, content = render_openmetrics(
+        cluster_type_phase_metric, cluster_phase_metric
+    )
+    return web.Response(headers={"Content-Type": content_type}, body=content)
 
 
 async def metrics_server():
-    """
-    Launches a lightweight HTTP server to serve the metrics endpoint.
-    """
+    """Launch a lightweight HTTP server to serve the metrics endpoint."""
     ekclient = easykube.Configuration.from_environment().async_client()
 
     app = web.Application()
     app.add_routes([web.get("/metrics", functools.partial(metrics_handler, ekclient))])
 
-    runner = web.AppRunner(app, handle_signals = False)
+    runner = web.AppRunner(app, handle_signals=False)
     await runner.setup()
 
-    site = web.TCPSite(runner, "0.0.0.0", "8080", shutdown_timeout = 1.0)
+    site = web.TCPSite(runner, "0.0.0.0", "8080", shutdown_timeout=1.0)
     await site.start()
 
     # Sleep until we need to clean up

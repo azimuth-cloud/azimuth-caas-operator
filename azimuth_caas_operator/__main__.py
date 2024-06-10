@@ -9,12 +9,12 @@ async def main():
     """
     Run the operator and the metrics server together.
     """
-    from . import operator
+    # This import is required to pick up the operator handlers
+    from . import operator  # noqa
 
     kopf.configure()
     tasks = await kopf.spawn_tasks(
-        clusterwide = True,
-        liveness_endpoint = "http://0.0.0.0:8000/healthz"
+        clusterwide=True, liveness_endpoint="http://0.0.0.0:8000/healthz"
     )
     tasks.append(asyncio.create_task(metrics.metrics_server()))
     await kopf.run_tasks(tasks)

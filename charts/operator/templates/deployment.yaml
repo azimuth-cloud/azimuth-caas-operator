@@ -33,6 +33,10 @@ spec:
               value: {{ quote .Values.config.ansibleRunnerImage.repository }}
             - name: ANSIBLE_RUNNER_IMAGE_TAG
               value: {{ default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag | quote }}
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           startupProbe:

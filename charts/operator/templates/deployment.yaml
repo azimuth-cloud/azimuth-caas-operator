@@ -25,14 +25,18 @@ spec:
           image: {{ printf "%s:%s" .Values.image.repository (default .Chart.AppVersion .Values.image.tag) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: CONSUL_HTTP_ADDR
-              value: {{ tpl .Values.config.consulUrl . | quote }}
             - name: ARA_API_SERVER
               value: {{ tpl .Values.config.araUrl . | quote }}
             - name: ANSIBLE_RUNNER_IMAGE_REPO
               value: {{ quote .Values.config.ansibleRunnerImage.repository }}
             - name: ANSIBLE_RUNNER_IMAGE_TAG
               value: {{ default .Chart.AppVersion .Values.config.ansibleRunnerImage.tag | quote }}
+            - name: GLOBAL_EXTRAVARS_SECRET
+              value: {{
+                include "azimuth-caas-operator.fullname" . |
+                  printf "%s/%s-extravars" .Release.Namespace |
+                  quote
+              }}
           ports:
             - name: metrics
               containerPort: 8080

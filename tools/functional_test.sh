@@ -16,7 +16,6 @@ helm upgrade azimuth-caas-operator ./charts/operator \
   --set-string image.tag=${GITHUB_SHA::7} \
   --set-string config.ansibleRunnerImage.tag=${GITHUB_SHA::7} \
   --set-string ara.image.tag=${GITHUB_SHA::7} \
-  --set-string config.consulUrl=fakeconsul
 
 # add required secrets, not that they care used for this test
 echo "foo" >clouds.yaml

@@ -165,7 +165,6 @@ spec:
     @mock.patch.dict(
         os.environ,
         {
-            "CONSUL_HTTP_ADDR": "fakeconsulurl",
             "ARA_API_SERVER": "fakearaurl",
         },
         clear=True,
@@ -173,8 +172,14 @@ spec:
     def test_get_job_env_configmap(self):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
+        global_extravars = {
+            "global_extravar1": "value1",
+            "global_extravar2": "value2",
+        }
 
-        config = ansible_runner.get_env_configmap(cluster, cluster_type.spec, "fakekey")
+        config = ansible_runner.get_env_configmap(
+            cluster, cluster_type.spec, "fakekey", global_extravars
+        )
         expected = """\
 apiVersion: v1
 data:
@@ -182,14 +187,12 @@ data:
 
     ARA_API_SERVER: fakearaurl
 
-    CONSUL_HTTP_ADDR: fakeconsulurl
-
     '
   extravars: "cluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeclusterID1\\n\\
     cluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file:\\
-    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: bar\\nnested:\\n  baz:\\
-    \\ bob\\nrandom_bool: true\\nrandom_dict:\\n  random_str: foo\\nrandom_int: 8\\nvery_random_int:\\
-    \\ 42\\n"
+    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: bar\\nglobal_extravar1:\\
+    \\ value1\\nglobal_extravar2: value2\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n\\
+    \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
 kind: ConfigMap
 metadata:
   name: test1-create

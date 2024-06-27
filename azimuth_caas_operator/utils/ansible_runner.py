@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import os
+import typing
 import yaml
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -80,14 +81,48 @@ async def ensure_deploy_key_secret(client, cluster: cluster_crd.Cluster):
     return base64.b64decode(secret.data["id_ed25519.pub"]).decode()
 
 
+async def get_global_extravars(client):
+    """
+    Retrieves the global extra vars from the specified secret.
+    """
+    # The secret is specified in the form namespace/name
+    secret_info = os.environ.get("GLOBAL_EXTRAVARS_SECRET")
+    if not secret_info:
+        return {}
+    secret_resource = await client.api("v1").resource("secrets")
+    secret_namespace, secret_name = secret_info.split("/", maxsplit=1)
+    try:
+        secret = await secret_resource.fetch(secret_name, namespace=secret_namespace)
+    except ApiError as exc:
+        if exc.status_code == 404:
+            # If the secret does not exist, log it but proceed with no global extravars
+            LOG.warn("global extravars secret was specified but does not exist")
+            return {}
+        else:
+            raise
+    # We parse each value as YAML and merge them together
+    # If the value doesn't parse as YAML, log it but proceed as if the key didn't exist
+    global_extravars = {}
+    for key, b64data in sorted(secret.get("data", {}).items()):
+        data = base64.b64decode(b64data)
+        try:
+            global_extravars.update(yaml.safe_load(data))
+        except yaml.YAMLError:
+            LOG.exception("global extravars key is not valid YAML - %s", key)
+    return global_extravars
+
+
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
+    global_extravars: typing.Dict[str, typing.Any],
     remove=False,
     update=False,
 ):
-    extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
+    extraVars = dict(global_extravars)
+    extraVars.update(cluster_type_spec.extraVars)
+    extraVars.update(cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.status.clusterID
     extraVars["cluster_type"] = cluster.spec.clusterTypeName
@@ -98,10 +133,6 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
 
     envvars = dict(cluster_type_spec.envVars)
-    try:
-        envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
-    except KeyError:
-        raise RuntimeError("CONSUL_HTTP_ADDR is not set")
     if "ARA_API_SERVER" in os.environ:
         envvars["ARA_API_CLIENT"] = "http"
         envvars["ARA_API_SERVER"] = os.environ["ARA_API_SERVER"]
@@ -568,6 +599,9 @@ async def start_job(
             namespace=namespace,
         )
 
+    # Extract the global extravars from the specified configmap, if specified
+    global_extravars = await get_global_extravars(client)
+
     # ensure that we have generated an SSH key for the cluster
     cluster_deploy_ssh_public_key = await ensure_deploy_key_secret(client, cluster)
 
@@ -577,6 +611,7 @@ async def start_job(
             cluster,
             cluster_type_spec,
             cluster_deploy_ssh_public_key,
+            global_extravars,
             remove=remove,
             update=update,
         ),

@@ -81,6 +81,65 @@ async def ensure_deploy_key_secret(client, cluster: cluster_crd.Cluster):
     return base64.b64decode(secret.data["id_ed25519.pub"]).decode()
 
 
+async def ensure_service_account(client, cluster: cluster_crd.Cluster):
+    """
+    Ensures that a service account exists with the given name.
+    """
+    service_account = await client.apply_object(
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "name": f"{cluster.metadata.name}-tfstate",
+                "namespace": cluster.metadata.namespace,
+                "ownerReferences": [
+                    {
+                        "apiVersion": cluster.api_version,
+                        "kind": cluster.kind,
+                        "name": cluster.metadata.name,
+                        "uid": cluster.metadata.uid,
+                    },
+                ],
+            },
+        },
+        force=True,
+    )
+    # If there is a cluster role specified, bind it to the service account
+    if "ANSIBLE_RUNNER_CLUSTER_ROLE" in os.environ:
+        await client.apply_object(
+            {
+                "apiVersion": "rbac.authorization.k8s.io/v1",
+                "kind": "RoleBinding",
+                "metadata": {
+                    "name": service_account.metadata.name,
+                    "namespace": cluster.metadata.namespace,
+                    "ownerReferences": [
+                        {
+                            "apiVersion": cluster.api_version,
+                            "kind": cluster.kind,
+                            "name": cluster.metadata.name,
+                            "uid": cluster.metadata.uid,
+                        },
+                    ],
+                },
+                "roleRef": {
+                    "apiGroup": "rbac.authorization.k8s.io",
+                    "kind": "ClusterRole",
+                    "name": os.environ["ANSIBLE_RUNNER_CLUSTER_ROLE"],
+                },
+                "subjects": [
+                    {
+                        "kind": "ServiceAccount",
+                        "name": service_account.metadata.name,
+                        "namespace": service_account.metadata.namespace,
+                    },
+                ],
+            },
+            force=True,
+        )
+    return service_account.metadata.name
+
+
 async def get_global_extravars(client):
     """
     Retrieves the global extra vars from the specified secret.
@@ -158,6 +217,7 @@ def get_env_configmap(
 def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
+    service_account_name: str,
     remove=False,
     update=False,
 ):
@@ -193,6 +253,7 @@ spec:
       # auto-remove delete jobs after one hour
       ttlSecondsAfterFinished: 3600
  ''' if remove else ''}
+      serviceAccountName: {service_account_name}
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -607,9 +668,18 @@ async def start_job(
         force=True,
     )
 
+    # Ensure that the service account exists for the cluster
+    service_account_name = await ensure_service_account(client, cluster)
+
     # create the job
     await client.create_object(
-        get_job(cluster, cluster_type_spec, remove=remove, update=update)
+        get_job(
+            cluster,
+            cluster_type_spec,
+            service_account_name,
+            remove=remove,
+            update=update,
+        )
     )
 
 

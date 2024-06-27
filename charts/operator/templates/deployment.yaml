@@ -37,6 +37,8 @@ spec:
                   printf "%s/%s-extravars" .Release.Namespace |
                   quote
               }}
+            - name: ANSIBLE_RUNNER_CLUSTER_ROLE
+              value: {{ include "azimuth-caas-operator.fullname" . }}:tfstate
           ports:
             - name: metrics
               containerPort: 8080

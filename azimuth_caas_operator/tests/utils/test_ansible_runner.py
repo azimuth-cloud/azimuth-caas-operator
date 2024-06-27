@@ -5,6 +5,8 @@ import unittest
 from unittest import mock
 import yaml
 
+from easykube.rest.util import PropertyDict
+
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.tests import async_utils
@@ -24,7 +26,9 @@ class TestAnsibleRunner(base.TestCase):
         cluster = cluster_crd.get_fake()
         cluster_type = cluster_type_crd.get_fake()
 
-        job = ansible_runner.get_job(cluster, cluster_type.spec, remove=True)
+        job = ansible_runner.get_job(
+            cluster, cluster_type.spec, "test1-tfstate", remove=True
+        )
 
         expected = """\
 apiVersion: batch/v1
@@ -139,6 +143,7 @@ spec:
         fsGroup: 1000
         runAsGroup: 1000
         runAsUser: 1000
+      serviceAccountName: test1-tfstate
       ttlSecondsAfterFinished: 3600
       volumes:
       - emptyDir: {}
@@ -254,6 +259,38 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
         mock_client = mock.AsyncMock()
         global_extravars = await ansible_runner.get_global_extravars(mock_client)
         self.assertEqual({}, global_extravars)
+
+    @mock.patch.dict(
+        os.environ,
+        {"ANSIBLE_RUNNER_CLUSTER_ROLE": "azimuth-caas-operator:tfstate"},
+        clear=True,
+    )
+    async def test_ensure_service_account(self):
+        mock_client = mock.AsyncMock()
+
+        def fake_apply_object(obj, force=False):
+            return PropertyDict(obj)
+
+        mock_client.apply_object.side_effect = fake_apply_object
+        cluster = cluster_crd.get_fake()
+
+        service_account_name = await ansible_runner.ensure_service_account(
+            mock_client, cluster
+        )
+
+        class KindMatcher:
+            def __init__(self, kind):
+                self._kind = kind
+
+            def __eq__(self, actual):
+                return actual["kind"] == self._kind
+
+        self.assertEqual("test1-tfstate", service_account_name)
+        self.assertEqual(2, mock_client.apply_object.call_count)
+        mock_client.apply_object.assert_any_call(
+            KindMatcher("ServiceAccount"), force=True
+        )
+        mock_client.apply_object.assert_any_call(KindMatcher("RoleBinding"), force=True)
 
     @mock.patch.object(ansible_runner, "get_job_resource")
     async def test_get_jobs_for_cluster_create(self, mock_job_resource):

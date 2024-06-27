@@ -432,7 +432,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             await operator.cluster_delete(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
-            "wait for delete job to complete for cluster1 in ns", str(ctx.exception)
+            "Wait for delete job to complete for cluster1 in ns", str(ctx.exception)
         )
         mock_create_finsish.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns"
@@ -446,6 +446,125 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.DELETING
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+
+    @mock.patch.object(ansible_runner, "delete_secret")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "start_job")
+    @mock.patch.object(ansible_runner, "get_delete_job_for_cluster")
+    @mock.patch.object(ansible_runner, "ensure_create_jobs_finished")
+    async def test_cluster_delete_finishes(
+        self,
+        mock_create_finsish,
+        mock_get_jobs,
+        mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
+        mock_get_job_state,
+        mock_delete_secret,
+    ):
+        mock_get_jobs.return_value = "fakejob"
+        mock_get_job_state.return_value = True
+        fake_body = cluster_crd.get_fake_dict()
+
+        await operator.cluster_delete(fake_body, "cluster1", "ns", {})
+
+        mock_create_finsish.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns"
+        )
+        mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_start.assert_not_called()
+        mock_update.assert_not_called()
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_delete_secret.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cloudsyaml", "ns"
+        )
+
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "start_job")
+    @mock.patch.object(ansible_runner, "get_delete_job_for_cluster")
+    @mock.patch.object(ansible_runner, "ensure_create_jobs_finished")
+    async def test_cluster_delete_waits_on_running_jobs(
+        self,
+        mock_create_finsish,
+        mock_get_jobs,
+        mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
+        mock_get_job_state,
+    ):
+        mock_get_jobs.return_value = "fakejob"
+        mock_get_job_state.return_value = None
+        fake_body = cluster_crd.get_fake_dict()
+
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await operator.cluster_delete(fake_body, "cluster1", "ns", {})
+
+        self.assertEqual(
+            "Wait for delete job to complete for cluster1 in ns", str(ctx.exception)
+        )
+        mock_create_finsish.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns"
+        )
+        mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_start.assert_not_called()
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.DELETING
+        )
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+
+    @mock.patch.object(ansible_runner, "unlabel_job")
+    @mock.patch.object(ansible_runner, "get_job_error_message")
+    @mock.patch.object(ansible_runner, "get_job_completed_state")
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(ansible_runner, "start_job")
+    @mock.patch.object(ansible_runner, "get_delete_job_for_cluster")
+    @mock.patch.object(ansible_runner, "ensure_create_jobs_finished")
+    async def test_cluster_delete_trigger_retry_on_error(
+        self,
+        mock_create_finsish,
+        mock_get_jobs,
+        mock_start,
+        mock_update,
+        mock_ensure_cluster_id,
+        mock_get_job_state,
+        mock_get_error,
+        mock_unlabel,
+    ):
+        mock_get_jobs.return_value = "fakejob"
+        mock_get_job_state.return_value = False
+        mock_get_error.return_value = "Problem with job."
+        fake_body = cluster_crd.get_fake_dict()
+
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await operator.cluster_delete(fake_body, "cluster1", "ns", {})
+
+        self.assertEqual(
+            "Delete job failed for cluster1 in ns because: Problem with job.",
+            str(ctx.exception),
+        )
+        mock_create_finsish.assert_awaited_once_with(
+            operator.K8S_CLIENT, "cluster1", "ns"
+        )
+        mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_start.assert_not_called()
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.DELETING,
+            error="Failure when trying to delete platform. "
+            "Possible reason for the failure was: Problem with job.",
+        )
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
 
     @mock.patch("aiohttp.ClientSession.get")
     async def test_fetch_ui_meta_from_url_success(self, mock_get):

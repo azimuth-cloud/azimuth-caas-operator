@@ -334,62 +334,59 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
     delete_job = await ansible_runner.get_delete_job_for_cluster(
         K8S_CLIENT, name, namespace
     )
-    if delete_job:
-        is_job_success = ansible_runner.get_job_completed_state(delete_job)
-
-        # raise exception to retry if the job is still running
-        if is_job_success is None:
-            await cluster_utils.update_cluster(
-                K8S_CLIENT,
-                name,
-                namespace,
-                cluster_crd.ClusterPhase.DELETING,
-            )
-            msg = f"Waiting for delete job to complete for {name} in {namespace}"
-            LOG.info(msg)
-            raise kopf.TemporaryError(msg, delay=20)
-
-        # if the delete job finished
-        if is_job_success:
-            await ansible_runner.delete_secret(
-                K8S_CLIENT, cluster.spec.cloudCredentialsSecretName, namespace
-            )
-            LOG.info(f"Delete job complete for {name} in {namespace}")
-            # let kopf remove finalizer and complete the cluster delete
-            return
-
-        if cluster.status.phase != cluster_crd.ClusterPhase.FAILED:
-            error = "Failed to delete platform. Please contact Azimuth operators."
-            reason = await ansible_runner.get_job_error_message(K8S_CLIENT, delete_job)
-            if reason:
-                error += f" Possible reason for the failure was: {reason}"
-
-            await cluster_utils.update_cluster(
-                K8S_CLIENT,
-                name,
-                namespace,
-                cluster_crd.ClusterPhase.FAILED,
-                error=error,
-            )
-        else:
-            # we already failed last time,
-            # so unlabel the job this time, so we trigger a retry next time
-            await ansible_runner.unlabel_job(K8S_CLIENT, delete_job)
-            # TODO(johngarbutt): should we set ttlSecondsAfterFinished on delete jobs?
-
-        LOG.error(
-            f"Delete job failed for {name} in {namespace} because: {reason} "
-            "Please fix the problem, "
-            "then delete all failed jobs to trigger a new delete job."
-        )
-        raise RuntimeError(f"Failed to delete {name} in {namespace}")
 
     # delete job not yet created, lets create one
-    await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)
-    await cluster_utils.update_cluster(
-        K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
-    )
-    LOG.info(f"Success creating a delete job for {name} in {namespace}")
-    raise kopf.TemporaryError(
-        f"wait for delete job to complete for {name} in {namespace}", delay=30
-    )
+    if not delete_job:
+        await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, remove=True)
+        await cluster_utils.update_cluster(
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
+        )
+        LOG.info(f"Success creating a delete job for {name} in {namespace}")
+        raise kopf.TemporaryError(
+            f"Wait for delete job to complete for {name} in {namespace}", delay=20
+        )
+
+    # delete job was created last time, check on progress
+    is_job_success = ansible_runner.get_job_completed_state(delete_job)
+
+    # raise exception to retry if the job is still running
+    if is_job_success is None:
+        await cluster_utils.update_cluster(
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.DELETING
+        )
+        msg = f"Wait for delete job to complete for {name} in {namespace}"
+        LOG.info(msg)
+        # Wait 20 seconds before checking if the delete has completed
+        raise kopf.TemporaryError(msg, delay=20)
+
+    if is_job_success:
+        await ansible_runner.delete_secret(
+            K8S_CLIENT, cluster.spec.cloudCredentialsSecretName, namespace
+        )
+        LOG.info(f"Delete job complete for {name} in {namespace}")
+        # let kopf remove finalizer and complete the cluster delete
+        return
+
+    else:
+        # job failed, update the cluster, and keep retrying
+        error = "Failure when trying to delete platform."
+        reason = await ansible_runner.get_job_error_message(K8S_CLIENT, delete_job)
+        if reason:
+            error += f" Possible reason for the failure was: {reason}"
+
+        # don't go into an error state as we keep retrying,
+        # but do set an error message to help debugging
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            cluster_crd.ClusterPhase.DELETING,
+            error=error,
+        )
+        # unlabel the job, so we trigger a retry next time
+        await ansible_runner.unlabel_job(K8S_CLIENT, delete_job)
+
+        # Wait 60 seconds before retrying the delete
+        msg = f"Delete job failed for {name} in {namespace} because: {reason}"
+        LOG.error(msg)
+        raise kopf.TemporaryError(msg, delay=60)

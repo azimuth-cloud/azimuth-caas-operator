@@ -62,9 +62,9 @@ kubectl delete -f $SCRIPT_DIR/test_quick_delete_failure.yaml --wait=false
 # wait for delete we expect to work
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 
-# look at the other cluster, test for a delete error
-until kubectl wait --for=jsonpath='{.status.error}' cluster quick-test-fail-delete; do echo "wait for delete error"; kubectl get jobs; sleep 2; done
-# TODO: check app cred still exists
+# make sure the failed delete is still deleting
+until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
 
 kubectl get cluster
 kubectl get cluster -o yaml
+kubectl get jobs

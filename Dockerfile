@@ -47,15 +47,7 @@ RUN groupadd --gid $APP_GID $APP_GROUP && \
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED 1
 
-# By default, run the operator using kopf
+# By default, run the operator
 USER $APP_UID
 ENTRYPOINT ["tini", "-g", "--"]
-CMD [ \
-    "kopf", \
-    "run", \
-    "--module", \
-    "azimuth_caas_operator.operator", \
-    "--all-namespaces", \
-    "--liveness", \
-    "http://0.0.0.0:8000/healthz" \
-]
+CMD ["python", "-m", "azimuth_caas_operator"]

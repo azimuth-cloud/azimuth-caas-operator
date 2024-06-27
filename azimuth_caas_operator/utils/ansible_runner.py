@@ -15,7 +15,6 @@ from azimuth_caas_operator.utils import cluster_type as cluster_type_utils
 from azimuth_caas_operator.utils import image as image_utils
 from azimuth_caas_operator.utils import k8s
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -255,7 +254,7 @@ spec:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
-{'''
+{f'''
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
@@ -412,14 +411,13 @@ async def _get_job_outputs(client, job):
         client, job.metadata.name, job.metadata.namespace
     )
     events.reverse()
-    debug_result = None
     for event_details in events:
         # look for the last debug action
         # that has an outputs key in its result object
         if event_details["event"] == "runner_on_ok":
             event_data = event_details["event_data"]
             task_action = event_data["task_action"]
-            if task_action == "debug":
+            if task_action in {"debug", "ansible.builtin.debug"}:
                 debug_result = event_data.get("res", {})
                 outputs = debug_result.get("outputs", {})
                 if isinstance(outputs, dict):
@@ -493,9 +491,11 @@ async def _get_ansible_runner_events(client, job_name, namespace):
     for line in log_lines:
         try:
             json_log = json.loads(line)
-            json_events.append(json_log)
         except json.decoder.JSONDecodeError:
             LOG.warning("failed to decode log, most likely not ansible json output.")
+        else:
+            if "event" in json_log:
+                json_events.append(json_log)
     return json_events
 
 

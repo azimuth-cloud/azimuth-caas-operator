@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "azimuth-caas-operator.fullname" . }}
+  labels: {{ include "azimuth-caas-operator.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 8080
+      targetPort: metrics
+      protocol: TCP
+  selector: {{ include "azimuth-caas-operator.selectorLabels" . | nindent 4 }}

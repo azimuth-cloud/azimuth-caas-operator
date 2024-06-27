@@ -138,6 +138,7 @@ spec:
         fsGroup: 1000
         runAsGroup: 1000
         runAsUser: 1000
+      ttlSecondsAfterFinished: 3600
       volumes:
       - emptyDir: {}
         name: runner-data

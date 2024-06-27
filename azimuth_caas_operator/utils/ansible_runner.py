@@ -170,6 +170,10 @@ metadata:
 spec:
   template:
     spec:
+{f'''
+      # auto-remove delete jobs after one hour
+      ttlSecondsAfterFinished: 3600
+ ''' if remove else ''}
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

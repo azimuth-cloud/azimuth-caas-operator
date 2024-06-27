@@ -89,26 +89,15 @@ async def get_global_extravars(client):
     secret_info = os.environ.get("GLOBAL_EXTRAVARS_SECRET")
     if not secret_info:
         return {}
+    LOG.info("extracting global extravars from %s", secret_info)
     secret_resource = await client.api("v1").resource("secrets")
     secret_namespace, secret_name = secret_info.split("/", maxsplit=1)
-    try:
-        secret = await secret_resource.fetch(secret_name, namespace=secret_namespace)
-    except ApiError as exc:
-        if exc.status_code == 404:
-            # If the secret does not exist, log it but proceed with no global extravars
-            LOG.warn("global extravars secret was specified but does not exist")
-            return {}
-        else:
-            raise
-    # We parse each value as YAML and merge them together
-    # If the value doesn't parse as YAML, log it but proceed as if the key didn't exist
+    secret = await secret_resource.fetch(secret_name, namespace=secret_namespace)
+    # We parse each value from the secret as YAML and merge them together
     global_extravars = {}
-    for key, b64data in sorted(secret.get("data", {}).items()):
+    for b64data in sorted(secret.get("data", {}).values()):
         data = base64.b64decode(b64data)
-        try:
-            global_extravars.update(yaml.safe_load(data))
-        except yaml.YAMLError:
-            LOG.exception("global extravars key is not valid YAML - %s", key)
+        global_extravars.update(yaml.safe_load(data))
     return global_extravars
 
 

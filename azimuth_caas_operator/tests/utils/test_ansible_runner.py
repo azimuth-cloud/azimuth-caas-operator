@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import unittest
@@ -207,6 +208,53 @@ metadata:
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
+    @mock.patch.dict(
+        os.environ, {"GLOBAL_EXTRAVARS_SECRET": "ns-1/extravars"}, clear=True
+    )
+    async def test_get_global_extravars(self):
+        mock_client = mock.Mock()
+        mock_api = mock.AsyncMock()
+        mock_client.api.return_value = mock_api
+        mock_resource = mock.AsyncMock()
+        mock_api.resource.return_value = mock_resource
+        secret_data = {
+            "extravars": {
+                "extravar_1": "value1",
+                "extravar_2": "value2",
+            },
+            "moreextravars": {
+                "extravar_3": "value3",
+            },
+        }
+        mock_resource.fetch.return_value = {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": "extravars",
+                "namespace": "ns-1",
+            },
+            "data": {
+                k: base64.b64encode(yaml.safe_dump(v).encode()).decode()
+                for k, v in secret_data.items()
+            },
+        }
+
+        global_extravars = await ansible_runner.get_global_extravars(mock_client)
+
+        self.assertEqual(
+            {
+                "extravar_1": "value1",
+                "extravar_2": "value2",
+                "extravar_3": "value3",
+            },
+            global_extravars,
+        )
+
+    async def test_get_global_extravars_no_secret(self):
+        mock_client = mock.AsyncMock()
+        global_extravars = await ansible_runner.get_global_extravars(mock_client)
+        self.assertEqual({}, global_extravars)
+
     @mock.patch.object(ansible_runner, "get_job_resource")
     async def test_get_jobs_for_cluster_create(self, mock_job_resource):
         fake_job_list = ["fakejob1", "fakejob2"]

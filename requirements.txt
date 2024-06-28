@@ -21,7 +21,7 @@ kopf==1.37.2
 kube-custom-resource==0.4.0
 multidict==6.0.5
 pbr==6.0.0
-pycparser==2.21
+pycparser==2.22
 pydantic==2.7.3
 pydantic_core==2.18.4
 python-json-logger==2.0.7

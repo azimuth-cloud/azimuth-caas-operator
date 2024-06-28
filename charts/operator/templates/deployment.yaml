@@ -25,7 +25,7 @@ spec:
           image: {{ printf "%s:%s" .Values.image.repository (default .Chart.AppVersion .Values.image.tag) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- with .Values.config.consulUrl }}
+            {{- if .Values.config.consulUrl }}
             - name: CONSUL_HTTP_ADDR
               value: {{ tpl .Values.config.consulUrl . | quote }}
             {{- end }}

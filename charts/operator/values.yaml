@@ -1,5 +1,7 @@
 # Config for the operator
 config:
+  # The URL for Consul, if using Consul
+  consulUrl:
   # The URL for ARA
   araUrl: "{{ printf \"http://%s-ara.%s:8000\" .Release.Name .Release.Namespace }}"
   # The image for ansible runner

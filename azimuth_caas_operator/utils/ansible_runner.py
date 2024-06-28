@@ -181,6 +181,8 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
 
     envvars = dict(cluster_type_spec.envVars)
+    if "CONSUL_HTTP_ADDR" in os.environ:
+        envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
     if "ARA_API_SERVER" in os.environ:
         envvars["ARA_API_CLIENT"] = "http"
         envvars["ARA_API_SERVER"] = os.environ["ARA_API_SERVER"]

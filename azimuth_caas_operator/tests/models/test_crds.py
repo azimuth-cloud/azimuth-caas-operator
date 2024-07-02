@@ -227,6 +227,14 @@ class TestModels(base.TestCase):
                     "type": "object",
                     "x-kubernetes-preserve-unknown-fields": true
                   },
+                  "extraVarOverrides": {
+                    "additionalProperties": {
+                      "x-kubernetes-preserve-unknown-fields": true
+                    },
+                    "nullable": true,
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
                   "createdByUsername": {
                     "nullable": true,
                     "type": "string"

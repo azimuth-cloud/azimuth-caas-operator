@@ -172,6 +172,7 @@ def get_env_configmap(
     extraVars = dict(global_extravars)
     extraVars.update(cluster_type_spec.extraVars)
     extraVars.update(cluster.spec.extraVars)
+    extraVars.update(cluster.spec.extraVarOverrides)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.status.clusterID
     extraVars["cluster_type"] = cluster.spec.clusterTypeName

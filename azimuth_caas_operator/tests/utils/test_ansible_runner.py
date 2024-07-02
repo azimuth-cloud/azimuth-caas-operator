@@ -186,7 +186,7 @@ data:
     '
   extravars: "cluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeclusterID1\\n\\
     cluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file:\\
-    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: bar\\nnested:\\n  baz:\\
+    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: boo\\nnested:\\n  baz:\\
     \\ bob\\nrandom_bool: true\\nrandom_dict:\\n  random_str: foo\\nrandom_int: 8\\nvery_random_int:\\
     \\ 42\\n"
 kind: ConfigMap

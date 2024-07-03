@@ -200,6 +200,24 @@ metadata:
     uid: fakeuid1
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(config))
+        # check cluster_image comes from cluster template
+        self.assertEqual(
+            "testimage1",
+            yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)[
+                "cluster_image"
+            ],
+        )
+        # check very_random_int comes from extravars
+        self.assertEqual(
+            "42",
+            yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)[
+                "very_random_int"
+            ],
+        )
+        # check foo is correctly overriden by extra vars overrides
+        self.assertEqual(
+            "boo", yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)["foo"]
+        )
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):

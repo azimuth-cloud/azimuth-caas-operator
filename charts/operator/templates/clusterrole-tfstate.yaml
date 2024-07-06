@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "azimuth-caas-operator.fullname" . }}:tfstate
+  labels: {{ include "azimuth-caas-operator.labels" . | nindent 4 }}
+rules:
+  # This clusterrole is attached to cluster service accounts using a rolebinding
+  # That means when it is used, it is namespace-scoped
+  # It includes the permissions that are required to manage OpenTofu states in secrets
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [list, get, create, update]
+  # Leases are used to implement state locking
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, create, update]

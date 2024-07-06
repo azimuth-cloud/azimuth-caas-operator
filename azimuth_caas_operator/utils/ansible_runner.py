@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import os
+import typing
 import yaml
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
@@ -80,14 +81,96 @@ async def ensure_deploy_key_secret(client, cluster: cluster_crd.Cluster):
     return base64.b64decode(secret.data["id_ed25519.pub"]).decode()
 
 
+async def ensure_service_account(client, cluster: cluster_crd.Cluster):
+    """
+    Ensures that a service account exists with the given name.
+    """
+    service_account = await client.apply_object(
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "name": f"{cluster.metadata.name}-tfstate",
+                "namespace": cluster.metadata.namespace,
+                "ownerReferences": [
+                    {
+                        "apiVersion": cluster.api_version,
+                        "kind": cluster.kind,
+                        "name": cluster.metadata.name,
+                        "uid": cluster.metadata.uid,
+                    },
+                ],
+            },
+        },
+        force=True,
+    )
+    # If there is a cluster role specified, bind it to the service account
+    if "ANSIBLE_RUNNER_CLUSTER_ROLE" in os.environ:
+        await client.apply_object(
+            {
+                "apiVersion": "rbac.authorization.k8s.io/v1",
+                "kind": "RoleBinding",
+                "metadata": {
+                    "name": service_account.metadata.name,
+                    "namespace": cluster.metadata.namespace,
+                    "ownerReferences": [
+                        {
+                            "apiVersion": cluster.api_version,
+                            "kind": cluster.kind,
+                            "name": cluster.metadata.name,
+                            "uid": cluster.metadata.uid,
+                        },
+                    ],
+                },
+                "roleRef": {
+                    "apiGroup": "rbac.authorization.k8s.io",
+                    "kind": "ClusterRole",
+                    "name": os.environ["ANSIBLE_RUNNER_CLUSTER_ROLE"],
+                },
+                "subjects": [
+                    {
+                        "kind": "ServiceAccount",
+                        "name": service_account.metadata.name,
+                        "namespace": service_account.metadata.namespace,
+                    },
+                ],
+            },
+            force=True,
+        )
+    return service_account.metadata.name
+
+
+async def get_global_extravars(client):
+    """
+    Retrieves the global extra vars from the specified secret.
+    """
+    # The secret is specified in the form namespace/name
+    secret_info = os.environ.get("GLOBAL_EXTRAVARS_SECRET")
+    if not secret_info:
+        return {}
+    LOG.info("extracting global extravars from %s", secret_info)
+    secret_resource = await client.api("v1").resource("secrets")
+    secret_namespace, secret_name = secret_info.split("/", maxsplit=1)
+    secret = await secret_resource.fetch(secret_name, namespace=secret_namespace)
+    # We parse each value from the secret as YAML and merge them together
+    global_extravars = {}
+    for b64data in sorted(secret.get("data", {}).values()):
+        data = base64.b64decode(b64data)
+        global_extravars.update(yaml.safe_load(data))
+    return global_extravars
+
+
 def get_env_configmap(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
+    global_extravars: typing.Dict[str, typing.Any],
     remove=False,
     update=False,
 ):
-    extraVars = dict(cluster_type_spec.extraVars, **cluster.spec.extraVars)
+    extraVars = dict(global_extravars)
+    extraVars.update(cluster_type_spec.extraVars)
+    extraVars.update(cluster.spec.extraVars)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.status.clusterID
     extraVars["cluster_type"] = cluster.spec.clusterTypeName
@@ -98,10 +181,8 @@ def get_env_configmap(
         extraVars["cluster_state"] = "absent"
 
     envvars = dict(cluster_type_spec.envVars)
-    try:
+    if "CONSUL_HTTP_ADDR" in os.environ:
         envvars["CONSUL_HTTP_ADDR"] = os.environ["CONSUL_HTTP_ADDR"]
-    except KeyError:
-        raise RuntimeError("CONSUL_HTTP_ADDR is not set")
     if "ARA_API_SERVER" in os.environ:
         envvars["ARA_API_CLIENT"] = "http"
         envvars["ARA_API_SERVER"] = os.environ["ARA_API_SERVER"]
@@ -138,6 +219,7 @@ def get_env_configmap(
 def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
+    service_account_name: str,
     remove=False,
     update=False,
 ):
@@ -173,6 +255,7 @@ spec:
       # auto-remove delete jobs after one hour
       ttlSecondsAfterFinished: 3600
  ''' if remove else ''}
+      serviceAccountName: {service_account_name}
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -568,6 +651,9 @@ async def start_job(
             namespace=namespace,
         )
 
+    # Extract the global extravars from the specified configmap, if specified
+    global_extravars = await get_global_extravars(client)
+
     # ensure that we have generated an SSH key for the cluster
     cluster_deploy_ssh_public_key = await ensure_deploy_key_secret(client, cluster)
 
@@ -577,15 +663,25 @@ async def start_job(
             cluster,
             cluster_type_spec,
             cluster_deploy_ssh_public_key,
+            global_extravars,
             remove=remove,
             update=update,
         ),
         force=True,
     )
 
+    # Ensure that the service account exists for the cluster
+    service_account_name = await ensure_service_account(client, cluster)
+
     # create the job
     await client.create_object(
-        get_job(cluster, cluster_type_spec, remove=remove, update=update)
+        get_job(
+            cluster,
+            cluster_type_spec,
+            service_account_name,
+            remove=remove,
+            update=update,
+        )
     )
 
 

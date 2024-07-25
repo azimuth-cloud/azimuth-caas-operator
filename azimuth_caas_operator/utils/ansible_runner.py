@@ -303,6 +303,9 @@ spec:
         - -c
         - |
             set -ex
+            if [ -f /var/lib/caas/cloudcreds/cacert ]; then
+              export OS_CACERT=/var/lib/caas/cloudcreds/cacert
+            fi
             export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
             if [ -f /runner/project/requirements.yml ]; then
               ansible-galaxy install -r /runner/project/requirements.yml

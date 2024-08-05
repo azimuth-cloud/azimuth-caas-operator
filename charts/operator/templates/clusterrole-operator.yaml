@@ -18,6 +18,14 @@ rules:
   - apiGroups: ["caas.azimuth.stackhpc.com"]
     resources: ["*"]
     verbs: ["*"]
+  - apiGroups:
+      - scheduling.azimuth.stackhpc.com
+    resources:
+      - leases
+    verbs:
+      - list
+      - get
+      - delete
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["*"]

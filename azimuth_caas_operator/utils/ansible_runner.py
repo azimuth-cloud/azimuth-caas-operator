@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 
 from easykube import ApiError
+import kopf
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
@@ -688,6 +689,32 @@ async def start_job(
     )
 
 
-async def delete_secret(client, secret_name, namespace):
+async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
+    lease_resource = await client.api(
+        "scheduling.azimuth.stackhpc.com/v1alpha1").resource(
+        "leases"
+    )
+    try:
+        await lease_resource.delete(cluster.spec.leaseName, namespace=namespace)
+    except ApiError as exc:
+        # ignore if its missing
+        if exc.status_code != 404:
+            raise
+    lease = None
+    try:
+        lease = await lease_resource.fetch(
+            cluster.spec.leaseName, namespace=namespace
+        )
+    except ApiError as exc:
+        # ignore if its missing
+        if exc.status_code != 404:
+            raise
+    if lease:
+        raise kopf.TemporaryError(
+            "Lease is not deleted yet, wait till deleted.",
+            delay=60,
+        )
+
     secrets_resource = await client.api("v1").resource("secrets")
-    await secrets_resource.delete(secret_name, namespace=namespace)
+    await secrets_resource.delete(cluster.spec.cloudCredentialsSecretName,
+                                  namespace=namespace)

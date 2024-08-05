@@ -13,8 +13,9 @@ from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
-from azimuth_caas_operator.utils import lease as lease_utils
 from azimuth_caas_operator.utils import k8s
+from azimuth_caas_operator.utils import lease as lease_utils
+
 
 LOG = logging.getLogger(__name__)
 CLUSTER_LABEL = "azimuth-caas-cluster"
@@ -368,9 +369,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         raise kopf.TemporaryError(msg, delay=20)
 
     if is_job_success:
-        await ansible_runner.delete_secret(
-            K8S_CLIENT, cluster, namespace
-        )
+        await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
         LOG.info(f"Delete job complete for {name} in {namespace}")
         # let kopf remove finalizer and complete the cluster delete
         return

@@ -17,14 +17,12 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         LOG.info("No leaseName set, skipping lease check.")
         return
 
-    lease_resource = await client.api(SCHEDULE_API_VERSION).resource(
-        "leases"
-    )
+    lease_resource = await client.api(SCHEDULE_API_VERSION).resource("leases")
     lease = await lease_resource.fetch(
-        cluster.spec.leaseName, namespace=cluster.metadata.namespace,
+        cluster.spec.leaseName,
+        namespace=cluster.metadata.namespace,
     )
     if lease and "status" in lease and lease["status"]["phase"] == "Active":
-        # TODO: Implement flavor mappings!!
         LOG.info("Lease is active!")
         # return mapping of requested flavor to reservation flavor
         return lease["status"]["flavorMap"]
@@ -34,10 +32,13 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
     if lease:
         lease_start = lease["spec"].get("startTime")
         if lease_start:
-            time_until_expiry = lease_start - datetime.datetime.now(tz=datetime.timezone.utc)
+            time_until_expiry = lease_start - datetime.datetime.now(
+                tz=datetime.timezone.utc
+            )
             if time_until_expiry.total_seconds() > 60:
                 delay = time_until_expiry.total_seconds()
 
     # Wait until the lease is active
-    raise kopf.TemporaryError(f"Lease {cluster.spec.leaseName} is not active.",
-                              delay=delay)
+    raise kopf.TemporaryError(
+        f"Lease {cluster.spec.leaseName} is not active.", delay=delay
+    )

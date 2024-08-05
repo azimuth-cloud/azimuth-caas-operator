@@ -692,9 +692,8 @@ async def start_job(
 
 async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
     lease_resource = await client.api(
-        "scheduling.azimuth.stackhpc.com/v1alpha1").resource(
-        "leases"
-    )
+        "scheduling.azimuth.stackhpc.com/v1alpha1"
+    ).resource("leases")
     try:
         await lease_resource.delete(cluster.spec.leaseName, namespace=namespace)
     except ApiError as exc:
@@ -703,9 +702,7 @@ async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
             raise
     lease = None
     try:
-        lease = await lease_resource.fetch(
-            cluster.spec.leaseName, namespace=namespace
-        )
+        lease = await lease_resource.fetch(cluster.spec.leaseName, namespace=namespace)
     except ApiError as exc:
         # ignore if its missing
         if exc.status_code != 404:
@@ -717,5 +714,6 @@ async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
         )
 
     secrets_resource = await client.api("v1").resource("secrets")
-    await secrets_resource.delete(cluster.spec.cloudCredentialsSecretName,
-                                  namespace=namespace)
+    await secrets_resource.delete(
+        cluster.spec.cloudCredentialsSecretName, namespace=namespace
+    )

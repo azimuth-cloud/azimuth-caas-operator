@@ -33,9 +33,7 @@ async def ensure_cluster_id(client, cluster: cluster_crd.Cluster):
     LOG.debug(f"set clusterID for {name} in {namespace}")
 
 
-async def update_cluster_flavors(
-        client, cluster: cluster_crd.Cluster, flavors: dict
-):
+async def update_cluster_flavors(client, cluster: cluster_crd.Cluster, flavors: dict):
     """
     Update the cluster with the flavors that were reserved.
     """
@@ -45,16 +43,10 @@ async def update_cluster_flavors(
             flavor_overrides[key] = flavors[value]
     name = cluster.metadata.name
     namespace = cluster.metadata.namespace
-    cluster_resource = await client.api(registry.API_VERSION).resource(
-        "clusters"
-    )
+    cluster_resource = await client.api(registry.API_VERSION).resource("clusters")
     await cluster_resource.patch(
         name,
-        {
-            "spec": {
-                "extraVarOverrides": flavor_overrides
-            }
-        },
+        {"spec": {"extraVarOverrides": flavor_overrides}},
         namespace=namespace,
     )
     LOG.debug(f"set flavors for {name} in {namespace}")

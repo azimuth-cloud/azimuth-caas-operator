@@ -3,7 +3,7 @@ image:
   # This is a mirror of quay.io/recordsansible/ara-api that is mirrored
   # and tagged for each operator version that is built
   # This is because the quay.io repo only provides latest tags
-  repository: ghcr.io/stackhpc/ara-api
+  repository: ghcr.io/azimuth-cloud/ara-api
   pullPolicy: IfNotPresent
   tag: ""  # Defaults to appVersion
 

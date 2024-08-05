@@ -43,6 +43,7 @@ class ClusterSpec(schema.BaseModel):
     clusterTypeName: str = pydantic.Field(min_length=1)
     clusterTypeVersion: str = pydantic.Field(min_length=1)
     cloudCredentialsSecretName: str = pydantic.Field(min_length=1)
+    leaseName: schema.Optional[str] = None
     # partially described by the cluster type ui-meta
     extraVars: schema.Dict[str, schema.Any] = pydantic.Field(default_factory=dict)
     createdByUsername: schema.Optional[str] = None
@@ -96,6 +97,7 @@ def get_fake_dict():
             clusterTypeName="type1",
             clusterTypeVersion="1234",
             cloudCredentialsSecretName="cloudsyaml",
+            leaseName="test1",
             extraVars=dict(foo="bar", very_random_int=42, nested=dict(baz="bob")),
         ),
         status=dict(clusterID="fakeclusterID1"),

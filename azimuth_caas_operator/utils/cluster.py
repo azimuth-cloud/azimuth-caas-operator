@@ -41,12 +41,13 @@ async def update_cluster_flavors(client, cluster: cluster_crd.Cluster, flavors: 
     for key, value in cluster.spec.extraVars.items():
         if value in flavors.keys():
             flavor_overrides[key] = flavors[value]
+    cluster.spec.extraVarOverrides = flavor_overrides
     name = cluster.metadata.name
     namespace = cluster.metadata.namespace
     cluster_resource = await client.api(registry.API_VERSION).resource("clusters")
     await cluster_resource.patch(
         name,
-        {"spec": {"extraVarOverrides": flavor_overrides}},
+        {"spec": {"extraVarOverrides": cluster.spec.extraVarOverrides}},
         namespace=namespace,
     )
     LOG.debug(f"set flavors for {name} in {namespace}")

@@ -1,7 +1,7 @@
 name: "quicktest"
 label: "Quick Test"
 description: Very quick test platform, uses no real resources.
-logo: https://github.com/stackhpc/azimuth/raw/master/branding/azimuth-logo-blue.png
+logo: https://github.com/azimuth-cloud/azimuth/raw/master/branding/azimuth-logo-blue.png
 
 # Workstations are deployed without an SSH key
 requires_ssh_key: false

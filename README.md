@@ -1,6 +1,6 @@
 # azimuth-caas-operator
-![tox](https://github.com/stackhpc/azimuth-caas-operator/actions/workflows/tox.yaml/badge.svg?branch=main)
-![tox](https://github.com/stackhpc/azimuth-caas-operator/actions/workflows/functional.yaml/badge.svg?branch=main)
+![tox](https://github.com/azimuth-cloud/azimuth-caas-operator/actions/workflows/tox.yaml/badge.svg?branch=main)
+![tox](https://github.com/azimuth-cloud/azimuth-caas-operator/actions/workflows/functional.yaml/badge.svg?branch=main)
 
 K8s operator to create clusters using K8s CRDs
 
@@ -9,7 +9,7 @@ K8s operator to create clusters using K8s CRDs
 The `azimuth-caas-operator` can be installed using [Helm](https://helm.sh):
 
 ```sh
-helm repo add azimuth-caas-operator https://stackhpc.github.io/azimuth-caas-operator
+helm repo add azimuth-caas-operator https://azimuth-cloud.github.io/azimuth-caas-operator
 
 # check for the latest versions
 helm repo update
@@ -20,8 +20,7 @@ helm upgrade \
   azimuth-caas-operator \
   azimuth-caas-operator/azimuth-caas-operator \
   -n azimuth-caas-operator \
-  -i \
-  --version ">=0.1.0"
+  -i
 ```
 
 Once the operator is up and running you will then need to create
@@ -80,7 +79,7 @@ if the default does not work for your setup:
 
 * `CONSUL_HTTP_ADDR=zenith-consul-server.zenith:8500`
 * `ARA_API_SERVER=http://azimuth-ara.azimuth-caas-operator:8000`
-* `ANSIBLE_RUNNER_IMAGE=ghcr.io/stackhpc/azimuth-caas-operator-ee:v0.1.0`
+* `ANSIBLE_RUNNER_IMAGE=ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:v0.1.0`
 
 ## Run unit tests
 
@@ -104,7 +103,7 @@ You can test it with tox too:
     helm upgrade ingress-nginx ingress-nginx/ingress-nginx \
       --version 4.4.0 --create-namespace --namespace ingress-nginx \
       -i -f tools/nginx_values.yaml
-    helm repo add zenith https://stackhpc.github.io/zenith
+    helm repo add zenith https://azimuth-cloud.github.io/zenith
     # TODO: this is broken, need consul client enabled? or update sshd config
     helm upgrade zenith zenith/zenith-server \
       --version 0.1.0-dev.0.update-consul.169 -i -f tools/zenith_values.yaml \

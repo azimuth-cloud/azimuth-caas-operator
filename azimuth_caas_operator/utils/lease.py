@@ -1,12 +1,32 @@
 import datetime
 import logging
 
+import easykube
 import kopf
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 
 SCHEDULE_API_VERSION = "scheduling.azimuth.stackhpc.com/v1alpha1"
+FINALIZER = "caas.stackhpc.com"
 LOG = logging.getLogger(__name__)
+
+
+async def _patch_finalizers(resource, name, namespace, finalizers):
+    """
+    Patches the finalizers of a resource. If the resource does not exist any
+    more, that is classed as a success.
+    """
+    try:
+        await resource.patch(
+            name, {"metadata": {"finalizers": finalizers}}, namespace=namespace
+        )
+    except easykube.ApiError as exc:
+        # Patching the finalizers can result in a 422 if we are deleting and CAPO
+        # has removed its finalizer while we were working
+        if exc.status_code == 422:
+            raise kopf.TemporaryError("error patching finalizers", delay=1)
+        elif exc.status_code != 404:
+            raise
 
 
 async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
@@ -24,6 +44,18 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
     )
     if lease and "status" in lease and lease["status"]["phase"] == "Active":
         LOG.info("Lease is active!")
+
+        # we want to use this lease, so lets add a finalizer
+        # we can remove once we are happy to delete the lease
+        finalizers = lease.get("metadata", {}).get("finalizers", [])
+        finalizers.append(FINALIZER)
+        await _patch_finalizers(
+            lease_resource,
+            cluster.spec.leaseName,
+            cluster.metadata.namespace,
+            finalizers,
+        )
+
         # return mapping of requested flavor to reservation flavor
         return lease["status"]["flavorMap"]
 
@@ -41,4 +73,19 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
     # Wait until the lease is active
     raise kopf.TemporaryError(
         f"Lease {cluster.spec.leaseName} is not active.", delay=delay
+    )
+
+
+async def drop_lease_finalizer(client, cluster: cluster_crd.Cluster):
+    lease_resource = await client.api(SCHEDULE_API_VERSION).resource("leases")
+    lease = await lease_resource.fetch(
+        cluster.spec.leaseName,
+        namespace=cluster.metadata.namespace,
+    )
+    finalizers = lease.get("metadata", {}).get("finalizers", [])
+    await _patch_finalizers(
+        lease_resource,
+        cluster.spec.leaseName,
+        cluster.metadata.namespace,
+        [f for f in finalizers if f != FINALIZER],
     )

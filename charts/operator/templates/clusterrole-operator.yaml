@@ -25,7 +25,7 @@ rules:
     verbs:
       - list
       - get
-      - delete
+      - patch
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["*"]

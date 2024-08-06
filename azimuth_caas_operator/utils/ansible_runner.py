@@ -236,6 +236,8 @@ def get_job(
     defines_inventory = "ANSIBLE_INVENTORY" in dict(cluster_type_spec.envVars)
     # for ANSIBLE_INVENTORY in envvars to work, there must be no inventory/ directory
 
+    remove_app_cred = remove and (cluster.spec.leaseName is None)
+
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -315,7 +317,7 @@ spec:
               ansible-galaxy install -r /runner/project/roles/requirements.yml
             fi
             ansible-runner run /runner -j
-            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove else ""}
+            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove_app_cred else ""}
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"
@@ -691,28 +693,6 @@ async def start_job(
 
 
 async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
-    lease_resource = await client.api(
-        "scheduling.azimuth.stackhpc.com/v1alpha1"
-    ).resource("leases")
-    try:
-        await lease_resource.delete(cluster.spec.leaseName, namespace=namespace)
-    except ApiError as exc:
-        # ignore if its missing
-        if exc.status_code != 404:
-            raise
-    lease = None
-    try:
-        lease = await lease_resource.fetch(cluster.spec.leaseName, namespace=namespace)
-    except ApiError as exc:
-        # ignore if its missing
-        if exc.status_code != 404:
-            raise
-    if lease:
-        raise kopf.TemporaryError(
-            "Lease is not deleted yet, wait till deleted.",
-            delay=60,
-        )
-
     secrets_resource = await client.api("v1").resource("secrets")
     await secrets_resource.delete(
         cluster.spec.cloudCredentialsSecretName, namespace=namespace

@@ -369,7 +369,10 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         raise kopf.TemporaryError(msg, delay=20)
 
     if is_job_success:
-        await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
+        if cluster.spec.leaseName:
+            await lease_utils.drop_lease_finalizer(K8S_CLIENT, cluster)
+        else:
+            await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
         LOG.info(f"Delete job complete for {name} in {namespace}")
         # let kopf remove finalizer and complete the cluster delete
         return

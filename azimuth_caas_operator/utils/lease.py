@@ -21,11 +21,7 @@ async def _patch_finalizers(resource, name, namespace, finalizers):
             name, {"metadata": {"finalizers": finalizers}}, namespace=namespace
         )
     except easykube.ApiError as exc:
-        # Patching the finalizers can result in a 422 if we are deleting and CAPO
-        # has removed its finalizer while we were working
-        if exc.status_code == 422:
-            raise kopf.TemporaryError("error patching finalizers", delay=1)
-        elif exc.status_code != 404:
+        if exc.status_code != 404:
             raise
 
 
@@ -42,12 +38,11 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         cluster.spec.leaseName,
         namespace=cluster.metadata.namespace,
     )
-    if lease and "status" in lease and lease["status"]["phase"] == "Active":
-        LOG.info("Lease is active!")
 
-        # we want to use this lease, so lets add a finalizer
-        # we can remove once we are happy to delete the lease
-        finalizers = lease.get("metadata", {}).get("finalizers", [])
+    # we want to use this lease, so lets add a finalizer
+    # we can remove once we are happy to delete the lease
+    finalizers = lease.get("metadata", {}).get("finalizers", [])
+    if FINALIZER not in finalizers:
         finalizers.append(FINALIZER)
         await _patch_finalizers(
             lease_resource,
@@ -55,7 +50,10 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
             cluster.metadata.namespace,
             finalizers,
         )
+        LOG.info("Added finalizer to the lease.")
 
+    if lease and "status" in lease and lease["status"]["phase"] == "Active":
+        LOG.info("Lease is active!")
         # return mapping of requested flavor to reservation flavor
         return lease["status"]["flavorMap"]
 

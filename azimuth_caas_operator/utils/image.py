@@ -1,7 +1,7 @@
 import os
 
 
-DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO = "ghcr.io/stackhpc/azimuth-caas-operator-ee"
+DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO = "ghcr.io/azimuth-cloud/azimuth-caas-operator-ee"
 
 
 def get_ansible_runner_image():

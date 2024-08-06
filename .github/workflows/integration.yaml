@@ -20,10 +20,12 @@ jobs:
         with:
           os-clouds: ${{ secrets.OS_CLOUDS }}
           environment-prefix: caas-ci
+          target-cloud: ${{ vars.TARGET_CLOUD }}
           # Use the version of the chart that we just built
           # We also don't need all the tests
           # The workstation is sufficient to test that the CaaS machinery is working
           extra-vars: |
+            azimuth_caas_operator_chart_repo: https://azimuth-cloud.github.io/azimuth-caas-operator
             azimuth_caas_operator_chart_version: ${{ inputs.chart-version }}
             generate_tests_caas_test_case_slurm_enabled: false
             generate_tests_caas_test_case_repo2docker_enabled: false

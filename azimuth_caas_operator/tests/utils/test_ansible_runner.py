@@ -70,7 +70,7 @@ spec:
           value: /runner/project/ansible.cfg
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
         name: run
         volumeMounts:
         - mountPath: /runner/project
@@ -106,7 +106,7 @@ spec:
           >>/runner/inventory/hosts
 
           '
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
         name: inventory
         volumeMounts:
         - mountPath: /runner/inventory
@@ -131,7 +131,7 @@ spec:
           ls -al /runner/project
 
           '
-        image: ghcr.io/stackhpc/azimuth-caas-operator-ee:12345ab
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
         name: clone
         volumeMounts:
         - mountPath: /runner/project

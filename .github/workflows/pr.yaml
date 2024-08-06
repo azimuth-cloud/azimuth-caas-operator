@@ -23,19 +23,19 @@ jobs:
   # When the PR is from a branch of the main repo, publish images and charts
   publish_images:
     uses: ./.github/workflows/publish-images.yaml
-    if: github.repository == 'stackhpc/azimuth-caas-operator'
+    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   publish_charts:
     needs: [publish_images]
     uses: ./.github/workflows/publish-charts.yaml
-    if: github.repository == 'stackhpc/azimuth-caas-operator'
+    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   # The functional tests require the runner image, so we can only run them
   # once the image has been built, and on PRs from the main repo
   functional_tests:
     needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
-    if: github.repository == 'stackhpc/azimuth-caas-operator'
+    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   # The integration tests require the charts, and are only worth running once
   # the functional tests are passing
@@ -45,4 +45,4 @@ jobs:
     with:
       chart-version: ${{ needs.publish_charts.outputs.chart-version }}
     secrets: inherit
-    if: github.repository == 'stackhpc/azimuth-caas-operator'
+    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'

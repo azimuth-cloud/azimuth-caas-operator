@@ -28,7 +28,7 @@ jobs:
         id: image-meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/stackhpc/azimuth-caas-operator
+          images: ghcr.io/azimuth-cloud/azimuth-caas-operator
           # Produce the branch name or tag and the SHA as tags
           tags: |
             type=ref,event=branch
@@ -36,7 +36,7 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push image
-        uses: stackhpc/github-actions/docker-multiarch-build-push@master
+        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
         with:
           cache-key: azimuth-caas-operator
           context: .
@@ -79,7 +79,7 @@ jobs:
         id: image-meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/stackhpc/azimuth-caas-operator-ee
+          images: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee
           # Produce the branch name or tag and the SHA as tags
           tags: |
             type=ref,event=branch
@@ -87,7 +87,7 @@ jobs:
             type=sha,prefix=
 
       - name: Build and push image
-        uses: stackhpc/github-actions/docker-multiarch-build-push@master
+        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
         with:
           cache-key: azimuth-caas-operator-ee
           context: ./ee-context/
@@ -112,4 +112,4 @@ jobs:
           skopeo copy \
             --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
             docker://quay.io/recordsansible/ara-api:latest \
-            docker://ghcr.io/stackhpc/ara-api:${GITHUB_SHA::7}
+            docker://ghcr.io/azimuth-cloud/ara-api:${GITHUB_SHA::7}

@@ -53,7 +53,8 @@ spec:
       - command:
         - /bin/bash
         - -c
-        - "set -ex\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
+        - "set -ex\\nif [ -f /var/lib/caas/cloudcreds/cacert ]; then\\n  export OS_CACERT=/var/lib/caas/cloudcreds/cacert\\n\\
+          fi\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
           \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
           \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
           \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\

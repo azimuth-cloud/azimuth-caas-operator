@@ -10,6 +10,8 @@ SCHEDULE_API_VERSION = "scheduling.azimuth.stackhpc.com/v1alpha1"
 FINALIZER = "caas.stackhpc.com"
 LOG = logging.getLogger(__name__)
 
+class LeaseInError(Exception):
+    pass
 
 async def _patch_finalizers(resource, name, namespace, finalizers):
     """
@@ -56,6 +58,9 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         LOG.info("Lease is active!")
         # return mapping of requested flavor to reservation flavor
         return lease["status"]["flavorMap"]
+
+    if lease and "status" in lease and lease["status"]["phase"] == "Error":
+        raise LeaseInError("Lease is in Error state.")
 
     LOG.info(f"Lease {cluster.spec.leaseName} is not active, wait till active.")
     delay = 60

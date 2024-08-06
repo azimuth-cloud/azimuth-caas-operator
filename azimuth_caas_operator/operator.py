@@ -139,7 +139,22 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         return
 
     # Wait for Blazar lease to be active
-    flavor_map = await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
+    try:
+        flavor_map = await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
+    except lease_utils.LeaseInError:
+        # TODO(johngarbutt) we need to tell between these two cases!
+        await cluster_utils.update_cluster(
+            K8S_CLIENT,
+            name,
+            namespace,
+            cluster_crd.ClusterPhase.FAILED,
+            error="Cloud is full, or you are out of credits.",
+        )
+        msg = f"Lease is in Error state for {name} in {namespace}"
+        LOG.error(msg)
+        # keep polling until the lease is active, but report the error
+        raise kopf.TemporaryError(msg, delay=20)
+
     await cluster_utils.update_cluster_flavors(K8S_CLIENT, cluster, flavor_map)
 
     # Check for an existing create job

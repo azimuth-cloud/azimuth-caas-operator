@@ -141,21 +141,20 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     # Wait for Blazar lease to be active
     try:
         flavor_map = await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
-    except lease_utils.LeaseInError:
+    except lease_utils.LeaseInError as exc:
         # TODO(johngarbutt) we need to tell between these two cases!
+        message = str(exc)
+        if "external service enforcement filter denied the request" in message.lower():
+            message = "Not enough credits to create platform"
         await cluster_utils.update_cluster(
-            K8S_CLIENT,
-            name,
-            namespace,
-            cluster_crd.ClusterPhase.FAILED,
-            error="Cloud is full, or you are out of credits.",
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED, error=message
         )
         msg = f"Lease is in Error state for {name} in {namespace}"
         LOG.error(msg)
         # keep polling until the lease is active, but report the error
         raise kopf.TemporaryError(msg, delay=20)
-
-    await cluster_utils.update_cluster_flavors(K8S_CLIENT, cluster, flavor_map)
+    else:
+        await cluster_utils.update_cluster_flavors(K8S_CLIENT, cluster, flavor_map)
 
     # Check for an existing create job
     create_job = await ansible_runner.get_create_job_for_cluster(

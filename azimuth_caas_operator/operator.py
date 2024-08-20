@@ -76,7 +76,6 @@ async def _update_cluster_type(client, name, namespace, status):
     )
 
 
-# TODO(johngarbutt): move to utils.cluster_type
 async def _fetch_ui_meta_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -142,7 +141,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
     try:
         flavor_map = await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
     except lease_utils.LeaseInError as exc:
-        # TODO(johngarbutt) we need to tell between these two cases!
         message = str(exc)
         if "external service enforcement filter denied the request" in message.lower():
             message = "Not enough credits to create platform"
@@ -201,7 +199,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
-                # TODO(johngarbutt): we to better information on the reason!
                 error=error,
                 outputs=outputs,
             )
@@ -303,7 +300,6 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
-                # TODO(johngarbutt): we to better information on the reason!
                 error=error,
                 outputs=outputs,
             )
@@ -317,8 +313,6 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
     if not is_upgrade and not is_extra_var_update:
         LOG.info(f"Skip update, no meaningful changes for: {name} in {namespace}")
         return
-
-    # TODO(johngarbutt): should we check if we are about to be auto-deleted?
 
     # There is no running create job, so lets create one
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, update=True)
@@ -386,6 +380,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         if cluster.spec.leaseName:
             await lease_utils.drop_lease_finalizer(K8S_CLIENT, cluster)
         else:
+            # legacy behavior is appcred deleted by caas
             await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
         LOG.info(f"Delete job complete for {name} in {namespace}")
         # let kopf remove finalizer and complete the cluster delete

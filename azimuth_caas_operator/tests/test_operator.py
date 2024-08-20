@@ -201,6 +201,42 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_create_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(cluster_utils, "update_cluster")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "ensure_cluster_id")
+    @mock.patch.object(ansible_runner, "is_create_job_running")
+    async def test_cluster_create_error_on_lease_error(
+        self,
+        mock_create_job,
+        mock_ensure_cluster_id,
+        mock_ensure_lease,
+        mock_update,
+    ):
+        mock_create_job.return_value = True
+        fake_body = cluster_crd.get_fake_dict()
+        mock_ensure_lease.side_effect = lease_utils.LeaseInError(
+            "external service enforcement filter denied the request"
+        )
+
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await operator.cluster_create(fake_body, "cluster1", "ns", {})
+
+        self.assertEqual(
+            "Lease is in Error state for cluster1 in ns",
+            str(ctx.exception),
+        )
+        cluster = cluster_crd.Cluster(**fake_body)
+        mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_create_job.assert_not_called()
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_update.assert_awaited_once_with(
+            operator.K8S_CLIENT,
+            "cluster1",
+            "ns",
+            cluster_crd.ClusterPhase.FAILED,
+            error="Not enough credits to create platform",
+        )
+
     @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")

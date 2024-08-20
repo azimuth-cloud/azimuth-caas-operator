@@ -8,6 +8,7 @@ from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_c
 from azimuth_caas_operator import operator
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
+from azimuth_caas_operator.utils import lease as lease_utils
 
 
 class TestOperator(unittest.IsolatedAsyncioTestCase):
@@ -91,6 +92,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             operator.K8S_CLIENT, fake_cluster
         )
 
+    @mock.patch.object(cluster_utils, "update_cluster_flavors")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
@@ -101,10 +104,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_start,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
+        mock_update_flavors,
     ):
         # testing the zero jobs case
         mock_get_jobs.return_value = None
         fake_body = cluster_crd.get_fake_dict()
+        mock_ensure_lease.return_value = {"flavor_a": "flavor_reserved"}
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_create(fake_body, "cluster1", "ns", {})
@@ -125,6 +131,10 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_update_flavors.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster, {"flavor_a": "flavor_reserved"}
+        )
 
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")

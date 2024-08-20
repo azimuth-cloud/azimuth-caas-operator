@@ -39,7 +39,7 @@ async def update_cluster_flavors(client, cluster: cluster_crd.Cluster, flavors: 
     """
     flavor_overrides = {}
     for key, value in cluster.spec.extraVars.items():
-        if type(value) == str and value in flavors.keys():
+        if isinstance(value, str) and value in flavors.keys():
             flavor_overrides[key] = flavors[value]
     cluster.spec.extraVarOverrides = flavor_overrides
     name = cluster.metadata.name

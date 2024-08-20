@@ -136,6 +136,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             operator.K8S_CLIENT, cluster, {"flavor_a": "flavor_reserved"}
         )
 
+    @mock.patch.object(cluster_utils, "update_cluster_flavors")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -148,6 +150,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
+        mock_update_flavors,
     ):
         mock_get_jobs.return_value = "fakejob"
         fake_body = cluster_crd.get_fake_dict()
@@ -168,7 +172,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
         mock_get_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_success.assert_called_once_with("fakejob")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_update_flavors.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster, mock.ANY
+        )
 
+    @mock.patch.object(cluster_utils, "update_cluster_flavors")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_waits_for_create_job_to_complete(
@@ -353,6 +363,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
+    @mock.patch.object(cluster_utils, "update_cluster_flavors")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
@@ -367,6 +379,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_outputs,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
+        mock_update_flavors,
     ):
         # TODO(johngarbutt): should generate a working fake job list!
         mock_get_jobs.return_value = "fakejob"
@@ -393,7 +407,13 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success.assert_called_once_with("fakejob")
         mock_outputs.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
         mock_error.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_update_flavors.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster, mock.ANY
+        )
 
+    @mock.patch.object(cluster_utils, "update_cluster_flavors")
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -404,6 +424,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
+        mock_update_flavors,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_success.return_value = None
@@ -419,6 +441,10 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
+        )
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_update_flavors.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster, mock.ANY
         )
 
     @mock.patch.object(cluster_utils, "ensure_cluster_id")

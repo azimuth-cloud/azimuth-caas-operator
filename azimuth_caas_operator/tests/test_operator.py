@@ -177,7 +177,6 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             operator.K8S_CLIENT, cluster, mock.ANY
         )
 
-    @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(ansible_runner, "is_create_job_running")
@@ -185,6 +184,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         self,
         mock_create_job,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
     ):
         mock_create_job.return_value = True
         fake_body = cluster_crd.get_fake_dict()
@@ -199,7 +199,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_create_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -212,6 +214,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
     ):
         mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
@@ -236,7 +239,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
@@ -253,6 +258,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_unlabel,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
     ):
         mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
@@ -276,7 +282,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
@@ -295,6 +303,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_unlabel,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
     ):
         mock_create_job.return_value = False
         mock_update_job.return_value = "update-job"
@@ -320,7 +329,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
         mock_completed.assert_called_once_with("update-job")
         mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "update-job")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(lease_utils, "ensure_lease_active")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
@@ -333,6 +344,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_start,
         mock_update,
         mock_ensure_cluster_id,
+        mock_ensure_lease,
     ):
         mock_create_job.return_value = False
         mock_update_job.return_value = None
@@ -362,6 +374,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             extra_vars=fake_cluster.spec.extraVars,
         )
         mock_update_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, fake_cluster)
 
     @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
@@ -483,6 +496,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(lease_utils, "drop_lease_finalizer")
     @mock.patch.object(ansible_runner, "delete_secret")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
@@ -499,10 +513,12 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id,
         mock_get_job_state,
         mock_delete_secret,
+        mock_drop_lease,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_get_job_state.return_value = True
         fake_body = cluster_crd.get_fake_dict()
+        del fake_body["spec"]["leaseName"]
 
         await operator.cluster_delete(fake_body, "cluster1", "ns", {})
 
@@ -514,9 +530,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_start.assert_not_called()
         mock_update.assert_not_called()
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
-        mock_delete_secret.assert_awaited_once_with(
-            operator.K8S_CLIENT, "cloudsyaml", "ns"
-        )
+        mock_delete_secret.assert_awaited_once_with(operator.K8S_CLIENT, cluster, "ns")
+        mock_drop_lease.assert_not_called()
 
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")

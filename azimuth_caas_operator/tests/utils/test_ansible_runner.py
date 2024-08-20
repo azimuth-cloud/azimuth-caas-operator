@@ -24,6 +24,7 @@ class TestAnsibleRunner(base.TestCase):
     )
     def test_get_job_remove(self):
         cluster = cluster_crd.get_fake()
+        cluster.spec.leaseName = None
         cluster_type = cluster_type_crd.get_fake()
 
         job = ansible_runner.get_job(

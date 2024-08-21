@@ -14,6 +14,8 @@ from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_c
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
 from azimuth_caas_operator.utils import k8s
+from azimuth_caas_operator.utils import lease as lease_utils
+
 
 LOG = logging.getLogger(__name__)
 CLUSTER_LABEL = "azimuth-caas-cluster"
@@ -74,7 +76,6 @@ async def _update_cluster_type(client, name, namespace, status):
     )
 
 
-# TODO(johngarbutt): move to utils.cluster_type
 async def _fetch_ui_meta_from_url(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -136,6 +137,23 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
         LOG.info(f"Cluster {name} in {namespace} is paused - no action taken")
         return
 
+    # Wait for Blazar lease to be active
+    try:
+        flavor_map = await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
+    except lease_utils.LeaseInError as exc:
+        message = str(exc)
+        if "external service enforcement filter denied the request" in message.lower():
+            message = "Not enough credits to create platform"
+        await cluster_utils.update_cluster(
+            K8S_CLIENT, name, namespace, cluster_crd.ClusterPhase.FAILED, error=message
+        )
+        msg = f"Lease is in Error state for {name} in {namespace}"
+        LOG.error(msg)
+        # keep polling until the lease is active, but report the error
+        raise kopf.TemporaryError(msg, delay=20)
+    else:
+        await cluster_utils.update_cluster_flavors(K8S_CLIENT, cluster, flavor_map)
+
     # Check for an existing create job
     create_job = await ansible_runner.get_create_job_for_cluster(
         K8S_CLIENT, name, namespace
@@ -181,7 +199,6 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
-                # TODO(johngarbutt): we to better information on the reason!
                 error=error,
                 outputs=outputs,
             )
@@ -226,6 +243,9 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
     if cluster.spec.paused:
         LOG.info(f"Cluster {name} in {namespace} is paused - no action taken")
         return
+
+    # Wait for Blazar lease to be active
+    await lease_utils.ensure_lease_active(K8S_CLIENT, cluster)
 
     # Fail if create is still in progress
     # Note that we don't care if create worked.
@@ -280,7 +300,6 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
                 name,
                 namespace,
                 cluster_crd.ClusterPhase.FAILED,
-                # TODO(johngarbutt): we to better information on the reason!
                 error=error,
                 outputs=outputs,
             )
@@ -294,8 +313,6 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
     if not is_upgrade and not is_extra_var_update:
         LOG.info(f"Skip update, no meaningful changes for: {name} in {namespace}")
         return
-
-    # TODO(johngarbutt): should we check if we are about to be auto-deleted?
 
     # There is no running create job, so lets create one
     await ansible_runner.start_job(K8S_CLIENT, cluster, namespace, update=True)
@@ -360,9 +377,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         raise kopf.TemporaryError(msg, delay=20)
 
     if is_job_success:
-        await ansible_runner.delete_secret(
-            K8S_CLIENT, cluster.spec.cloudCredentialsSecretName, namespace
-        )
+        if cluster.spec.leaseName:
+            await lease_utils.drop_lease_finalizer(K8S_CLIENT, cluster)
+        else:
+            # legacy behavior is appcred deleted by caas
+            await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
         LOG.info(f"Delete job complete for {name} in {namespace}")
         # let kopf remove finalizer and complete the cluster delete
         return

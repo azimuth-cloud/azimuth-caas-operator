@@ -216,10 +216,22 @@ class TestModels(base.TestCase):
                     "minLength": 1,
                     "type": "string"
                   },
+                  "leaseName": {
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "extraVars": {
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
                     },
+                    "type": "object",
+                    "x-kubernetes-preserve-unknown-fields": true
+                  },
+                  "extraVarOverrides": {
+                    "additionalProperties": {
+                      "x-kubernetes-preserve-unknown-fields": true
+                    },
+                    "nullable": true,
                     "type": "object",
                     "x-kubernetes-preserve-unknown-fields": true
                   },

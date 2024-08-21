@@ -24,6 +24,7 @@ class TestAnsibleRunner(base.TestCase):
     )
     def test_get_job_remove(self):
         cluster = cluster_crd.get_fake()
+        cluster.spec.leaseName = None
         cluster_type = cluster_type_crd.get_fake()
 
         job = ansible_runner.get_job(
@@ -197,7 +198,7 @@ data:
     '
   extravars: "cluster_deploy_ssh_public_key: fakekey\\ncluster_id: fakeclusterID1\\n\\
     cluster_image: testimage1\\ncluster_name: test1\\ncluster_ssh_private_key_file:\\
-    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: bar\\nglobal_extravar1:\\
+    \\ /var/lib/caas/ssh/id_ed25519\\ncluster_type: type1\\nfoo: boo\\nglobal_extravar1:\\
     \\ value1\\nglobal_extravar2: value2\\nnested:\\n  baz: bob\\nrandom_bool: true\\nrandom_dict:\\n\\
     \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
 kind: ConfigMap
@@ -211,6 +212,24 @@ metadata:
     uid: fakeuid1
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(config))
+        # check cluster_image comes from cluster template
+        self.assertEqual(
+            "testimage1",
+            yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)[
+                "cluster_image"
+            ],
+        )
+        # check very_random_int comes from extravars
+        self.assertEqual(
+            "42",
+            yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)[
+                "very_random_int"
+            ],
+        )
+        # check foo is correctly overriden by extra vars overrides
+        self.assertEqual(
+            "boo", yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)["foo"]
+        )
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):

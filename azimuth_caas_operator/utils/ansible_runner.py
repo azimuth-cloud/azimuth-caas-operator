@@ -171,6 +171,7 @@ def get_env_configmap(
     extraVars = dict(global_extravars)
     extraVars.update(cluster_type_spec.extraVars)
     extraVars.update(cluster.spec.extraVars)
+    extraVars.update(cluster.spec.extraVarOverrides)
     extraVars["cluster_name"] = cluster.metadata.name
     extraVars["cluster_id"] = cluster.status.clusterID
     extraVars["cluster_type"] = cluster.spec.clusterTypeName
@@ -233,6 +234,8 @@ def get_job(
 
     defines_inventory = "ANSIBLE_INVENTORY" in dict(cluster_type_spec.envVars)
     # for ANSIBLE_INVENTORY in envvars to work, there must be no inventory/ directory
+
+    remove_app_cred = remove and (cluster.spec.leaseName is None)
 
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
@@ -313,7 +316,7 @@ spec:
               ansible-galaxy install -r /runner/project/roles/requirements.yml
             fi
             ansible-runner run /runner -j
-            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove else ""}
+            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove_app_cred else ""}
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"
@@ -688,6 +691,8 @@ async def start_job(
     )
 
 
-async def delete_secret(client, secret_name, namespace):
+async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
     secrets_resource = await client.api("v1").resource("secrets")
-    await secrets_resource.delete(secret_name, namespace=namespace)
+    await secrets_resource.delete(
+        cluster.spec.cloudCredentialsSecretName, namespace=namespace
+    )

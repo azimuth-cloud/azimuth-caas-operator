@@ -146,7 +146,7 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
       serviceAccountName: test1-tfstate
-      ttlSecondsAfterFinished: 3600
+      ttlSecondsAfterFinished: 36000
       volumes:
       - emptyDir: {}
         name: runner-data

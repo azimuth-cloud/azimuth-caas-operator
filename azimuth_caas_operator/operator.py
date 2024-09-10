@@ -410,9 +410,9 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             K8S_CLIENT, name, namespace
         )
         delay_multiplier = len(failed_delete_jobs) - 1
-        # limit max delay to 64 (2**6) minutes between retries
-        # although auto delete jobs should age out after 1 hour anyway
-        delay_multiplier = min(delay_multiplier, 6)
+        # limit max delay to 128 (2**7) minutes between retries
+        # although auto delete jobs should age out after 10 hours anyway
+        delay_multiplier = min(delay_multiplier, 7)
         delay = 60 * (2**delay_multiplier)
 
         msg = (

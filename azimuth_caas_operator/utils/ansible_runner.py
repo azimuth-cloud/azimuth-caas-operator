@@ -255,8 +255,8 @@ spec:
   template:
     spec:
 {f'''
-      # auto-remove delete jobs after one hour
-      ttlSecondsAfterFinished: 3600
+      # auto-remove delete jobs after 10 hours
+      ttlSecondsAfterFinished: 36000
  ''' if remove else ''}
       serviceAccountName: {service_account_name}
       securityContext:

@@ -415,6 +415,20 @@ async def get_delete_job_for_cluster(client, cluster_name, namespace):
     return await get_job_for_cluster(client, cluster_name, namespace, remove=True)
 
 
+async def get_failed_delete_jobs_for_cluster(client, cluster_name, namespace):
+    job_resource = await get_job_resource(client)
+    return [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": "failed-delete-job",
+            },
+            namespace=namespace,
+        )
+    ]
+
+
 async def get_job_for_cluster(
     client, cluster_name, namespace, remove=False, update=False
 ):
@@ -627,6 +641,15 @@ async def unlabel_job(client, job):
     await job_resource.patch(
         job.metadata.name,
         dict(metadata=dict(labels={"azimuth-caas-action": "complete-update"})),
+        namespace=job.metadata.namespace,
+    )
+
+
+async def unlabel_delete_job(client, job):
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.patch(
+        job.metadata.name,
+        dict(metadata=dict(labels={"azimuth-caas-action": "failed-delete-job"})),
         namespace=job.metadata.namespace,
     )
 

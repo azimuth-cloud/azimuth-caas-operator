@@ -605,7 +605,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
-    @mock.patch.object(ansible_runner, "unlabel_job")
+    @mock.patch.object(ansible_runner, "get_failed_delete_jobs_for_cluster")
+    @mock.patch.object(ansible_runner, "unlabel_delete_job")
     @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
@@ -622,18 +623,21 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id,
         mock_get_job_state,
         mock_get_error,
-        mock_unlabel,
+        mock_unlabel_delete_job,
+        mock_failed_jobs,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_get_job_state.return_value = False
         mock_get_error.return_value = "Problem with job."
         fake_body = cluster_crd.get_fake_dict()
+        mock_failed_jobs.return_value = ["failedjob1", "failedjob2"]
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_delete(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
-            "Delete job failed for cluster1 in ns because: Problem with job.",
+            "Delete job failed for cluster1 in ns retrying in 120 seconds "
+            "because: Problem with job.",
             str(ctx.exception),
         )
         mock_create_finsish.assert_awaited_once_with(
@@ -651,7 +655,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "Possible reason for the failure was: Problem with job.",
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
-        mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
+        mock_unlabel_delete_job.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
+        mock_failed_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
     @mock.patch("aiohttp.ClientSession.get")
     async def test_fetch_ui_meta_from_url_success(self, mock_get):

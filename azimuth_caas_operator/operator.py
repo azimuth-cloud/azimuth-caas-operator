@@ -409,7 +409,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         failed_delete_jobs = await ansible_runner.get_failed_delete_jobs_for_cluster(
             K8S_CLIENT, name, namespace
         )
-        delay = 60 * (2 ** (len(failed_delete_jobs) - 1))
+        delay_multiplier = len(failed_delete_jobs) - 1
+        # limit max delay to 64 (2**6) minutes between retries
+        # although auto delete jobs should age out after 1 hour anyway
+        delay_multiplier = min(delay_multiplier, 6)
+        delay = 60 * (2**delay_multiplier)
 
         msg = (
             f"Delete job failed for {name} in {namespace} "

@@ -403,9 +403,21 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             error=error,
         )
         # unlabel the job, so we trigger a retry next time
-        await ansible_runner.unlabel_job(K8S_CLIENT, delete_job)
+        await ansible_runner.unlabel_delete_job(K8S_CLIENT, delete_job)
 
-        # Wait 60 seconds before retrying the delete
-        msg = f"Delete job failed for {name} in {namespace} because: {reason}"
+        # wait longer each time we fail
+        failed_delete_jobs = await ansible_runner.get_failed_delete_jobs_for_cluster(
+            K8S_CLIENT, name, namespace
+        )
+        delay_multiplier = len(failed_delete_jobs) - 1
+        # limit max delay to 128 (2**7) minutes between retries
+        # although auto delete jobs should age out after 10 hours anyway
+        delay_multiplier = min(delay_multiplier, 7)
+        delay = 60 * (2**delay_multiplier)
+
+        msg = (
+            f"Delete job failed for {name} in {namespace} "
+            f"retrying in {delay} seconds because: {reason}"
+        )
         LOG.error(msg)
-        raise kopf.TemporaryError(msg, delay=60)
+        raise kopf.TemporaryError(msg, delay=delay)

@@ -65,7 +65,14 @@ kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 
 # make sure the failed delete is still deleting
 until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
+# make sure the failed delete has an error set
+until kubectl wait --for=jsonpath='{.status.error}' cluster quick-test-fail-delete; do echo "wait for delete failure"; sleep 2; done
+# make sure the failed delete is still deleting
+until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
 
 kubectl get cluster
 kubectl get cluster -o yaml
 kubectl get jobs
+
+# output logs from operator
+kubectl logs -n azimuth-caas-operator deployment/azimuth-caas-operator operator

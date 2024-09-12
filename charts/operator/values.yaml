@@ -11,6 +11,9 @@ config:
   # Any global extravars to use
   globalExtraVars: {}
 
+# A bundle of trusted CAs to use instead of the defaults
+trustBundle:
+
 # The operator image to use
 image:
   repository: ghcr.io/azimuth-cloud/azimuth-caas-operator

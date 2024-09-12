@@ -49,6 +49,11 @@ spec:
               protocol: TCP
           resources: {{ toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            {{- if .Values.trustBundle }}
+            - name: trust-bundle
+              mountPath: /etc/ssl/certs
+              readOnly: true
+            {{- end }}
             - name: tmp
               mountPath: /tmp
       {{- with .Values.nodeSelector }}
@@ -61,5 +66,10 @@ spec:
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+        {{- if .Values.trustBundle }}
+        - name: trust-bundle
+          configMap:
+            name: {{ include "azimuth-caas-operator.fullname" . }}-trust-bundle
+        {{- end }}
         - name: tmp
           emptyDir: {}

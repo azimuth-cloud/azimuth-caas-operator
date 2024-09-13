@@ -156,11 +156,13 @@ async def ensure_trust_bundle_configmap(client, target_namespace):
         "mirroring trust bundle configmap %s from %s to %s",
         trust_bundle_configmap_name,
         source_namespace,
-        target_namespace
+        target_namespace,
     )
     # Fetch the source configmap
     configmaps = await client.api("v1").resource("configmaps")
-    source = await configmaps.fetch(trust_bundle_configmap_name, namespace = source_namespace)
+    source = await configmaps.fetch(
+        trust_bundle_configmap_name, namespace=source_namespace
+    )
     # Prepare the mirrored configmap
     mirror = copy.deepcopy(source)
     # Replace the metadata object with one containing only what we need
@@ -168,16 +170,15 @@ async def ensure_trust_bundle_configmap(client, target_namespace):
         "name": source["metadata"]["name"],
         # Set the namespace to the target namespace
         "namespace": target_namespace,
-        "labels": { "app.kubernetes.io/created-by": "azimuth-caas-operator" },
+        "labels": {"app.kubernetes.io/created-by": "azimuth-caas-operator"},
         "annotations": {
             "caas.azimuth.stackhpc.com/mirrors": "{}/{}".format(
-                source_namespace,
-                trust_bundle_configmap_name
+                source_namespace, trust_bundle_configmap_name
             ),
         },
     }
     # Apply the mirror object
-    await client.apply_object(mirror)
+    await client.apply_object(mirror, force=True)
     return trust_bundle_configmap_name
 
 

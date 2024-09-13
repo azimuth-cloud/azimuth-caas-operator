@@ -1,4 +1,5 @@
 import base64
+import copy
 import json
 import logging
 import os
@@ -140,6 +141,46 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
     return service_account.metadata.name
 
 
+async def ensure_trust_bundle_configmap(client, target_namespace):
+    """
+    Ensures that the trust bundle is copied into the target namespace and
+    returns the name of the configmap.
+    """
+    # Check if there is a configmap containing a trust bundle that we need to mount
+    trust_bundle_configmap_name = os.environ.get("TRUST_BUNDLE_CONFIGMAP")
+    if not trust_bundle_configmap_name:
+        return None
+    # Get the namespace that the operator is deployed in
+    source_namespace = os.environ["SELF_NAMESPACE"]
+    LOG.info(
+        "mirroring trust bundle configmap %s from %s to %s",
+        trust_bundle_configmap_name,
+        source_namespace,
+        target_namespace
+    )
+    # Fetch the source configmap
+    configmaps = await client.api("v1").resource("configmaps")
+    source = await configmaps.fetch(trust_bundle_configmap_name, namespace = source_namespace)
+    # Prepare the mirrored configmap
+    mirror = copy.deepcopy(source)
+    # Replace the metadata object with one containing only what we need
+    mirror["metadata"] = {
+        "name": source["metadata"]["name"],
+        # Set the namespace to the target namespace
+        "namespace": target_namespace,
+        "labels": { "app.kubernetes.io/created-by": "azimuth-caas-operator" },
+        "annotations": {
+            "caas.azimuth.stackhpc.com/mirrors": "{}/{}".format(
+                source_namespace,
+                trust_bundle_configmap_name
+            ),
+        },
+    }
+    # Apply the mirror object
+    await client.apply_object(mirror)
+    return trust_bundle_configmap_name
+
+
 async def get_global_extravars(client):
     """
     Retrieves the global extra vars from the specified secret.
@@ -221,6 +262,7 @@ def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     service_account_name: str,
+    trust_bundle_configmap_name: typing.Optional[str],
     remove=False,
     update=False,
 ):
@@ -254,7 +296,7 @@ metadata:
 spec:
   template:
     spec:
-{f'''
+{'''
       # auto-remove delete jobs after 10 hours
       ttlSecondsAfterFinished: 36000
  ''' if remove else ''}
@@ -294,10 +336,25 @@ spec:
             git checkout {cluster_type_spec.gitVersion}
             git submodule update --init --recursive
             ls -al /runner/project
+{f'''
+        env:
+        # Set environment variables to make apps trust the CA bundle
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+''' if trust_bundle_configmap_name else ''}
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
+{'''
+        - name: trust-bundle
+          mountPath: /etc/ssl/certs
+          readOnly: true
+''' if trust_bundle_configmap_name else ''}
       containers:
       - name: run
         image: "{image}"
@@ -339,6 +396,17 @@ spec:
         # Use the writable directory for ansible-home
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
+{f'''
+        # Set environment variables to make apps trust the CA bundle
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: REQUESTS_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+''' if trust_bundle_configmap_name else ''}
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
@@ -365,6 +433,11 @@ spec:
         - name: ssh
           mountPath: /home/runner/.ssh
           readOnly: true
+{'''
+        - name: trust-bundle
+          mountPath: /etc/ssl/certs
+          readOnly: true
+''' if trust_bundle_configmap_name else ''}
       volumes:
       - name: runner-data
         emptyDir: {{}}
@@ -385,6 +458,11 @@ spec:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
           optional: true
+{f'''
+      - name: trust-bundle
+        configMap:
+          name: {trust_bundle_configmap_name}
+''' if trust_bundle_configmap_name else ''}
   backoffLimit: {1 if remove else 0}
   # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
   activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa
@@ -702,12 +780,16 @@ async def start_job(
     # Ensure that the service account exists for the cluster
     service_account_name = await ensure_service_account(client, cluster)
 
+    # Ensure that the trust bundle has been copied into the namespace
+    trust_bundle_configmap_name = await ensure_trust_bundle_configmap(client, namespace)
+
     # create the job
     await client.create_object(
         get_job(
             cluster,
             cluster_type_spec,
             service_account_name,
+            trust_bundle_configmap_name,
             remove=remove,
             update=update,
         )

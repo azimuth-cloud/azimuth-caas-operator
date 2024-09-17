@@ -58,6 +58,10 @@ class TestModels(base.TestCase):
                   "playbook": {
                     "type": "string"
                   },
+                  "initPlaybook": {
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "jobTimeout": {
                     "type": "integer"
                   },
@@ -296,6 +300,10 @@ class TestModels(base.TestCase):
                         "type": "string"
                       },
                       "playbook": {
+                        "type": "string"
+                      },
+                      "initPlaybook": {
+                        "nullable": true,
                         "type": "string"
                       },
                       "jobTimeout": {

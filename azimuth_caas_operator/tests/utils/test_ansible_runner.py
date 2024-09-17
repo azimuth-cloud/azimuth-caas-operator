@@ -140,6 +140,35 @@ spec:
           name: runner-data
           subPath: project
         workingDir: /runner
+      - command:
+        - /bin/bash
+        - -c
+        - "set -ex\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
+          \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
+          \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
+          \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\
+          fi\\nansible-runner run /runner -j\\n"
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: init.yaml
+        - name: ANSIBLE_CONFIG
+          value: /runner/project/ansible.cfg
+        - name: ANSIBLE_HOME
+          value: /var/lib/ansible
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
+        name: init-playbook
+        volumeMounts:
+        - mountPath: /runner/project
+          name: runner-data
+          subPath: project
+        - mountPath: /runner/artifacts
+          name: runner-data
+          subPath: artifacts
+        - mountPath: /var/lib/ansible
+          name: ansible-home
+        - mountPath: /runner/env
+          name: env
+          readOnly: true
       restartPolicy: Never
       securityContext:
         fsGroup: 1000

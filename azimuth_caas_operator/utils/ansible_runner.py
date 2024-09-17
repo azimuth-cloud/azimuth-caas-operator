@@ -298,6 +298,41 @@ spec:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
+{f'''
+      - name: init-playbook
+        image: "{image}"
+        command:
+        - /bin/bash
+        - -c
+        - |
+            set -ex
+            export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
+            if [ -f /runner/project/requirements.yml ]; then
+              ansible-galaxy install -r /runner/project/requirements.yml
+            elif [ -f /runner/project/roles/requirements.yml ]; then
+              ansible-galaxy install -r /runner/project/roles/requirements.yml
+            fi
+            ansible-runner run /runner -j
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: "{cluster_type_spec.init_playbook}"
+        - name: ANSIBLE_CONFIG
+          value: /runner/project/ansible.cfg
+        - name: ANSIBLE_HOME
+          value: /var/lib/ansible
+        volumeMounts:
+        - name: runner-data
+          mountPath: /runner/project
+          subPath: project
+        - name: runner-data
+          mountPath: /runner/artifacts
+          subPath: artifacts
+        - name: ansible-home
+          mountPath: /var/lib/ansible
+        - name: env
+          mountPath: /runner/env
+          readOnly: true
+''' if cluster_type_spec.init_playbook else ''}
       containers:
       - name: run
         image: "{image}"

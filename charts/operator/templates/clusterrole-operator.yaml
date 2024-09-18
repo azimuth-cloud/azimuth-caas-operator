@@ -19,6 +19,14 @@ rules:
     resources: ["*"]
     verbs: ["*"]
   - apiGroups:
+      - identity.azimuth.stackhpc.com
+    resources:
+      - platforms
+    verbs:
+      - list
+      - get
+      - patch
+  - apiGroups:
       - scheduling.azimuth.stackhpc.com
     resources:
       - leases

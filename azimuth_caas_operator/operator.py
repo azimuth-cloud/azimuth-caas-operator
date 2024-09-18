@@ -122,6 +122,11 @@ async def cluster_resume(body, name, namespace, **kwargs):
     # Ensure that the clusterID is set for all clusters
     cluster = cluster_crd.Cluster(**body)
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
+    # Ensure that the lease is adopted, if required
+    if cluster.spec.leaseName:
+        await lease_utils.adopt_lease(K8S_CLIENT, cluster)
 
 
 @kopf.on.create(registry.API_GROUP, "cluster")
@@ -131,6 +136,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
 
     # If cluster reconciliation is paused, don't do anything else
     if cluster.spec.paused:
@@ -238,6 +246,9 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
 
     # If cluster reconciliation is paused, don't do anything else
     if cluster.spec.paused:
@@ -378,7 +389,7 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
 
     if is_job_success:
         if cluster.spec.leaseName:
-            await lease_utils.drop_lease_finalizer(K8S_CLIENT, cluster)
+            await lease_utils.release_lease(K8S_CLIENT, cluster)
         else:
             # legacy behavior is appcred deleted by caas
             await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)

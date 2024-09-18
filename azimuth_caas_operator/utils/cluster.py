@@ -40,8 +40,8 @@ async def adopt_identity_platform(client, cluster: cluster_crd.Cluster):
     """
     Adopt the identity platform for the cluster.
     """
-    ekplatforms = await client.api(IDENTITY_API_VERSION).resource("platforms")
     try:
+        ekplatforms = await client.api(IDENTITY_API_VERSION).resource("platforms")
         platform = await ekplatforms.fetch(
             f"caas-{cluster.metadata.name}", namespace=cluster.metadata.namespace
         )
@@ -50,38 +50,39 @@ async def adopt_identity_platform(client, cluster: cluster_crd.Cluster):
             return
         else:
             raise
-    platform_patch = []
-    if "ownerReferences" not in platform.metadata:
-        platform_patch.append(
-            {
-                "op": "add",
-                "path": "/metadata/ownerReferences",
-                "value": [],
-            }
-        )
-    if not any(
-        ref["uid"] == cluster.metadata.uid
-        for ref in platform.metadata.get("ownerReferences", [])
-    ):
-        platform_patch.append(
-            {
-                "op": "add",
-                "path": "/metadata/ownerReferences/-",
-                "value": {
-                    "apiVersion": cluster.api_version,
-                    "kind": cluster.kind,
-                    "name": cluster.metadata.name,
-                    "uid": cluster.metadata.uid,
-                    "blockOwnerDeletion": True,
-                },
-            }
-        )
-    if platform_patch:
-        await ekplatforms.json_patch(
-            platform.metadata.name,
-            platform_patch,
-            namespace=platform.metadata.namespace,
-        )
+    else:
+        platform_patch = []
+        if "ownerReferences" not in platform.metadata:
+            platform_patch.append(
+                {
+                    "op": "add",
+                    "path": "/metadata/ownerReferences",
+                    "value": [],
+                }
+            )
+        if not any(
+            ref["uid"] == cluster.metadata.uid
+            for ref in platform.metadata.get("ownerReferences", [])
+        ):
+            platform_patch.append(
+                {
+                    "op": "add",
+                    "path": "/metadata/ownerReferences/-",
+                    "value": {
+                        "apiVersion": cluster.api_version,
+                        "kind": cluster.kind,
+                        "name": cluster.metadata.name,
+                        "uid": cluster.metadata.uid,
+                        "blockOwnerDeletion": True,
+                    },
+                }
+            )
+        if platform_patch:
+            await ekplatforms.json_patch(
+                platform.metadata.name,
+                platform_patch,
+                namespace=platform.metadata.namespace,
+            )
 
 
 async def update_cluster_flavors(client, cluster: cluster_crd.Cluster, flavors: dict):

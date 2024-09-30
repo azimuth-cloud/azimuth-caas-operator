@@ -26,6 +26,7 @@ class ClusterTypeSpec(schema.BaseModel):
     gitVersion: str
     # Playbook is contained in the above git repo
     playbook: str
+    init_playbook: schema.Optional[str] = None
     # The timeout (in seconds) to apply to the kubernetes job resource
     # which creates, updates and deletes the cluster instances
     jobTimeout: int = pydantic.Field(default=1200)
@@ -83,6 +84,7 @@ def get_fake_dict():
             gitUrl="https://github.com/test.git",
             gitVersion="12345ab",
             playbook="sample.yaml",
+            initPlaybook="init.yaml",
             extraVars=dict(
                 cluster_image="testimage1",
                 random_bool=True,

@@ -42,8 +42,8 @@ additional_build_steps:
     - |
         ENV TF_PLUGIN_CACHE_DIR=/home/runner/.terraform.d/plugin-cache
         ARG opentofu_version=1.6.0
-        RUN wget https://github.com/opentofu/opentofu/releases/download/v{terraform_version}/tofu_${terraform_version}_linux_amd64.zip && \
-          unzip tofu_${terraform_version}_linux_amd64.zip && rm tofu_${terraform_version}_linux_amd64.zip && \
+        RUN wget https://github.com/opentofu/opentofu/releases/download/v${opentofu_version}/tofu_${opentofu_version}_linux_amd64.zip && \
+          unzip tofu_${opentofu_version}_linux_amd64.zip && rm tofu_${opentofu_version}_linux_amd64.zip && \
           mv tofu /usr/local/bin && \
           mkdir -p /home/runner/tofu_setup && \
           mkdir -p $TF_PLUGIN_CACHE_DIR

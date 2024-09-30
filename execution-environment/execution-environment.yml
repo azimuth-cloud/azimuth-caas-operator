@@ -20,6 +20,10 @@ dependencies:
 options:
   package_manager_path: /usr/bin/microdnf
 
+additional_build_files:
+  - src: main.tf
+    dest: tofu_setup
+
 additional_build_steps:
   prepend_base:
     # Give the user with UID 1000 a name
@@ -43,7 +47,7 @@ additional_build_steps:
           mv tofu /usr/local/bin && \
           mkdir -p /home/runner/tofu_setup && \
           mkdir -p $TF_PLUGIN_CACHE_DIR
-        COPY main.tf /home/runner/tofu_setup/main.tf
+        COPY _build/tofu_setup/main.tf /home/runner/tofu_setup/main.tf
         RUN cd /home/runner/tofu_setup && terraform init
   prepend_builder:
     - RUN $PYCMD -m pip install -U pip

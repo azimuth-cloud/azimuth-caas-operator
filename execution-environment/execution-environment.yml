@@ -46,7 +46,7 @@ additional_build_steps:
           mv tofu /usr/local/bin
 
   # add these at the end, so we run in the correct user context
-  append_base:
+  append_final:
     - |
         ENV TF_PLUGIN_CACHE_DIR=/home/runner/.terraform.d/plugin-cache
         RUN mkdir -p $TF_PLUGIN_CACHE_DIR && mkdir -p /home/runner/tofu_setup

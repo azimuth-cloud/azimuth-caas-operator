@@ -388,6 +388,9 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         raise kopf.TemporaryError(msg, delay=20)
 
     if is_job_success:
+        # Ensure that resources used by ansible-runner jobs are deleted
+        await ansible_runner.purge_job_resources(K8S_CLIENT, cluster)
+        # Release the lease, if one is specified
         if cluster.spec.leaseName:
             await lease_utils.release_lease(K8S_CLIENT, cluster)
         else:

@@ -590,6 +590,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
+    @mock.patch.object(ansible_runner, "purge_job_resources")
     @mock.patch.object(lease_utils, "release_lease")
     @mock.patch.object(ansible_runner, "delete_secret")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -608,6 +609,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_get_job_state,
         mock_delete_secret,
         mock_release_lease,
+        mock_purge_job_resources,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_get_job_state.return_value = True
@@ -626,6 +628,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_delete_secret.assert_awaited_once_with(operator.K8S_CLIENT, cluster, "ns")
         mock_release_lease.assert_not_called()
+        mock_purge_job_resources.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")

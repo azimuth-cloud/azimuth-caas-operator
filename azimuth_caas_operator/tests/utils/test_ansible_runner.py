@@ -40,11 +40,6 @@ metadata:
     azimuth-caas-action: remove
     azimuth-caas-cluster: test1
   namespace: ns1
-  ownerReferences:
-  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-    kind: Cluster
-    name: test1
-    uid: fakeuid1
 spec:
   activeDeadlineSeconds: 1200
   backoffLimit: 1
@@ -195,11 +190,6 @@ metadata:
     azimuth-caas-action: remove
     azimuth-caas-cluster: test1
   namespace: ns1
-  ownerReferences:
-  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-    kind: Cluster
-    name: test1
-    uid: fakeuid1
 spec:
   activeDeadlineSeconds: 1200
   backoffLimit: 1
@@ -382,13 +372,10 @@ data:
     \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
 kind: ConfigMap
 metadata:
+  labels:
+    azimuth-caas-cluster: test1
   name: test1-create
   namespace: ns1
-  ownerReferences:
-  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-    kind: Cluster
-    name: test1
-    uid: fakeuid1
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(config))
         # check cluster_image comes from cluster template
@@ -727,3 +714,65 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
 
         self.assertFalse(result)
         mock_get_create_job.assert_awaited_once_with("client", "cluster", "ns")
+
+    def _configure_mock_api(self, resources):
+        mock_resources = {resource: mock.AsyncMock() for resource in resources}
+        mock_api = mock.AsyncMock()
+        mock_api.resource.side_effect = lambda resource: mock_resources[resource]
+        return mock_api, mock_resources
+
+    def _configure_mock_client(self, apis):
+        mock_apis = {}
+        mock_resources = {}
+        for api, resources in apis.items():
+            mock_api, mock_api_resources = self._configure_mock_api(resources)
+            mock_apis[api] = mock_api
+            mock_resources[api] = mock_api_resources
+        mock_client = mock.Mock()
+        mock_client.api.side_effect = lambda api: mock_apis[api]
+        return mock_client, mock_apis, mock_resources
+
+    async def test_purge_job_resources(self):
+        mock_client, mock_apis, mock_resources = self._configure_mock_client(
+            {
+                "v1": ["configmaps", "secrets", "serviceaccounts"],
+                "rbac.authorization.k8s.io/v1": ["rolebindings"],
+                "batch/v1": ["jobs"],
+            }
+        )
+        cluster = cluster_crd.get_fake()
+
+        await ansible_runner.purge_job_resources(mock_client, cluster)
+
+        mock_client.api.assert_any_call("v1")
+        mock_apis["v1"].resource.assert_any_await("secrets")
+        mock_resources["v1"]["secrets"].delete.assert_awaited_once_with(
+            "test1-deploy-key", namespace="ns1"
+        )
+        mock_apis["v1"].resource.assert_any_await("serviceaccounts")
+        mock_resources["v1"]["serviceaccounts"].delete.assert_awaited_once_with(
+            "test1-tfstate", namespace="ns1"
+        )
+        mock_apis["v1"].resource.assert_any_await("configmaps")
+        mock_resources["v1"]["configmaps"].delete.assert_has_awaits(
+            [
+                mock.call("test1-create", namespace="ns1"),
+                mock.call("test1-update", namespace="ns1"),
+                mock.call("test1-remove", namespace="ns1"),
+            ],
+            any_order=True,
+        )
+
+        mock_client.api.assert_any_call("rbac.authorization.k8s.io/v1")
+        mock_apis["rbac.authorization.k8s.io/v1"].resource.assert_any_await(
+            "rolebindings"
+        )
+        mock_resources["rbac.authorization.k8s.io/v1"][
+            "rolebindings"
+        ].delete.assert_awaited_once_with("test1-tfstate", namespace="ns1")
+
+        mock_client.api.assert_any_call("batch/v1")
+        mock_apis["batch/v1"].resource.assert_any_await("jobs")
+        mock_resources["batch/v1"]["jobs"].delete_all.assert_awaited_once_with(
+            labels={"azimuth-caas-cluster": "test1"}, namespace="ns1"
+        )

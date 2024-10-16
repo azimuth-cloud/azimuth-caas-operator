@@ -44,14 +44,9 @@ async def create_deploy_key_secret(client, name: str, cluster: cluster_crd.Clust
             "metadata": {
                 "name": name,
                 "namespace": cluster.metadata.namespace,
-                "ownerReferences": [
-                    {
-                        "apiVersion": cluster.api_version,
-                        "kind": cluster.kind,
-                        "name": cluster.metadata.name,
-                        "uid": cluster.metadata.uid,
-                    },
-                ],
+                "labels": {
+                    "azimuth-caas-cluster": cluster.metadata.name,
+                },
             },
             "stringData": {
                 "id_ed25519.pub": public_key_text,
@@ -93,14 +88,9 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
             "metadata": {
                 "name": f"{cluster.metadata.name}-tfstate",
                 "namespace": cluster.metadata.namespace,
-                "ownerReferences": [
-                    {
-                        "apiVersion": cluster.api_version,
-                        "kind": cluster.kind,
-                        "name": cluster.metadata.name,
-                        "uid": cluster.metadata.uid,
-                    },
-                ],
+                "labels": {
+                    "azimuth-caas-cluster": cluster.metadata.name,
+                },
             },
         },
         force=True,
@@ -114,14 +104,9 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
                 "metadata": {
                     "name": service_account.metadata.name,
                     "namespace": cluster.metadata.namespace,
-                    "ownerReferences": [
-                        {
-                            "apiVersion": cluster.api_version,
-                            "kind": cluster.kind,
-                            "name": cluster.metadata.name,
-                            "uid": cluster.metadata.uid,
-                        },
-                    ],
+                    "labels": {
+                        "azimuth-caas-cluster": cluster.metadata.name,
+                    },
                 },
                 "roleRef": {
                     "apiGroup": "rbac.authorization.k8s.io",
@@ -243,14 +228,9 @@ def get_env_configmap(
         "metadata": {
             "name": f"{cluster.metadata.name}-{action}",
             "namespace": cluster.metadata.namespace,
-            "ownerReferences": [
-                {
-                    "apiVersion": cluster.api_version,
-                    "kind": cluster.kind,
-                    "name": cluster.metadata.name,
-                    "uid": cluster.metadata.uid,
-                },
-            ],
+            "labels": {
+                "azimuth-caas-cluster": cluster.metadata.name,
+            },
         },
         "data": {
             "envvars": yaml.safe_dump(envvars),
@@ -287,13 +267,8 @@ metadata:
   generateName: "{cluster.metadata.name}-{action}-"
   namespace: {cluster.metadata.namespace}
   labels:
-      azimuth-caas-cluster: "{cluster.metadata.name}"
-      azimuth-caas-action: "{action}"
-  ownerReferences:
-    - apiVersion: {cluster.api_version}
-      kind: {cluster.kind}
-      name: {cluster.metadata.name}
-      uid: "{cluster.metadata.uid}"
+    azimuth-caas-cluster: "{cluster.metadata.name}"
+    azimuth-caas-action: "{action}"
 spec:
   template:
     spec:
@@ -801,4 +776,43 @@ async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
     secrets_resource = await client.api("v1").resource("secrets")
     await secrets_resource.delete(
         cluster.spec.cloudCredentialsSecretName, namespace=namespace
+    )
+
+
+async def purge_job_resources(client, cluster: cluster_crd.Cluster):
+    """
+    Purge the resources used by jobs for the specified cluster.
+    """
+    secrets = await client.api("v1").resource("secrets")
+    await secrets.delete(
+        f"{cluster.metadata.name}-deploy-key", namespace=cluster.metadata.namespace
+    )
+
+    serviceaccts = await client.api("v1").resource("serviceaccounts")
+    await serviceaccts.delete(
+        f"{cluster.metadata.name}-tfstate", namespace=cluster.metadata.namespace
+    )
+
+    rolebindings = await client.api("rbac.authorization.k8s.io/v1").resource(
+        "rolebindings"
+    )
+    await rolebindings.delete(
+        f"{cluster.metadata.name}-tfstate", namespace=cluster.metadata.namespace
+    )
+
+    configmaps = await client.api("v1").resource("configmaps")
+    await configmaps.delete(
+        f"{cluster.metadata.name}-create", namespace=cluster.metadata.namespace
+    )
+    await configmaps.delete(
+        f"{cluster.metadata.name}-update", namespace=cluster.metadata.namespace
+    )
+    await configmaps.delete(
+        f"{cluster.metadata.name}-remove", namespace=cluster.metadata.namespace
+    )
+
+    jobs = await client.api("batch/v1").resource("jobs")
+    await jobs.delete_all(
+        labels={"azimuth-caas-cluster": cluster.metadata.name},
+        namespace=cluster.metadata.namespace,
     )

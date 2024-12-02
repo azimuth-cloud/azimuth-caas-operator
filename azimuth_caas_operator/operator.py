@@ -122,6 +122,11 @@ async def cluster_resume(body, name, namespace, **kwargs):
     # Ensure that the clusterID is set for all clusters
     cluster = cluster_crd.Cluster(**body)
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
+    # Ensure that the lease is adopted, if required
+    if cluster.spec.leaseName:
+        await lease_utils.adopt_lease(K8S_CLIENT, cluster)
 
 
 @kopf.on.create(registry.API_GROUP, "cluster")
@@ -131,6 +136,9 @@ async def cluster_create(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
 
     # If cluster reconciliation is paused, don't do anything else
     if cluster.spec.paused:
@@ -238,6 +246,9 @@ async def cluster_update(body, name, namespace, labels, **kwargs):
 
     # Before doing anything, ensure the clusterID is set
     await cluster_utils.ensure_cluster_id(K8S_CLIENT, cluster)
+
+    # Ensure that the identity platform is adopted, if one exists
+    await cluster_utils.adopt_identity_platform(K8S_CLIENT, cluster)
 
     # If cluster reconciliation is paused, don't do anything else
     if cluster.spec.paused:
@@ -377,8 +388,11 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
         raise kopf.TemporaryError(msg, delay=20)
 
     if is_job_success:
+        # Ensure that resources used by ansible-runner jobs are deleted
+        await ansible_runner.purge_job_resources(K8S_CLIENT, cluster)
+        # Release the lease, if one is specified
         if cluster.spec.leaseName:
-            await lease_utils.drop_lease_finalizer(K8S_CLIENT, cluster)
+            await lease_utils.release_lease(K8S_CLIENT, cluster)
         else:
             # legacy behavior is appcred deleted by caas
             await ansible_runner.delete_secret(K8S_CLIENT, cluster, namespace)
@@ -403,9 +417,21 @@ async def cluster_delete(body, name, namespace, labels, **kwargs):
             error=error,
         )
         # unlabel the job, so we trigger a retry next time
-        await ansible_runner.unlabel_job(K8S_CLIENT, delete_job)
+        await ansible_runner.unlabel_delete_job(K8S_CLIENT, delete_job)
 
-        # Wait 60 seconds before retrying the delete
-        msg = f"Delete job failed for {name} in {namespace} because: {reason}"
+        # wait longer each time we fail
+        failed_delete_jobs = await ansible_runner.get_failed_delete_jobs_for_cluster(
+            K8S_CLIENT, name, namespace
+        )
+        delay_multiplier = len(failed_delete_jobs) - 1
+        # limit max delay to 128 (2**7) minutes between retries
+        # although auto delete jobs should age out after 10 hours anyway
+        delay_multiplier = min(delay_multiplier, 7)
+        delay = 60 * (2**delay_multiplier)
+
+        msg = (
+            f"Delete job failed for {name} in {namespace} "
+            f"retrying in {delay} seconds because: {reason}"
+        )
         LOG.error(msg)
-        raise kopf.TemporaryError(msg, delay=60)
+        raise kopf.TemporaryError(msg, delay=delay)

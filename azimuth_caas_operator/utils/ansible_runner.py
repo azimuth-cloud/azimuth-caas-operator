@@ -1,4 +1,5 @@
 import base64
+import copy
 import json
 import logging
 import os
@@ -43,14 +44,9 @@ async def create_deploy_key_secret(client, name: str, cluster: cluster_crd.Clust
             "metadata": {
                 "name": name,
                 "namespace": cluster.metadata.namespace,
-                "ownerReferences": [
-                    {
-                        "apiVersion": cluster.api_version,
-                        "kind": cluster.kind,
-                        "name": cluster.metadata.name,
-                        "uid": cluster.metadata.uid,
-                    },
-                ],
+                "labels": {
+                    "azimuth-caas-cluster": cluster.metadata.name,
+                },
             },
             "stringData": {
                 "id_ed25519.pub": public_key_text,
@@ -92,14 +88,9 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
             "metadata": {
                 "name": f"{cluster.metadata.name}-tfstate",
                 "namespace": cluster.metadata.namespace,
-                "ownerReferences": [
-                    {
-                        "apiVersion": cluster.api_version,
-                        "kind": cluster.kind,
-                        "name": cluster.metadata.name,
-                        "uid": cluster.metadata.uid,
-                    },
-                ],
+                "labels": {
+                    "azimuth-caas-cluster": cluster.metadata.name,
+                },
             },
         },
         force=True,
@@ -113,14 +104,9 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
                 "metadata": {
                     "name": service_account.metadata.name,
                     "namespace": cluster.metadata.namespace,
-                    "ownerReferences": [
-                        {
-                            "apiVersion": cluster.api_version,
-                            "kind": cluster.kind,
-                            "name": cluster.metadata.name,
-                            "uid": cluster.metadata.uid,
-                        },
-                    ],
+                    "labels": {
+                        "azimuth-caas-cluster": cluster.metadata.name,
+                    },
                 },
                 "roleRef": {
                     "apiGroup": "rbac.authorization.k8s.io",
@@ -138,6 +124,47 @@ async def ensure_service_account(client, cluster: cluster_crd.Cluster):
             force=True,
         )
     return service_account.metadata.name
+
+
+async def ensure_trust_bundle_configmap(client, target_namespace):
+    """
+    Ensures that the trust bundle is copied into the target namespace and
+    returns the name of the configmap.
+    """
+    # Check if there is a configmap containing a trust bundle that we need to mount
+    trust_bundle_configmap_name = os.environ.get("TRUST_BUNDLE_CONFIGMAP")
+    if not trust_bundle_configmap_name:
+        return None
+    # Get the namespace that the operator is deployed in
+    source_namespace = os.environ["SELF_NAMESPACE"]
+    LOG.info(
+        "mirroring trust bundle configmap %s from %s to %s",
+        trust_bundle_configmap_name,
+        source_namespace,
+        target_namespace,
+    )
+    # Fetch the source configmap
+    configmaps = await client.api("v1").resource("configmaps")
+    source = await configmaps.fetch(
+        trust_bundle_configmap_name, namespace=source_namespace
+    )
+    # Prepare the mirrored configmap
+    mirror = copy.deepcopy(source)
+    # Replace the metadata object with one containing only what we need
+    mirror["metadata"] = {
+        "name": source["metadata"]["name"],
+        # Set the namespace to the target namespace
+        "namespace": target_namespace,
+        "labels": {"app.kubernetes.io/created-by": "azimuth-caas-operator"},
+        "annotations": {
+            "caas.azimuth.stackhpc.com/mirrors": "{}/{}".format(
+                source_namespace, trust_bundle_configmap_name
+            ),
+        },
+    }
+    # Apply the mirror object
+    await client.apply_object(mirror, force=True)
+    return trust_bundle_configmap_name
 
 
 async def get_global_extravars(client):
@@ -201,14 +228,9 @@ def get_env_configmap(
         "metadata": {
             "name": f"{cluster.metadata.name}-{action}",
             "namespace": cluster.metadata.namespace,
-            "ownerReferences": [
-                {
-                    "apiVersion": cluster.api_version,
-                    "kind": cluster.kind,
-                    "name": cluster.metadata.name,
-                    "uid": cluster.metadata.uid,
-                },
-            ],
+            "labels": {
+                "azimuth-caas-cluster": cluster.metadata.name,
+            },
         },
         "data": {
             "envvars": yaml.safe_dump(envvars),
@@ -221,6 +243,7 @@ def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     service_account_name: str,
+    trust_bundle_configmap_name: typing.Optional[str],
     remove=False,
     update=False,
 ):
@@ -244,19 +267,14 @@ metadata:
   generateName: "{cluster.metadata.name}-{action}-"
   namespace: {cluster.metadata.namespace}
   labels:
-      azimuth-caas-cluster: "{cluster.metadata.name}"
-      azimuth-caas-action: "{action}"
-  ownerReferences:
-    - apiVersion: {cluster.api_version}
-      kind: {cluster.kind}
-      name: {cluster.metadata.name}
-      uid: "{cluster.metadata.uid}"
+    azimuth-caas-cluster: "{cluster.metadata.name}"
+    azimuth-caas-action: "{action}"
 spec:
   template:
     spec:
-{f'''
-      # auto-remove delete jobs after one hour
-      ttlSecondsAfterFinished: 3600
+{'''
+      # auto-remove delete jobs after 10 hours
+      ttlSecondsAfterFinished: 36000
  ''' if remove else ''}
       serviceAccountName: {service_account_name}
       securityContext:
@@ -294,10 +312,25 @@ spec:
             git checkout {cluster_type_spec.gitVersion}
             git submodule update --init --recursive
             ls -al /runner/project
+{f'''
+        env:
+        # Set environment variables to make apps trust the CA bundle
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+''' if trust_bundle_configmap_name else ''}
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
+{'''
+        - name: trust-bundle
+          mountPath: /etc/ssl/certs
+          readOnly: true
+''' if trust_bundle_configmap_name else ''}
       containers:
       - name: run
         image: "{image}"
@@ -339,6 +372,17 @@ spec:
         # Use the writable directory for ansible-home
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
+{f'''
+        # Set environment variables to make apps trust the CA bundle
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: REQUESTS_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+''' if trust_bundle_configmap_name else ''}
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
@@ -365,6 +409,11 @@ spec:
         - name: ssh
           mountPath: /home/runner/.ssh
           readOnly: true
+{'''
+        - name: trust-bundle
+          mountPath: /etc/ssl/certs
+          readOnly: true
+''' if trust_bundle_configmap_name else ''}
       volumes:
       - name: runner-data
         emptyDir: {{}}
@@ -385,6 +434,11 @@ spec:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
           optional: true
+{f'''
+      - name: trust-bundle
+        configMap:
+          name: {trust_bundle_configmap_name}
+''' if trust_bundle_configmap_name else ''}
   backoffLimit: {1 if remove else 0}
   # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
   activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa
@@ -413,6 +467,20 @@ async def get_update_job_for_cluster(client, cluster_name, namespace):
 
 async def get_delete_job_for_cluster(client, cluster_name, namespace):
     return await get_job_for_cluster(client, cluster_name, namespace, remove=True)
+
+
+async def get_failed_delete_jobs_for_cluster(client, cluster_name, namespace):
+    job_resource = await get_job_resource(client)
+    return [
+        job
+        async for job in job_resource.list(
+            labels={
+                "azimuth-caas-cluster": cluster_name,
+                "azimuth-caas-action": "failed-delete-job",
+            },
+            namespace=namespace,
+        )
+    ]
 
 
 async def get_job_for_cluster(
@@ -631,6 +699,15 @@ async def unlabel_job(client, job):
     )
 
 
+async def unlabel_delete_job(client, job):
+    job_resource = await client.api("batch/v1").resource("jobs")
+    await job_resource.patch(
+        job.metadata.name,
+        dict(metadata=dict(labels={"azimuth-caas-action": "failed-delete-job"})),
+        namespace=job.metadata.namespace,
+    )
+
+
 async def start_job(
     client, cluster: cluster_crd.Cluster, namespace, remove=False, update=False
 ):
@@ -679,12 +756,16 @@ async def start_job(
     # Ensure that the service account exists for the cluster
     service_account_name = await ensure_service_account(client, cluster)
 
+    # Ensure that the trust bundle has been copied into the namespace
+    trust_bundle_configmap_name = await ensure_trust_bundle_configmap(client, namespace)
+
     # create the job
     await client.create_object(
         get_job(
             cluster,
             cluster_type_spec,
             service_account_name,
+            trust_bundle_configmap_name,
             remove=remove,
             update=update,
         )
@@ -695,4 +776,43 @@ async def delete_secret(client, cluster: cluster_crd.Cluster, namespace: str):
     secrets_resource = await client.api("v1").resource("secrets")
     await secrets_resource.delete(
         cluster.spec.cloudCredentialsSecretName, namespace=namespace
+    )
+
+
+async def purge_job_resources(client, cluster: cluster_crd.Cluster):
+    """
+    Purge the resources used by jobs for the specified cluster.
+    """
+    secrets = await client.api("v1").resource("secrets")
+    await secrets.delete(
+        f"{cluster.metadata.name}-deploy-key", namespace=cluster.metadata.namespace
+    )
+
+    serviceaccts = await client.api("v1").resource("serviceaccounts")
+    await serviceaccts.delete(
+        f"{cluster.metadata.name}-tfstate", namespace=cluster.metadata.namespace
+    )
+
+    rolebindings = await client.api("rbac.authorization.k8s.io/v1").resource(
+        "rolebindings"
+    )
+    await rolebindings.delete(
+        f"{cluster.metadata.name}-tfstate", namespace=cluster.metadata.namespace
+    )
+
+    configmaps = await client.api("v1").resource("configmaps")
+    await configmaps.delete(
+        f"{cluster.metadata.name}-create", namespace=cluster.metadata.namespace
+    )
+    await configmaps.delete(
+        f"{cluster.metadata.name}-update", namespace=cluster.metadata.namespace
+    )
+    await configmaps.delete(
+        f"{cluster.metadata.name}-remove", namespace=cluster.metadata.namespace
+    )
+
+    jobs = await client.api("batch/v1").resource("jobs")
+    await jobs.delete_all(
+        labels={"azimuth-caas-cluster": cluster.metadata.name},
+        namespace=cluster.metadata.namespace,
     )

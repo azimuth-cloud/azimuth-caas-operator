@@ -47,6 +47,10 @@ RUN groupadd --gid $APP_GID $APP_GROUP && \
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED 1
 
+# Make httpx use the system trust roots
+# By default, this means we use the CAs from the ca-certificates package
+ENV SSL_CERT_FILE /etc/ssl/certs/ca-certificates.crt
+
 # By default, run the operator
 USER $APP_UID
 ENTRYPOINT ["tini", "-g", "--"]

@@ -19,6 +19,14 @@ rules:
     resources: ["*"]
     verbs: ["*"]
   - apiGroups:
+      - identity.azimuth.stackhpc.com
+    resources:
+      - platforms
+    verbs:
+      - list
+      - get
+      - patch
+  - apiGroups:
       - scheduling.azimuth.stackhpc.com
     resources:
       - leases
@@ -45,7 +53,7 @@ rules:
     resources:
       - clusterrolebindings
       - rolebindings
-    verbs: ["get", "list", "create", "update", "patch"]
+    verbs: ["*"]
   # Required so that the CaaS operator can grant permissions on leases for the TF plugin
   - apiGroups: [coordination.k8s.io]
     resources: [leases]

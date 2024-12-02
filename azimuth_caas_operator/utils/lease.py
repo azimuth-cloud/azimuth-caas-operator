@@ -15,27 +15,86 @@ class LeaseInError(Exception):
     pass
 
 
-async def _patch_finalizers(client, name, namespace, finalizers):
+async def adopt_lease(client, cluster: cluster_crd.Cluster):
     """
-    Patches the finalizers of a resource. If the resource does not exist any
-    more, that is classed as a success.
+    Ensures that the lease for the cluster is adopted by the cluster.
     """
-    lease_resource = await client.api(SCHEDULE_API_VERSION).resource("leases")
+    ekleases = await client.api(SCHEDULE_API_VERSION).resource("leases")
+    lease = await ekleases.fetch(
+        cluster.spec.leaseName, namespace=cluster.metadata.namespace
+    )
+    lease_patch = []
+    if "finalizers" not in lease.metadata:
+        lease_patch.append(
+            {
+                "op": "add",
+                "path": "/metadata/finalizers",
+                "value": [],
+            }
+        )
+    if FINALIZER not in lease.metadata.get("finalizers", []):
+        lease_patch.append(
+            {
+                "op": "add",
+                "path": "/metadata/finalizers/-",
+                "value": FINALIZER,
+            }
+        )
+    if "ownerReferences" not in lease.metadata:
+        lease_patch.append(
+            {
+                "op": "add",
+                "path": "/metadata/ownerReferences",
+                "value": [],
+            }
+        )
+    if not any(
+        ref["uid"] == cluster.metadata.uid
+        for ref in lease.metadata.get("ownerReferences", [])
+    ):
+        lease_patch.append(
+            {
+                "op": "add",
+                "path": "/metadata/ownerReferences/-",
+                "value": {
+                    "apiVersion": cluster.api_version,
+                    "kind": cluster.kind,
+                    "name": cluster.metadata.name,
+                    "uid": cluster.metadata.uid,
+                    "blockOwnerDeletion": True,
+                },
+            }
+        )
+    if lease_patch:
+        lease = await ekleases.json_patch(
+            lease.metadata.name, lease_patch, namespace=lease.metadata.namespace
+        )
+    return lease
+
+
+async def release_lease(client, cluster: cluster_crd.Cluster):
+    ekleases = await client.api(SCHEDULE_API_VERSION).resource("leases")
     try:
-        await lease_resource.patch(
-            name, {"metadata": {"finalizers": finalizers}}, namespace=namespace
+        lease = await ekleases.fetch(
+            cluster.spec.leaseName, namespace=cluster.metadata.namespace
         )
     except easykube.ApiError as exc:
-        if exc.status_code != 404:
+        if exc.status_code == 404:
+            return
+        else:
             raise
-
-
-async def _get_lease(client, cluster: cluster_crd.Cluster):
-    lease_resource = await client.api(SCHEDULE_API_VERSION).resource("leases")
-    return await lease_resource.fetch(
-        cluster.spec.leaseName,
-        namespace=cluster.metadata.namespace,
-    )
+    # Remove our finalizer from the lease to indicate that we are done with it
+    existing_finalizers = lease.metadata.get("finalizers", [])
+    if FINALIZER in existing_finalizers:
+        await ekleases.patch(
+            lease.metadata.name,
+            {
+                "metadata": {
+                    "finalizers": [f for f in existing_finalizers if f != FINALIZER],
+                },
+            },
+            namespace=lease.metadata.namespace,
+        )
 
 
 async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
@@ -46,20 +105,8 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         LOG.info("No leaseName set, skipping lease check.")
         return {}
 
-    lease = await _get_lease(client, cluster)
-
-    # we want to use this lease, so lets add a finalizer
-    # we can remove once we are happy to delete the lease
-    finalizers = lease.get("metadata", {}).get("finalizers", [])
-    if FINALIZER not in finalizers:
-        finalizers.append(FINALIZER)
-        await _patch_finalizers(
-            client,
-            cluster.spec.leaseName,
-            cluster.metadata.namespace,
-            finalizers,
-        )
-        LOG.info("Added finalizer to the lease.")
+    # Get and adopt the lease
+    lease = await adopt_lease(client, cluster)
 
     lease_status = lease.get("status", {})
 
@@ -88,21 +135,4 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
     # Wait until the lease is active
     raise kopf.TemporaryError(
         f"Lease {cluster.spec.leaseName} is not active.", delay=delay
-    )
-
-
-async def drop_lease_finalizer(client, cluster: cluster_crd.Cluster):
-    try:
-        lease = await _get_lease(client, cluster)
-    except easykube.ApiError as exc:
-        if exc.status_code == 404:
-            return
-        else:
-            raise
-    finalizers = lease.get("metadata", {}).get("finalizers", [])
-    await _patch_finalizers(
-        client,
-        cluster.spec.leaseName,
-        cluster.metadata.namespace,
-        [f for f in finalizers if f != FINALIZER],
     )

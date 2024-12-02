@@ -35,12 +35,12 @@ kubectl get clustertype quick-test -o yaml
 
 # find the correct version a sub it into the tests
 cluster_version=$(kubectl get clustertype quick-test -ojsonpath='{.metadata.resourceVersion}')
-sed -i "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick.yaml
-kubectl create -f $SCRIPT_DIR/test_quick.yaml
+sed "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick.yaml |
+  kubectl create -f -
 
-sed -i "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick_delete_failure.yaml
 kubectl create secret generic openstack2 --from-file=clouds.yaml || true
-kubectl create -f $SCRIPT_DIR/test_quick_delete_failure.yaml
+sed "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick_delete_failure.yaml |
+  kubectl create -f -
 
 until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 2; done
 
@@ -65,7 +65,14 @@ kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 
 # make sure the failed delete is still deleting
 until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
+# make sure the failed delete has an error set
+until kubectl wait --for=jsonpath='{.status.error}' cluster quick-test-fail-delete; do echo "wait for delete failure"; sleep 2; done
+# make sure the failed delete is still deleting
+until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
 
 kubectl get cluster
 kubectl get cluster -o yaml
 kubectl get jobs
+
+# output logs from operator
+kubectl logs -n azimuth-caas-operator deployment/azimuth-caas-operator operator

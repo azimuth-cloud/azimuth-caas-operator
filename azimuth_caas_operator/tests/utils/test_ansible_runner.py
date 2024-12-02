@@ -28,7 +28,7 @@ class TestAnsibleRunner(base.TestCase):
         cluster_type = cluster_type_crd.get_fake()
 
         job = ansible_runner.get_job(
-            cluster, cluster_type.spec, "test1-tfstate", remove=True
+            cluster, cluster_type.spec, "test1-tfstate", None, remove=True
         )
 
         expected = """\
@@ -40,11 +40,6 @@ metadata:
     azimuth-caas-action: remove
     azimuth-caas-cluster: test1
   namespace: ns1
-  ownerReferences:
-  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-    kind: Cluster
-    name: test1
-    uid: fakeuid1
 spec:
   activeDeadlineSeconds: 1200
   backoffLimit: 1
@@ -146,7 +141,7 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
       serviceAccountName: test1-tfstate
-      ttlSecondsAfterFinished: 3600
+      ttlSecondsAfterFinished: 36000
       volumes:
       - emptyDir: {}
         name: runner-data
@@ -167,6 +162,180 @@ spec:
           defaultMode: 256
           optional: true
           secretName: ssh-type1
+"""  # noqa
+        self.assertEqual(expected, yaml.safe_dump(job))
+
+    @mock.patch.dict(
+        os.environ,
+        {
+            "ANSIBLE_RUNNER_IMAGE_TAG": "12345ab",
+        },
+        clear=True,
+    )
+    def test_get_job_remove_with_trust_bundle(self):
+        cluster = cluster_crd.get_fake()
+        cluster.spec.leaseName = None
+        cluster_type = cluster_type_crd.get_fake()
+
+        job = ansible_runner.get_job(
+            cluster, cluster_type.spec, "test1-tfstate", "trust-bundle", remove=True
+        )
+
+        expected = """\
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: test1-remove-
+  labels:
+    azimuth-caas-action: remove
+    azimuth-caas-cluster: test1
+  namespace: ns1
+spec:
+  activeDeadlineSeconds: 1200
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -c
+        - "set -ex\\nif [ -f /var/lib/caas/cloudcreds/cacert ]; then\\n  export OS_CACERT=/var/lib/caas/cloudcreds/cacert\\n\\
+          fi\\nexport ANSIBLE_CALLBACK_PLUGINS=\\"$(python3 -m ara.setup.callback_plugins)\\"\\
+          \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
+          \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
+          \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\
+          fi\\nansible-runner run /runner -j\\nopenstack application credential delete\\
+          \\ az-caas-test1 || true\\n"
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: sample.yaml
+        - name: OS_CLOUD
+          value: openstack
+        - name: OS_CLIENT_CONFIG_FILE
+          value: /var/lib/caas/cloudcreds/clouds.yaml
+        - name: ANSIBLE_CONFIG
+          value: /runner/project/ansible.cfg
+        - name: ANSIBLE_HOME
+          value: /var/lib/ansible
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: REQUESTS_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
+        name: run
+        volumeMounts:
+        - mountPath: /runner/project
+          name: runner-data
+          subPath: project
+        - mountPath: /runner/inventory
+          name: runner-data
+          subPath: inventory
+        - mountPath: /runner/artifacts
+          name: runner-data
+          subPath: artifacts
+        - mountPath: /var/lib/ansible
+          name: ansible-home
+        - mountPath: /runner/env
+          name: env
+          readOnly: true
+        - mountPath: /var/lib/caas/cloudcreds
+          name: cloudcreds
+          readOnly: true
+        - mountPath: /var/lib/caas/ssh
+          name: deploy-key
+          readOnly: true
+        - mountPath: /home/runner/.ssh
+          name: ssh
+          readOnly: true
+        - mountPath: /etc/ssl/certs
+          name: trust-bundle
+          readOnly: true
+      initContainers:
+      - command:
+        - /bin/bash
+        - -c
+        - 'echo ''[openstack]'' >/runner/inventory/hosts
+
+          echo ''localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3''
+          >>/runner/inventory/hosts
+
+          '
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
+        name: inventory
+        volumeMounts:
+        - mountPath: /runner/inventory
+          name: runner-data
+          subPath: inventory
+        workingDir: /inventory
+      - command:
+        - /bin/bash
+        - -c
+        - 'set -ex
+
+          git clone https://github.com/test.git /runner/project
+
+          git config --global --add safe.directory /runner/project
+
+          cd /runner/project
+
+          git checkout 12345ab
+
+          git submodule update --init --recursive
+
+          ls -al /runner/project
+
+          '
+        env:
+        - name: CURL_CA_BUNDLE
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: GIT_SSL_CAINFO
+          value: /etc/ssl/certs/ca-certificates.crt
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/ca-certificates.crt
+        image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
+        name: clone
+        volumeMounts:
+        - mountPath: /runner/project
+          name: runner-data
+          subPath: project
+        - mountPath: /etc/ssl/certs
+          name: trust-bundle
+          readOnly: true
+        workingDir: /runner
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      serviceAccountName: test1-tfstate
+      ttlSecondsAfterFinished: 36000
+      volumes:
+      - emptyDir: {}
+        name: runner-data
+      - emptyDir: {}
+        name: ansible-home
+      - configMap:
+          name: test1-remove
+        name: env
+      - name: cloudcreds
+        secret:
+          secretName: cloudsyaml
+      - name: deploy-key
+        secret:
+          defaultMode: 256
+          secretName: test1-deploy-key
+      - name: ssh
+        secret:
+          defaultMode: 256
+          optional: true
+          secretName: ssh-type1
+      - configMap:
+          name: trust-bundle
+        name: trust-bundle
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(job))
 
@@ -203,13 +372,10 @@ data:
     \\  random_str: foo\\nrandom_int: 8\\nvery_random_int: 42\\n"
 kind: ConfigMap
 metadata:
+  labels:
+    azimuth-caas-cluster: test1
   name: test1-create
   namespace: ns1
-  ownerReferences:
-  - apiVersion: caas.azimuth.stackhpc.com/v1alpha1
-    kind: Cluster
-    name: test1
-    uid: fakeuid1
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(config))
         # check cluster_image comes from cluster template
@@ -233,6 +399,73 @@ metadata:
 
 
 class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
+    async def test_ensure_trust_bundle_configmap_no_configmap(self):
+        mock_client = mock.Mock()
+
+        trust_bundle_configmap = await ansible_runner.ensure_trust_bundle_configmap(
+            mock_client, "ns-2"
+        )
+
+        self.assertIsNone(trust_bundle_configmap)
+        mock_client.api.assert_not_called()
+
+    @mock.patch.dict(
+        os.environ,
+        {
+            "TRUST_BUNDLE_CONFIGMAP": "trust-bundle",
+            "SELF_NAMESPACE": "ns-1",
+        },
+        clear=True,
+    )
+    async def test_ensure_trust_bundle_configmap(self):
+        trust_bundle_data = {"ca-certificates.crt": "certificatedata"}
+        trust_bundle_source = {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": "trust-bundle",
+                "namespace": "ns-1",
+                "creationTimestamp": "timestamp",
+                "uid": "trust-bundle-uid",
+            },
+            "data": trust_bundle_data,
+        }
+        trust_bundle_mirror = {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "name": "trust-bundle",
+                "namespace": "ns-2",
+                "labels": {
+                    "app.kubernetes.io/created-by": "azimuth-caas-operator",
+                },
+                "annotations": {
+                    "caas.azimuth.stackhpc.com/mirrors": "ns-1/trust-bundle",
+                },
+            },
+            "data": trust_bundle_data,
+        }
+
+        mock_client = mock.Mock()
+        mock_client.apply_object = mock.AsyncMock()
+        mock_api = mock.AsyncMock()
+        mock_client.api.return_value = mock_api
+        mock_resource = mock.AsyncMock()
+        mock_api.resource.return_value = mock_resource
+        mock_resource.fetch.return_value = trust_bundle_source
+
+        trust_bundle_configmap = await ansible_runner.ensure_trust_bundle_configmap(
+            mock_client, "ns-2"
+        )
+
+        self.assertEqual("trust-bundle", trust_bundle_configmap)
+        mock_client.api.assert_called_once_with("v1")
+        mock_api.resource.assert_called_once_with("configmaps")
+        mock_resource.fetch.assert_called_once_with("trust-bundle", namespace="ns-1")
+        mock_client.apply_object.assert_called_once_with(
+            trust_bundle_mirror, force=True
+        )
+
     @mock.patch.dict(
         os.environ, {"GLOBAL_EXTRAVARS_SECRET": "ns-1/extravars"}, clear=True
     )
@@ -481,3 +714,65 @@ class TestAsyncUtils(unittest.IsolatedAsyncioTestCase):
 
         self.assertFalse(result)
         mock_get_create_job.assert_awaited_once_with("client", "cluster", "ns")
+
+    def _configure_mock_api(self, resources):
+        mock_resources = {resource: mock.AsyncMock() for resource in resources}
+        mock_api = mock.AsyncMock()
+        mock_api.resource.side_effect = lambda resource: mock_resources[resource]
+        return mock_api, mock_resources
+
+    def _configure_mock_client(self, apis):
+        mock_apis = {}
+        mock_resources = {}
+        for api, resources in apis.items():
+            mock_api, mock_api_resources = self._configure_mock_api(resources)
+            mock_apis[api] = mock_api
+            mock_resources[api] = mock_api_resources
+        mock_client = mock.Mock()
+        mock_client.api.side_effect = lambda api: mock_apis[api]
+        return mock_client, mock_apis, mock_resources
+
+    async def test_purge_job_resources(self):
+        mock_client, mock_apis, mock_resources = self._configure_mock_client(
+            {
+                "v1": ["configmaps", "secrets", "serviceaccounts"],
+                "rbac.authorization.k8s.io/v1": ["rolebindings"],
+                "batch/v1": ["jobs"],
+            }
+        )
+        cluster = cluster_crd.get_fake()
+
+        await ansible_runner.purge_job_resources(mock_client, cluster)
+
+        mock_client.api.assert_any_call("v1")
+        mock_apis["v1"].resource.assert_any_await("secrets")
+        mock_resources["v1"]["secrets"].delete.assert_awaited_once_with(
+            "test1-deploy-key", namespace="ns1"
+        )
+        mock_apis["v1"].resource.assert_any_await("serviceaccounts")
+        mock_resources["v1"]["serviceaccounts"].delete.assert_awaited_once_with(
+            "test1-tfstate", namespace="ns1"
+        )
+        mock_apis["v1"].resource.assert_any_await("configmaps")
+        mock_resources["v1"]["configmaps"].delete.assert_has_awaits(
+            [
+                mock.call("test1-create", namespace="ns1"),
+                mock.call("test1-update", namespace="ns1"),
+                mock.call("test1-remove", namespace="ns1"),
+            ],
+            any_order=True,
+        )
+
+        mock_client.api.assert_any_call("rbac.authorization.k8s.io/v1")
+        mock_apis["rbac.authorization.k8s.io/v1"].resource.assert_any_await(
+            "rolebindings"
+        )
+        mock_resources["rbac.authorization.k8s.io/v1"][
+            "rolebindings"
+        ].delete.assert_awaited_once_with("test1-tfstate", namespace="ns1")
+
+        mock_client.api.assert_any_call("batch/v1")
+        mock_apis["batch/v1"].resource.assert_any_await("jobs")
+        mock_resources["batch/v1"]["jobs"].delete_all.assert_awaited_once_with(
+            labels={"azimuth-caas-cluster": "test1"}, namespace="ns1"
+        )

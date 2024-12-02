@@ -83,17 +83,26 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             ),
         )
 
+    @mock.patch.object(lease_utils, "adopt_lease")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
-    async def test_cluster_resume_ensures_cluster_id(self, mock_ensure_cluster_id):
+    async def test_cluster_resume(
+        self, mock_ensure_cluster_id, mock_adopt_identity_platform, mock_adopt_lease
+    ):
         fake_body = cluster_crd.get_fake_dict()
         fake_cluster = cluster_crd.Cluster(**fake_body)
         await operator.cluster_resume(fake_body, "cluster1", "ns")
         mock_ensure_cluster_id.assert_awaited_once_with(
             operator.K8S_CLIENT, fake_cluster
         )
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
+        mock_adopt_lease.assert_awaited_once_with(operator.K8S_CLIENT, fake_cluster)
 
     @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
@@ -104,6 +113,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_start,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
         mock_update_flavors,
     ):
@@ -131,6 +141,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             extra_vars={"foo": "bar", "very_random_int": 42, "nested": {"baz": "bob"}},
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update_flavors.assert_awaited_once_with(
             operator.K8S_CLIENT, cluster, {"flavor_a": "flavor_reserved"}
@@ -138,6 +151,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
     @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -150,6 +164,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
         mock_update_flavors,
     ):
@@ -162,6 +177,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -178,12 +196,14 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
 
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_update_waits_for_create_job_to_complete(
         self,
         mock_create_job,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
     ):
         mock_create_job.return_value = True
@@ -199,16 +219,21 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_create_job.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(ansible_runner, "is_create_job_running")
     async def test_cluster_create_error_on_lease_error(
         self,
         mock_create_job,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
         mock_update,
     ):
@@ -227,6 +252,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_create_job.assert_not_called()
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_update.assert_awaited_once_with(
@@ -238,6 +266,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
 
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -250,6 +279,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_completed,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
     ):
         mock_create_job.return_value = False
@@ -267,6 +297,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -278,6 +311,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
@@ -294,6 +328,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_unlabel,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
     ):
         mock_create_job.return_value = False
@@ -307,6 +342,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -321,6 +359,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "unlabel_job")
@@ -339,6 +378,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_unlabel,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
     ):
         mock_create_job.return_value = False
@@ -353,6 +393,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -368,6 +411,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_lease.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "start_job")
@@ -380,6 +424,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_start,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
     ):
         mock_create_job.return_value = False
@@ -399,6 +444,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id.assert_awaited_once_with(
             operator.K8S_CLIENT, fake_cluster
         )
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, fake_cluster
+        )
         mock_start.assert_awaited_once_with(
             operator.K8S_CLIENT, fake_cluster, "ns", update=True
         )
@@ -414,6 +462,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
     @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_outputs_from_job")
@@ -428,6 +477,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_outputs,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
         mock_update_flavors,
     ):
@@ -442,6 +492,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT,
             "cluster1",
@@ -463,6 +516,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
 
     @mock.patch.object(cluster_utils, "update_cluster_flavors")
     @mock.patch.object(lease_utils, "ensure_lease_active")
+    @mock.patch.object(cluster_utils, "adopt_identity_platform")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
     @mock.patch.object(cluster_utils, "update_cluster")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
@@ -473,6 +527,7 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_success,
         mock_update,
         mock_ensure_cluster_id,
+        mock_adopt_identity_platform,
         mock_ensure_lease,
         mock_update_flavors,
     ):
@@ -488,6 +543,9 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         cluster = cluster_crd.Cluster(**fake_body)
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
+        mock_adopt_identity_platform.assert_awaited_once_with(
+            operator.K8S_CLIENT, cluster
+        )
         mock_update.assert_awaited_once_with(
             operator.K8S_CLIENT, "cluster1", "ns", cluster_crd.ClusterPhase.CREATING
         )
@@ -532,7 +590,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
-    @mock.patch.object(lease_utils, "drop_lease_finalizer")
+    @mock.patch.object(ansible_runner, "purge_job_resources")
+    @mock.patch.object(lease_utils, "release_lease")
     @mock.patch.object(ansible_runner, "delete_secret")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
@@ -549,7 +608,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id,
         mock_get_job_state,
         mock_delete_secret,
-        mock_drop_lease,
+        mock_release_lease,
+        mock_purge_job_resources,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_get_job_state.return_value = True
@@ -567,7 +627,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_update.assert_not_called()
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
         mock_delete_secret.assert_awaited_once_with(operator.K8S_CLIENT, cluster, "ns")
-        mock_drop_lease.assert_not_called()
+        mock_release_lease.assert_not_called()
+        mock_purge_job_resources.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
@@ -605,7 +666,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
 
-    @mock.patch.object(ansible_runner, "unlabel_job")
+    @mock.patch.object(ansible_runner, "get_failed_delete_jobs_for_cluster")
+    @mock.patch.object(ansible_runner, "unlabel_delete_job")
     @mock.patch.object(ansible_runner, "get_job_error_message")
     @mock.patch.object(ansible_runner, "get_job_completed_state")
     @mock.patch.object(cluster_utils, "ensure_cluster_id")
@@ -622,18 +684,21 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
         mock_ensure_cluster_id,
         mock_get_job_state,
         mock_get_error,
-        mock_unlabel,
+        mock_unlabel_delete_job,
+        mock_failed_jobs,
     ):
         mock_get_jobs.return_value = "fakejob"
         mock_get_job_state.return_value = False
         mock_get_error.return_value = "Problem with job."
         fake_body = cluster_crd.get_fake_dict()
+        mock_failed_jobs.return_value = ["failedjob1", "failedjob2"]
 
         with self.assertRaises(kopf.TemporaryError) as ctx:
             await operator.cluster_delete(fake_body, "cluster1", "ns", {})
 
         self.assertEqual(
-            "Delete job failed for cluster1 in ns because: Problem with job.",
+            "Delete job failed for cluster1 in ns retrying in 120 seconds "
+            "because: Problem with job.",
             str(ctx.exception),
         )
         mock_create_finsish.assert_awaited_once_with(
@@ -651,7 +716,8 @@ class TestOperator(unittest.IsolatedAsyncioTestCase):
             "Possible reason for the failure was: Problem with job.",
         )
         mock_ensure_cluster_id.assert_awaited_once_with(operator.K8S_CLIENT, cluster)
-        mock_unlabel.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
+        mock_unlabel_delete_job.assert_awaited_once_with(operator.K8S_CLIENT, "fakejob")
+        mock_failed_jobs.assert_awaited_once_with(operator.K8S_CLIENT, "cluster1", "ns")
 
     @mock.patch("aiohttp.ClientSession.get")
     async def test_fetch_ui_meta_from_url_success(self, mock_get):

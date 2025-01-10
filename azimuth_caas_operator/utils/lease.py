@@ -119,7 +119,7 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         raise LeaseInError(lease_status.get("errorMessage", "Error creating lease"))
 
     LOG.info(f"Lease {cluster.spec.leaseName} is not active, wait till active.")
-    delay = 60
+    delay = int(os.environ.get("LEASE_CHECK_INTERVAL_SECONDS", "10"))
     if lease:
         lease_start_str = lease["spec"].get("startTime")
         if lease_start_str:
@@ -129,7 +129,7 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
             time_until_expiry = lease_start - datetime.datetime.now(
                 tz=datetime.timezone.utc
             )
-            if time_until_expiry.total_seconds() > 60:
+            if time_until_expiry.total_seconds() > delay:
                 delay = time_until_expiry.total_seconds()
 
     # Wait until the lease is active

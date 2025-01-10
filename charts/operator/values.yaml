@@ -8,6 +8,7 @@ config:
   ansibleRunnerImage:
     repository: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee
     tag: ""  # Defaults to appVersion
+  leaseCheckIntervalSeconds: 10
   # Any global extravars to use
   globalExtraVars: {}
 

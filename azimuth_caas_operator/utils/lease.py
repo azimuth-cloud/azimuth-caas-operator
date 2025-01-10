@@ -1,9 +1,9 @@
 import datetime
+import easykube
+import kopf
 import logging
 import os
 
-import easykube
-import kopf
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 

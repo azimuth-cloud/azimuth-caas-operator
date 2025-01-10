@@ -1,8 +1,9 @@
 import unittest
 from unittest import mock
 
-import kopf
 from easykube.rest.util import PropertyDict
+
+import kopf
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.utils import lease

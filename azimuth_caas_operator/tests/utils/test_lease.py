@@ -1,9 +1,8 @@
 import unittest
 from unittest import mock
 
-from easykube.rest.util import PropertyDict
-
 import kopf
+from easykube.rest.util import PropertyDict
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.utils import lease
@@ -40,7 +39,7 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
             "Lease test1 is not active.",
             str(ctx.exception),
         )
-        self.assertEqual(60, ctx.exception.delay)
+        self.assertEqual(10, ctx.exception.delay)
 
         mock_adopt_lease.assert_awaited_once_with(client, cluster)
 

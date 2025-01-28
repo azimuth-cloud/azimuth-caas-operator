@@ -2,6 +2,11 @@ name: Publish charts
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        type: string
+        description: The ref to build.
+        required: true
     outputs:
       chart-version:
         description: The chart version that was published
@@ -17,6 +22,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.ref || github.ref }}
           # This is important for the semver action to work correctly
           # when determining the number of commits since the last tag
           fetch-depth: 0

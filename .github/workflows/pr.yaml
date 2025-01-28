@@ -1,18 +1,17 @@
 name: on pull request
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - synchronize
       - ready_for_review
-      - edited
       - reopened
     branches:
       - main
 
 concurrency:
-  group: ${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
@@ -23,11 +22,17 @@ jobs:
   # When the PR is from a branch of the main repo, publish images and charts
   publish_images:
     uses: ./.github/workflows/publish-images.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
     if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   publish_charts:
     needs: [publish_images]
     uses: ./.github/workflows/publish-charts.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
     if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   # The functional tests require the runner image, so we can only run them
@@ -35,6 +40,9 @@ jobs:
   functional_tests:
     needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit
     if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
   # The integration tests require the charts, and are only worth running once

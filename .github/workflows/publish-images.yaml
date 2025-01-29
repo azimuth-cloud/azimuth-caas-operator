@@ -31,6 +31,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: azimuth-cloud/github-actions/semver@master
+
       - name: Calculate metadata for image
         id: image-meta
         uses: docker/metadata-action@v5
@@ -40,7 +44,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=sha,prefix=
+            type=raw,value=${{ steps.semver.outputs.short-sha }}
 
       - name: Build and push image
         uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
@@ -84,6 +88,10 @@ jobs:
             --context ./ee-context \
             --output-filename Dockerfile
 
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: azimuth-cloud/github-actions/semver@master
+
       - name: Calculate metadata for image
         id: image-meta
         uses: docker/metadata-action@v5
@@ -93,7 +101,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=sha,prefix=
+            type=raw,value=${{ steps.semver.outputs.short-sha }}
 
       - name: Build and push image
         uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
@@ -118,9 +126,13 @@ jobs:
       - name: Install skopeo
         run: sudo apt-get -y update && sudo apt-get install -y skopeo
 
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: azimuth-cloud/github-actions/semver@master
+
       - name: Mirror ARA image
         run: |-
           skopeo copy \
             --dest-creds ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} \
             docker://quay.io/recordsansible/ara-api:latest \
-            docker://ghcr.io/azimuth-cloud/ara-api:${GITHUB_SHA::7}
+            docker://ghcr.io/azimuth-cloud/ara-api:${{ steps.semver.outputs.short-sha }}

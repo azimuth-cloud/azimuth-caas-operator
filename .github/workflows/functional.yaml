@@ -27,6 +27,12 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.10.0
 
+      - name: Get SemVer version for current commit
+        id: semver
+        uses: azimuth-cloud/github-actions/semver@master
+
       - name: Run test
         timeout-minutes: 10
         run: tools/functional_test.sh
+        env:
+          IMAGE_TAG: ${{ steps.semver.outputs.short-sha }}

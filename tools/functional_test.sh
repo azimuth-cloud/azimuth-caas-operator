@@ -13,9 +13,9 @@ helm upgrade azimuth-caas-operator ./charts/operator \
   --install \
   --wait \
   --timeout 10m \
-  --set-string image.tag=${GITHUB_SHA::7} \
-  --set-string config.ansibleRunnerImage.tag=${GITHUB_SHA::7} \
-  --set-string ara.image.tag=${GITHUB_SHA::7} \
+  --set-string image.tag=${IMAGE_TAG} \
+  --set-string config.ansibleRunnerImage.tag=${IMAGE_TAG} \
+  --set-string ara.image.tag=${IMAGE_TAG} \
   --set-string config.globalExtraVars.extravar_1=value1 \
   --set-string config.globalExtraVars.extravar_2=value2
 

@@ -40,7 +40,7 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
             "Lease test1 is not active.",
             str(ctx.exception),
         )
-        self.assertEqual(60, ctx.exception.delay)
+        self.assertEqual(10, ctx.exception.delay)
 
         mock_adopt_lease.assert_awaited_once_with(client, cluster)
 

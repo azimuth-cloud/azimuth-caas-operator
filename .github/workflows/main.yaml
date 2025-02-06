@@ -15,11 +15,20 @@ jobs:
 
   publish_images:
     uses: ./.github/workflows/publish-images.yaml
+    with:
+      ref: ${{ github.ref }}
+    secrets: inherit
 
   publish_charts:
     needs: [publish_images]
     uses: ./.github/workflows/publish-charts.yaml
+    with:
+      ref: ${{ github.ref }}
+    secrets: inherit
 
   functional_tests:
     needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit

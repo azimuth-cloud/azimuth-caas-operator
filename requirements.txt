@@ -24,7 +24,7 @@ pbr==6.1.0
 propcache==0.2.1
 pycparser==2.22
 pydantic==2.10.3
-pydantic_core==2.27.1
+pydantic_core==2.28.0
 python-dateutil==2.9.0.post0
 python-json-logger==2.0.7
 PyYAML==6.0.2

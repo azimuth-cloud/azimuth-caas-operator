@@ -67,6 +67,8 @@ spec:
           value: /runner/project/ansible.cfg
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
+        - name: ANSIBLE_SSH_RETRIES
+          value: "10"
         image: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee:12345ab
         name: run
         volumeMounts:
@@ -217,6 +219,8 @@ spec:
           value: /runner/project/ansible.cfg
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
+        - name: ANSIBLE_SSH_RETRIES
+          value: "10"
         - name: CURL_CA_BUNDLE
           value: /etc/ssl/certs/ca-certificates.crt
         - name: GIT_SSL_CAINFO

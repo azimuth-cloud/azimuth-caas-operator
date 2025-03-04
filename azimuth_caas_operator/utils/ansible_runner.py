@@ -372,6 +372,9 @@ spec:
         # Use the writable directory for ansible-home
         - name: ANSIBLE_HOME
           value: /var/lib/ansible
+        # Make SSH connections more robust to transient failures
+        - name: ANSIBLE_SSH_RETRIES
+          value: "10"
 {f'''
         # Set environment variables to make apps trust the CA bundle
         - name: CURL_CA_BUNDLE

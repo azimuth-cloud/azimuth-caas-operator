@@ -20,7 +20,7 @@ iso8601==2.1.0
 kopf==1.37.4
 kube-custom-resource==0.6.1
 multidict==6.1.0
-pbr==6.1.0
+pbr==6.1.1
 propcache==0.2.1
 pycparser==2.22
 pydantic==2.10.6

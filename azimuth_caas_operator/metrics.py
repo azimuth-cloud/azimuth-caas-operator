@@ -13,7 +13,7 @@ class Metric:
 
     # The name of the metric
     name = None
-    # The type of the metric - info or guage
+    # The type of the metric - info or gauge
     type = "info"
     # The description of the metric
     description = None

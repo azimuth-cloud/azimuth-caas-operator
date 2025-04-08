@@ -26,7 +26,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends python3 tini ca-certificates -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy accross the venv
+# Copy across the venv
 COPY --from=build-image /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 

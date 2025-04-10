@@ -4,6 +4,8 @@ set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+ct lint --config ct.yaml
+
 # Install the CaaS operator from the chart we are about to ship
 # Make sure to use the images that we just built
 helm upgrade azimuth-caas-operator ./charts/operator \

@@ -17,7 +17,7 @@ httpcore==1.0.7
 httpx==0.28.1
 idna==3.10
 iso8601==2.1.0
-kopf==1.37.4
+kopf==1.37.5
 kube-custom-resource==0.6.1
 multidict==6.4.3
 pbr==6.1.1

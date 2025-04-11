@@ -47,7 +47,7 @@ you can create a test cluster of the above by running:
 ssh-keygen -f id_rsa -P ""
 kubectl create secret generic azimuth-sshkey --from-file=id_rsa --from-file=id_rsa.pub -n azimuth-caas-operator
 
-# add reqired cluster specific app cred
+# add required cluster specific app cred
 # this secret will be deleted when the cluster is deleted
 echo "foo" >clouds.yaml
 kubectl create secret generic openstack --from-file=clouds.yaml
@@ -88,7 +88,7 @@ We tox, and uses python3.9:
     pip install tox
     tox
 
-## Test opertor locally using tox
+## Test operator locally using tox
 
 You can test it with tox too:
 

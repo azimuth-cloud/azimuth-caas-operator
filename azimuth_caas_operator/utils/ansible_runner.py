@@ -680,7 +680,7 @@ async def ensure_create_jobs_finished(client, cluster_name, namespace):
 
 
 async def get_delete_jobs_status(client, cluster_name, namespace):
-    """List of jobs and thier states.
+    """List of jobs and their states.
 
     Status returned for all created jobs.
     None means the job has not completed.

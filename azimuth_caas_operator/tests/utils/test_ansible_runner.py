@@ -396,7 +396,7 @@ metadata:
                 "very_random_int"
             ],
         )
-        # check foo is correctly overriden by extra vars overrides
+        # check foo is correctly overridden by extra vars overrides
         self.assertEqual(
             "boo", yaml.load(config["data"]["extravars"], Loader=yaml.BaseLoader)["foo"]
         )

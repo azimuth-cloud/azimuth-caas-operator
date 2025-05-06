@@ -9,3 +9,4 @@ testtools>=1.4.0 # MIT
 codespell
 autopep8
 mypy
+types-PyYAML

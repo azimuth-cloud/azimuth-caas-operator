@@ -157,8 +157,8 @@ async def ensure_trust_bundle_configmap(client, target_namespace):
         "namespace": target_namespace,
         "labels": {"app.kubernetes.io/created-by": "azimuth-caas-operator"},
         "annotations": {
-            "caas.azimuth.stackhpc.com/mirrors": "{}/{}".format(
-                source_namespace, trust_bundle_configmap_name
+            "caas.azimuth.stackhpc.com/mirrors": (
+                f"{source_namespace}/{trust_bundle_configmap_name}"
             ),
         },
     }
@@ -191,7 +191,7 @@ def get_env_configmap(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     cluster_deploy_ssh_public_key: str,
-    global_extravars: typing.Dict[str, typing.Any],
+    global_extravars: dict[str, typing.Any],
     remove=False,
     update=False,
 ):
@@ -243,7 +243,7 @@ def get_job(
     cluster: cluster_crd.Cluster,
     cluster_type_spec: cluster_type_crd.ClusterTypeSpec,
     service_account_name: str,
-    trust_bundle_configmap_name: typing.Optional[str],
+    trust_bundle_configmap_name: str | None,
     remove=False,
     update=False,
 ):

@@ -272,10 +272,14 @@ metadata:
 spec:
   template:
     spec:
-{'''
+{
+        '''
       # auto-remove delete jobs after 10 hours
       ttlSecondsAfterFinished: 36000
- ''' if remove else ''}
+ '''
+        if remove
+        else ""
+    }
       serviceAccountName: {service_account_name}
       securityContext:
         runAsUser: 1000
@@ -283,7 +287,8 @@ spec:
         fsGroup: 1000
       restartPolicy: Never
       initContainers:
-{f'''
+{
+        f'''
       - image: "{image}"
         name: inventory
         workingDir: /inventory
@@ -297,7 +302,10 @@ spec:
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
-''' if not defines_inventory else ''}
+'''
+        if not defines_inventory
+        else ""
+    }
       - image: "{image}"
         name: clone
         workingDir: /runner
@@ -312,7 +320,8 @@ spec:
             git checkout {cluster_type_spec.gitVersion}
             git submodule update --init --recursive
             ls -al /runner/project
-{f'''
+{
+        f'''
         env:
         # Set environment variables to make apps trust the CA bundle
         - name: CURL_CA_BUNDLE
@@ -321,16 +330,23 @@ spec:
           value: /etc/ssl/certs/ca-certificates.crt
         - name: SSL_CERT_FILE
           value: /etc/ssl/certs/ca-certificates.crt
-''' if trust_bundle_configmap_name else ''}
+'''
+        if trust_bundle_configmap_name
+        else ""
+    }
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
-{'''
+{
+        '''
         - name: trust-bundle
           mountPath: /etc/ssl/certs
           readOnly: true
-''' if trust_bundle_configmap_name else ''}
+'''
+        if trust_bundle_configmap_name
+        else ""
+    }
       containers:
       - name: run
         image: "{image}"
@@ -349,7 +365,11 @@ spec:
               ansible-galaxy install -r /runner/project/roles/requirements.yml
             fi
             ansible-runner run /runner -j
-            {f"openstack application credential delete az-caas-{cluster.metadata.name} || true" if remove_app_cred else ""}
+            {
+        f"openstack application credential delete az-caas-{cluster.metadata.name} || true"
+        if remove_app_cred
+        else ""
+    }
         env:
         - name: RUNNER_PLAYBOOK
           value: "{cluster_type_spec.playbook}"
@@ -375,7 +395,8 @@ spec:
         # Make SSH connections more robust to transient failures
         - name: ANSIBLE_SSH_RETRIES
           value: '10'
-{f'''
+{
+        f'''
         # Set environment variables to make apps trust the CA bundle
         - name: CURL_CA_BUNDLE
           value: /etc/ssl/certs/ca-certificates.crt
@@ -385,16 +406,23 @@ spec:
           value: /etc/ssl/certs/ca-certificates.crt
         - name: SSL_CERT_FILE
           value: /etc/ssl/certs/ca-certificates.crt
-''' if trust_bundle_configmap_name else ''}
+'''
+        if trust_bundle_configmap_name
+        else ""
+    }
         volumeMounts:
         - name: runner-data
           mountPath: /runner/project
           subPath: project
-{f'''
+{
+        f'''
         - name: runner-data
           mountPath: /runner/inventory
           subPath: inventory
-''' if not defines_inventory else ''}
+'''
+        if not defines_inventory
+        else ""
+    }
         - name: runner-data
           mountPath: /runner/artifacts
           subPath: artifacts
@@ -412,11 +440,15 @@ spec:
         - name: ssh
           mountPath: /home/runner/.ssh
           readOnly: true
-{'''
+{
+        '''
         - name: trust-bundle
           mountPath: /etc/ssl/certs
           readOnly: true
-''' if trust_bundle_configmap_name else ''}
+'''
+        if trust_bundle_configmap_name
+        else ""
+    }
       volumes:
       - name: runner-data
         emptyDir: {{}}
@@ -437,11 +469,15 @@ spec:
           secretName: "ssh-{cluster.spec.clusterTypeName}"
           defaultMode: 256
           optional: true
-{f'''
+{
+        f'''
       - name: trust-bundle
         configMap:
           name: {trust_bundle_configmap_name}
-''' if trust_bundle_configmap_name else ''}
+'''
+        if trust_bundle_configmap_name
+        else ""
+    }
   backoffLimit: {1 if remove else 0}
   # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
   activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa

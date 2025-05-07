@@ -9,3 +9,4 @@ codespell
 autopep8
 mypy
 types-PyYAML
+types-setuptools

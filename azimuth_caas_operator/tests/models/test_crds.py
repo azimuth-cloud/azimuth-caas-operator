@@ -1,10 +1,10 @@
 import json
+import unittest
 
 from azimuth_caas_operator.models import registry
-from azimuth_caas_operator.tests import base
 
 
-class TestModels(base.TestCase):
+class TestModels(unittest.TestCase):
     def test_cluster_type_crd_json(self):
         cluster_type_crd = None
         for resource in registry.get_crd_resources():

@@ -1,8 +1,9 @@
+import unittest
+
 from azimuth_caas_operator.models import registry
-from azimuth_caas_operator.tests import base
 
 
-class TestRegustry(base.TestCase):
+class TestRegustry(unittest.TestCase):
     def test_registry_size(self):
         reg = registry.get_registry()
         self.assertEqual(2, len(list(reg)))

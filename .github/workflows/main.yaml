@@ -12,6 +12,8 @@ concurrency:
 jobs:
   unit_tests:
     uses: ./.github/workflows/tox.yaml
+    with:
+      ref: ${{ github.ref }}
 
   publish_images:
     uses: ./.github/workflows/publish-images.yaml

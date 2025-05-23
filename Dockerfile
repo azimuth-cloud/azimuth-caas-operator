@@ -1,7 +1,7 @@
 FROM ubuntu:24.04 AS python-builder
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-venv
+    apt-get install -y python3 python3-venv git
 
 RUN python3 -m venv /venv && \
     /venv/bin/pip install -U pip setuptools

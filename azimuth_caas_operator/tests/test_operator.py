@@ -3,9 +3,9 @@ from unittest import mock
 
 import kopf
 
+from azimuth_caas_operator import operator
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
-from azimuth_caas_operator import operator
 from azimuth_caas_operator.utils import ansible_runner
 from azimuth_caas_operator.utils import cluster as cluster_utils
 from azimuth_caas_operator.utils import lease as lease_utils
@@ -759,7 +759,7 @@ services:
   - name: webconsole
     label: Web console
     icon_url: https://icon2
-"""  # noqa
+"""
 
         mock_get.return_value.__aenter__.return_value = mock_response
 

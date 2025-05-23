@@ -1,6 +1,5 @@
 import os
 
-
 DEFAULT_ANSIBLE_RUNNER_IMAGE_REPO = "ghcr.io/azimuth-cloud/azimuth-caas-operator-ee"
 
 

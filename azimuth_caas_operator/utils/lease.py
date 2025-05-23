@@ -125,9 +125,11 @@ async def ensure_lease_active(client, cluster: cluster_crd.Cluster):
         lease_start_str = lease["spec"].get("startTime")
         if lease_start_str:
             lease_start = datetime.datetime.fromisoformat(lease_start_str).astimezone(
-                tz=datetime.UTC
+                tz=datetime.timezone.utc
             )
-            time_until_expiry = lease_start - datetime.datetime.now(tz=datetime.UTC)
+            time_until_expiry = lease_start - datetime.datetime.now(
+                tz=datetime.timezone.utc
+            )
             if time_until_expiry.total_seconds() > delay:
                 delay = time_until_expiry.total_seconds()
 

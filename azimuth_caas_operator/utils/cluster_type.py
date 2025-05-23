@@ -46,7 +46,7 @@ async def _cache_client_type(client, cluster, cluster_type_spec, cluster_version
     patchedTimestamp = None
     # if we have an existing version, add a patched timestamp
     if cluster.status.clusterTypeVersion:
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         patchedTimestamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # if we didn't use the requested version,

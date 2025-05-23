@@ -106,7 +106,7 @@ async def update_cluster_flavors(client, cluster: cluster_crd.Cluster, flavors: 
 async def update_cluster(
     client, name, namespace, phase, extra_vars=None, outputs=None, error=None
 ):
-    now = datetime.datetime.now(tz=datetime.UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     now_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     status_updates = dict(phase=phase, updatedTimestamp=now_string)
     if extra_vars:
@@ -137,7 +137,7 @@ async def create_scheduled_delete_job(client, name, namespace, uid, lifetime_hou
         LOG.info("Skipping scheduled delete.")
         return
 
-    now = datetime.datetime.now(datetime.UTC)
+    now = datetime.datetime.now(datetime.timezone.utc)
     hours_int = 0
     try:
         hours_int = int(lifetime_hours)

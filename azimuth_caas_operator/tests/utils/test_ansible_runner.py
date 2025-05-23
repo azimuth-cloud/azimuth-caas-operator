@@ -3,8 +3,8 @@ import json
 import os
 import unittest
 from unittest import mock
-import yaml
 
+import yaml
 from easykube.rest.util import PropertyDict
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd

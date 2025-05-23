@@ -1,9 +1,8 @@
 import asyncio
 import functools
 
-from aiohttp import web
-
 import easykube
+from aiohttp import web
 
 from .models import registry
 

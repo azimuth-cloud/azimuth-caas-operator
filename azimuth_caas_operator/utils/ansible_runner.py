@@ -4,11 +4,10 @@ import json
 import logging
 import os
 import typing
+
 import yaml
-
-from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
-
+from cryptography.hazmat.primitives.asymmetric import ed25519
 from easykube import ApiError
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd

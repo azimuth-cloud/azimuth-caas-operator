@@ -36,7 +36,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y ca-certificates python3 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=python-builder /opt/venv /opt/venv
+COPY --from=python-builder /venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Make httpx use the system trust roots

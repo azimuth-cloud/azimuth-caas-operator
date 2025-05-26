@@ -13,7 +13,7 @@ COPY . /app
 RUN /venv/bin/pip install /app
 
 
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS run-image
 
 # Don't buffer stdout and stderr as it breaks realtime logging
 ENV PYTHONUNBUFFERED=1
@@ -33,10 +33,15 @@ RUN groupadd --gid $APP_GID $APP_GROUP && \
       $APP_USER
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates python3 && \
+    apt-get install --no-install-recommends -y ca-certificates python3 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=python-builder /venv /venv
+COPY --from=python-builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Make httpx use the system trust roots
+# By default, this means we use the CAs from the ca-certificates package
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 USER $APP_UID
 CMD ["python", "-m", "azimuth_caas_operator"]

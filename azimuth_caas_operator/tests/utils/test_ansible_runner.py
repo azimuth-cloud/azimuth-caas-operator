@@ -3,18 +3,17 @@ import json
 import os
 import unittest
 from unittest import mock
-import yaml
 
+import yaml
 from easykube.rest.util import PropertyDict
 
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
 from azimuth_caas_operator.tests import async_utils
-from azimuth_caas_operator.tests import base
 from azimuth_caas_operator.utils import ansible_runner
 
 
-class TestAnsibleRunner(base.TestCase):
+class TestAnsibleRunner(unittest.TestCase):
     @mock.patch.dict(
         os.environ,
         {

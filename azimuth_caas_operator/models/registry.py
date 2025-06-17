@@ -1,7 +1,6 @@
 import kube_custom_resource as crd
 
-from azimuth_caas_operator.models.v1alpha1 import cluster
-from azimuth_caas_operator.models.v1alpha1 import cluster_type
+from azimuth_caas_operator.models.v1alpha1 import cluster, cluster_type
 
 API_GROUP = "caas.azimuth.stackhpc.com"
 API_VERSION = API_GROUP + "/v1alpha1"

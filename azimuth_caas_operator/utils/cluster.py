@@ -2,13 +2,11 @@ import datetime
 import logging
 
 import easykube
-
 import yaml
 
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.utils import image as image_utils
-
 
 IDENTITY_API_VERSION = "identity.azimuth.stackhpc.com/v1alpha1"
 LOG = logging.getLogger(__name__)

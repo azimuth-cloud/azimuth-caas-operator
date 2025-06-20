@@ -23,6 +23,7 @@ jobs:
 
   # When the PR is from a branch of the main repo, publish images and charts
   publish_images:
+    needs: [unit_tests]
     uses: ./.github/workflows/publish-images.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}

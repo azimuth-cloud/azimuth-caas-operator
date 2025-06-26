@@ -1,8 +1,8 @@
 import datetime
 
 import kube_custom_resource as crd
-from kube_custom_resource import schema
 import pydantic
+from kube_custom_resource import schema
 
 
 class ClusterTypePhase(str, schema.Enum):

@@ -11,11 +11,9 @@ import yaml
 from azimuth_caas_operator.models import registry
 from azimuth_caas_operator.models.v1alpha1 import cluster as cluster_crd
 from azimuth_caas_operator.models.v1alpha1 import cluster_type as cluster_type_crd
-from azimuth_caas_operator.utils import ansible_runner
+from azimuth_caas_operator.utils import ansible_runner, k8s
 from azimuth_caas_operator.utils import cluster as cluster_utils
-from azimuth_caas_operator.utils import k8s
 from azimuth_caas_operator.utils import lease as lease_utils
-
 
 LOG = logging.getLogger(__name__)
 CLUSTER_LABEL = "azimuth-caas-cluster"

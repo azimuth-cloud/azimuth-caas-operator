@@ -1,9 +1,8 @@
 import asyncio
 import functools
 
-from aiohttp import web
-
 import easykube
+from aiohttp import web
 
 from .models import registry
 
@@ -89,7 +88,7 @@ def render_openmetrics(*metrics):
 
         for labels, value in metric.records():
             if labels:
-                labelstr = "{{{0}}}".format(
+                labelstr = "{{{0}}}".format(  # noqa
                     ",".join([f'{k}="{escape(v)}"' for k, v in sorted(labels.items())])
                 )
             else:

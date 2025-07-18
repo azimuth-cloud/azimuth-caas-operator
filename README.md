@@ -1,6 +1,4 @@
 # azimuth-caas-operator
-![tox](https://github.com/azimuth-cloud/azimuth-caas-operator/actions/workflows/tox.yaml/badge.svg?branch=main)
-![tox](https://github.com/azimuth-cloud/azimuth-caas-operator/actions/workflows/functional.yaml/badge.svg?branch=main)
 
 K8s operator to create clusters using K8s CRDs
 

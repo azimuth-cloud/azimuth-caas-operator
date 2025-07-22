@@ -1,0 +1,114 @@
+templated manifests should match snapshot:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: ara
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: ara
+        spec:
+          containers:
+            - env:
+                - name: ARA_ALLOWED_HOSTS
+                  value: '["*"]'
+                - name: ARA_IGNORED_FACTS
+                  value: '["ansible_env_skip"]'
+              image: ghcr.io/azimuth-cloud/ara-api:main
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                httpGet:
+                  httpHeaders:
+                    - name: Host
+                      value: localhost
+                  path: /api/v1/
+                  port: http
+              name: ara
+              ports:
+                - containerPort: 8000
+                  name: http
+                  protocol: TCP
+              readinessProbe:
+                httpGet:
+                  httpHeaders:
+                    - name: Host
+                      value: localhost
+                  path: /api/v1/
+                  port: http
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /opt/ara
+                  name: data
+                - mountPath: /tmp
+                  name: tmp
+          securityContext:
+            fsGroup: 1001
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: release-name-ara
+            - emptyDir: {}
+              name: tmp
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+  3: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      ports:
+        - name: http
+          port: 8000
+          protocol: TCP
+          targetPort: http
+      selector:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/name: ara
+      type: ClusterIP

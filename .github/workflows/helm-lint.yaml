@@ -39,7 +39,7 @@ jobs:
             --strict --summary
 
       - name: Run manifest snapshot test
-        run: sudo docker run -i --rm --user $(id -u) \
+        run: docker run -i --rm --user $(id -u) \
               -v $(pwd):/apps \
               helmunittest/helm-unittest \
               charts/operator

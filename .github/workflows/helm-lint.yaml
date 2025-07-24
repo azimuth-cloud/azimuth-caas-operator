@@ -34,7 +34,8 @@ jobs:
 
       - name: Run template validation
         run: |-
-          helm template foo charts/operator \
+          helm dependency build charts/operator \
+            && helm template foo charts/operator \
             | docker run -i --rm ghcr.io/yannh/kubeconform:latest \
             --strict --summary
 

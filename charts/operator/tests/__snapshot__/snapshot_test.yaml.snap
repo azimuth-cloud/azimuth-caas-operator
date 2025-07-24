@@ -1,0 +1,408 @@
+templated manifests should match snapshot:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: ara
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: ara
+        spec:
+          containers:
+            - env:
+                - name: ARA_ALLOWED_HOSTS
+                  value: '["*"]'
+                - name: ARA_IGNORED_FACTS
+                  value: '["ansible_env_skip"]'
+              image: ghcr.io/azimuth-cloud/ara-api:main
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                httpGet:
+                  httpHeaders:
+                    - name: Host
+                      value: localhost
+                  path: /api/v1/
+                  port: http
+              name: ara
+              ports:
+                - containerPort: 8000
+                  name: http
+                  protocol: TCP
+              readinessProbe:
+                httpGet:
+                  httpHeaders:
+                    - name: Host
+                      value: localhost
+                  path: /api/v1/
+                  port: http
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /opt/ara
+                  name: data
+                - mountPath: /tmp
+                  name: tmp
+          securityContext:
+            fsGroup: 1001
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: release-name-ara
+            - emptyDir: {}
+              name: tmp
+  2: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+  3: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: ara
+        app.kubernetes.io/version: main
+        helm.sh/chart: ara-0.1.0
+      name: release-name-ara
+    spec:
+      ports:
+        - name: http
+          port: 8000
+          protocol: TCP
+          targetPort: http
+      selector:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/name: ara
+      type: ClusterIP
+  4: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+        rbac.authorization.k8s.io/aggregate-to-admin: "true"
+        rbac.authorization.k8s.io/aggregate-to-edit: "true"
+        rbac.authorization.k8s.io/aggregate-to-view: "true"
+      name: release-name-azimuth-caas-operator:edit
+    rules:
+      - apiGroups:
+          - caas.azimuth.stackhpc.com
+        resources:
+          - '*'
+        verbs:
+          - '*'
+  5: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator:controller
+    rules:
+      - apiGroups:
+          - apiextensions.k8s.io
+        resources:
+          - customresourcedefinitions
+        verbs:
+          - '*'
+      - apiGroups:
+          - ""
+        resources:
+          - namespaces
+        verbs:
+          - list
+          - watch
+      - apiGroups:
+          - ""
+          - events.k8s.io
+        resources:
+          - events
+        verbs:
+          - create
+      - apiGroups:
+          - caas.azimuth.stackhpc.com
+        resources:
+          - '*'
+        verbs:
+          - '*'
+      - apiGroups:
+          - identity.azimuth.stackhpc.com
+        resources:
+          - platforms
+        verbs:
+          - list
+          - get
+          - patch
+      - apiGroups:
+          - scheduling.azimuth.stackhpc.com
+        resources:
+          - leases
+        verbs:
+          - list
+          - get
+          - patch
+      - apiGroups:
+          - batch
+        resources:
+          - jobs
+        verbs:
+          - '*'
+      - apiGroups:
+          - batch
+        resources:
+          - cronjobs
+        verbs:
+          - '*'
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+          - persistentvolumeclaims
+          - pods
+          - pods/log
+          - secrets
+          - serviceaccounts
+        verbs:
+          - '*'
+      - apiGroups:
+          - rbac.authorization.k8s.io
+        resources:
+          - clusterrolebindings
+          - rolebindings
+        verbs:
+          - '*'
+      - apiGroups:
+          - coordination.k8s.io
+        resources:
+          - leases
+        verbs:
+          - get
+          - create
+          - update
+  6: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator:tfstate
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - secrets
+        verbs:
+          - list
+          - get
+          - create
+          - update
+      - apiGroups:
+          - coordination.k8s.io
+        resources:
+          - leases
+        verbs:
+          - get
+          - create
+          - update
+  7: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+        rbac.authorization.k8s.io/aggregate-to-view: "true"
+      name: release-name-azimuth-caas-operator:view
+    rules:
+      - apiGroups:
+          - caas.azimuth.stackhpc.com
+        resources:
+          - '*'
+        verbs:
+          - get
+          - list
+          - watch
+  8: |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: release-name-azimuth-caas-operator:controller
+    subjects:
+      - kind: ServiceAccount
+        name: release-name-azimuth-caas-operator
+        namespace: NAMESPACE
+  9: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: azimuth-caas-operator
+      strategy:
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: azimuth-caas-operator
+        spec:
+          containers:
+            - env:
+                - name: ARA_API_SERVER
+                  value: http://RELEASE-NAME-ara.NAMESPACE:8000
+                - name: ANSIBLE_RUNNER_IMAGE_REPO
+                  value: ghcr.io/azimuth-cloud/azimuth-caas-operator-ee
+                - name: ANSIBLE_RUNNER_IMAGE_TAG
+                  value: main
+                - name: GLOBAL_EXTRAVARS_SECRET
+                  value: NAMESPACE/release-name-azimuth-caas-operator-extravars
+                - name: ANSIBLE_RUNNER_CLUSTER_ROLE
+                  value: release-name-azimuth-caas-operator:tfstate
+                - name: SELF_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: LEASE_CHECK_INTERVAL_SECONDS
+                  value: "10"
+              image: ghcr.io/azimuth-cloud/azimuth-caas-operator:main
+              imagePullPolicy: IfNotPresent
+              name: operator
+              ports:
+                - containerPort: 8080
+                  name: metrics
+                  protocol: TCP
+              resources: {}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - mountPath: /tmp
+                  name: tmp
+          securityContext:
+            runAsNonRoot: true
+          serviceAccountName: release-name-azimuth-caas-operator
+          volumes:
+            - emptyDir: {}
+              name: tmp
+  10: |
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator-extravars
+    stringData:
+      extravars: |
+        {}
+  11: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator
+    spec:
+      ports:
+        - name: metrics
+          port: 8080
+          protocol: TCP
+          targetPort: metrics
+      selector:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/name: azimuth-caas-operator
+      type: ClusterIP
+  12: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: azimuth-caas-operator
+        app.kubernetes.io/version: main
+        helm.sh/chart: azimuth-caas-operator-0.1.0
+      name: release-name-azimuth-caas-operator

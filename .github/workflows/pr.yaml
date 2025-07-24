@@ -21,6 +21,12 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
 
+  # Run the chart linting on every PR, even from external repos
+  lint:
+    uses: ./.github/workflows/helm-lint.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+  
   # When the PR is from a branch of the main repo, publish images and charts
   publish_images:
     needs: [unit_tests]

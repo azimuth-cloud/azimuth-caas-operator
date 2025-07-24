@@ -39,7 +39,8 @@ jobs:
             --strict --summary
 
       - name: Run manifest snapshot test
-        run: docker run -i --rm --user $(id -u) \
-              -v $(pwd):/apps \
-              helmunittest/helm-unittest \
-              charts/operator
+        run: |
+          docker run -i --rm --user $(id -u) \
+            -v $(pwd):/apps \
+            helmunittest/helm-unittest \
+            charts/operator

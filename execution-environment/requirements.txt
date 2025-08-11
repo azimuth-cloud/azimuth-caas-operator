@@ -1,6 +1,7 @@
 ara
 bcrypt
+jsonschema
+netaddr
 openstacksdk
 passlib
 python-openstackclient
-netaddr

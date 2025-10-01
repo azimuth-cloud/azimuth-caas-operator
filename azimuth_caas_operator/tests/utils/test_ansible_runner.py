@@ -142,7 +142,6 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
       serviceAccountName: test1-tfstate
-      ttlSecondsAfterFinished: 36000
       volumes:
       - emptyDir: {}
         name: runner-data
@@ -163,7 +162,10 @@ spec:
           defaultMode: 256
           optional: true
           secretName: ssh-type1
+  ttlSecondsAfterFinished: 36000
 """  # noqa
+        print(yaml.safe_dump(job))
+
         self.assertEqual(expected, yaml.safe_dump(job))
 
     @mock.patch.dict(
@@ -315,7 +317,6 @@ spec:
         runAsGroup: 1000
         runAsUser: 1000
       serviceAccountName: test1-tfstate
-      ttlSecondsAfterFinished: 36000
       volumes:
       - emptyDir: {}
         name: runner-data
@@ -339,6 +340,7 @@ spec:
       - configMap:
           name: trust-bundle
         name: trust-bundle
+  ttlSecondsAfterFinished: 36000
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(job))
 

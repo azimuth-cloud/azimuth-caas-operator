@@ -269,16 +269,16 @@ metadata:
     azimuth-caas-cluster: "{cluster.metadata.name}"
     azimuth-caas-action: "{action}"
 spec:
-  template:
-    spec:
-{
+    {
         '''
-      # auto-remove delete jobs after 10 hours
-      ttlSecondsAfterFinished: 36000
- '''
+  # auto-remove delete jobs after 10 hours
+  ttlSecondsAfterFinished: 36000
+'''
         if remove
         else ""
     }
+  template:
+    spec:
       serviceAccountName: {service_account_name}
       securityContext:
         runAsUser: 1000

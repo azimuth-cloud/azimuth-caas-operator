@@ -164,7 +164,6 @@ spec:
           secretName: ssh-type1
   ttlSecondsAfterFinished: 36000
 """  # noqa
-        print(yaml.safe_dump(job))
 
         self.assertEqual(expected, yaml.safe_dump(job))
 

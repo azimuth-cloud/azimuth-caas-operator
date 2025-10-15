@@ -23,7 +23,7 @@ multidict==6.7.0
 pbr==7.0.1
 propcache==0.4.1
 pycparser==2.23
-pydantic==2.12.1
+pydantic==2.12.2
 python-dateutil==2.9.0.post0
 python-json-logger==4.0.0
 PyYAML==6.0.3

@@ -87,15 +87,26 @@ async def release_lease(client, cluster: cluster_crd.Cluster):
     # Remove our finalizer from the lease to indicate that we are done with it
     existing_finalizers = lease.metadata.get("finalizers", [])
     if FINALIZER in existing_finalizers:
-        await ekleases.patch(
-            lease.metadata.name,
-            {
-                "metadata": {
-                    "finalizers": [f for f in existing_finalizers if f != FINALIZER],
+        try:
+            data = await ekleases.replace(
+                lease.metadata.name,
+                {   
+                    # Include the resource version for optimistic concurrency
+                    "metadata": {
+                        "finalizers": [f for f in existing_finalizers if f != FINALIZER],
+                        "resourceVersion": lease.metadata.resource_version,
+                    },
                 },
-            },
-            namespace=lease.metadata.namespace,
-        )
+                namespace=lease.metadata.namespace,
+            )
+        except easykube.ApiError as exc:
+            # Retry as soon as possible after a 409
+            if exc.status_code == 409:
+                raise kopf.TemporaryError("conflict updating status", delay=1)
+            else:
+                raise
+        # Store the new resource version
+        lease.metadata.resource_version = data["metadata"]["resourceVersion"]
 
 
 async def ensure_lease_active(client, cluster: cluster_crd.Cluster):

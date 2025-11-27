@@ -96,7 +96,7 @@ async def release_lease(client, cluster: cluster_crd.Cluster):
                         "finalizers": [
                             f for f in existing_finalizers if f != FINALIZER
                         ],
-                        "resourceVersion": lease.metadata.resource_version,
+                        "resourceVersion": lease["metadata"]["resourceVersion"],
                     },
                 },
                 namespace=lease.metadata.namespace,

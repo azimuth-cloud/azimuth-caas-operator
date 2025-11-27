@@ -142,6 +142,7 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
                     "name": "test1",
                     "namespace": "ns1",
                     "finalizers": ["caas.azimuth.stackhpc.com"],
+                    "resource_version": "12345",
                 },
             }
         )
@@ -149,8 +150,10 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
 
         await lease.release_lease(mock_client, cluster)
 
-        mock_resource.patch.assert_awaited_once_with(
-            "test1", {"metadata": {"finalizers": []}}, namespace="ns1"
+        mock_resource.replace.assert_awaited_once_with(
+            "test1",
+            {"metadata": {"finalizers": [], "resourceVersion": "12345"}},
+            namespace="ns1",
         )
 
     async def test_release_lease_preserves_other_finalizers(self):
@@ -163,6 +166,7 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
                     "name": "test1",
                     "namespace": "ns1",
                     "finalizers": ["another-finalizer", "caas.azimuth.stackhpc.com"],
+                    "resource_version": "12345",
                 },
             }
         )
@@ -170,8 +174,13 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
 
         await lease.release_lease(mock_client, cluster)
 
-        mock_resource.patch.assert_awaited_once_with(
+        mock_resource.replace.assert_awaited_once_with(
             "test1",
-            {"metadata": {"finalizers": ["another-finalizer"]}},
+            {
+                "metadata": {
+                    "finalizers": ["another-finalizer"],
+                    "resourceVersion": "12345",
+                }
+            },
             namespace="ns1",
         )

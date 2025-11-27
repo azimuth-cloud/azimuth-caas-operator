@@ -90,10 +90,12 @@ async def release_lease(client, cluster: cluster_crd.Cluster):
         try:
             data = await ekleases.replace(
                 lease.metadata.name,
-                {   
+                {
                     # Include the resource version for optimistic concurrency
                     "metadata": {
-                        "finalizers": [f for f in existing_finalizers if f != FINALIZER],
+                        "finalizers": [
+                            f for f in existing_finalizers if f != FINALIZER
+                        ],
                         "resourceVersion": lease.metadata.resource_version,
                     },
                 },

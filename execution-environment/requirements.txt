@@ -1,5 +1,5 @@
 ara
-bcrypt==4.3.0
+bcrypt==5.0.0
 jsonschema
 netaddr
 openstacksdk

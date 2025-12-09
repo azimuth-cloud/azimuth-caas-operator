@@ -174,27 +174,31 @@ spec:
         },
         clear=True,
     )
-    def test_get_job_remove_with_trust_bundle(self):
+    def test_get_job_create_with_trust_bundle(self):
         cluster = cluster_crd.get_fake()
         cluster.spec.leaseName = None
         cluster_type = cluster_type_crd.get_fake()
+        cluster_type.spec.jobCreateRetries = 3
 
         job = ansible_runner.get_job(
-            cluster, cluster_type.spec, "test1-tfstate", "trust-bundle", remove=True
+            cluster,
+            cluster_type.spec,
+            "test1-tfstate",
+            "trust-bundle",
         )
 
         expected = """\
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: test1-remove-
+  generateName: test1-create-
   labels:
-    azimuth-caas-action: remove
+    azimuth-caas-action: create
     azimuth-caas-cluster: test1
   namespace: ns1
 spec:
   activeDeadlineSeconds: 1200
-  backoffLimit: 1
+  backoffLimit: 3
   template:
     spec:
       containers:
@@ -206,8 +210,7 @@ spec:
           \\nif [ -f /runner/project/requirements.yml ]; then\\n  ansible-galaxy install\\
           \\ -r /runner/project/requirements.yml\\nelif [ -f /runner/project/roles/requirements.yml\\
           \\ ]; then\\n  ansible-galaxy install -r /runner/project/roles/requirements.yml\\n\\
-          fi\\nansible-runner run /runner -j\\nopenstack application credential delete\\
-          \\ az-caas-test1 || true\\n"
+          fi\\nansible-runner run /runner -j\\n"
         env:
         - name: RUNNER_PLAYBOOK
           value: sample.yaml
@@ -322,7 +325,7 @@ spec:
       - emptyDir: {}
         name: ansible-home
       - configMap:
-          name: test1-remove
+          name: test1-create
         name: env
       - name: cloudcreds
         secret:
@@ -339,7 +342,6 @@ spec:
       - configMap:
           name: trust-bundle
         name: trust-bundle
-  ttlSecondsAfterFinished: 36000
 """  # noqa
         self.assertEqual(expected, yaml.safe_dump(job))
 

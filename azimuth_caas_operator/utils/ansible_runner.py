@@ -259,6 +259,9 @@ def get_job(
 
     remove_app_cred = remove and (cluster.spec.leaseName is None)
 
+    # default to 1 retry for create, if not specified in the type
+    back_off_limit = 1 if remove else cluster_type_spec.jobCreateRetries
+
     # TODO(johngarbutt): need get secret keyname from somewhere
     job_yaml = f"""apiVersion: batch/v1
 kind: Job
@@ -477,7 +480,7 @@ spec:
         if trust_bundle_configmap_name
         else ""
     }
-  backoffLimit: {1 if remove else 0}
+  backoffLimit: {back_off_limit}
   # Set timeout so that jobs don't get stuck in configuring state if something goes wrong
   activeDeadlineSeconds: {cluster_type_spec.jobTimeout}"""  # noqa
     return yaml.safe_load(job_yaml)

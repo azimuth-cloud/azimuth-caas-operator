@@ -32,3 +32,8 @@ updates:
     commit-message:
       # Prefix all commit messages with "pip: "
       prefix: "pip"
+    ignore:
+      # Needs to be pinned due to passlib bug
+      - dependency-name: "bcrypt"
+        versions:
+        - ">4.3.0"

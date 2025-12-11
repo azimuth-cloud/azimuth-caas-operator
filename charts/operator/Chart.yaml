@@ -10,3 +10,7 @@ dependencies:
   - name: ara
     version: ">=0-0"
     repository: file://../ara
+
+maintainers:
+  - name: StackHPC
+    email: "azimuth@stackhpc.com"

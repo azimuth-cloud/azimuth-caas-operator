@@ -184,7 +184,7 @@ templated manifests should match snapshot:
         resources:
           - leases
         verbs:
-          - *
+          - '*'
       - apiGroups:
           - batch
         resources:

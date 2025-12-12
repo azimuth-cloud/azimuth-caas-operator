@@ -142,7 +142,6 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
                     "name": "test1",
                     "namespace": "ns1",
                     "finalizers": ["caas.azimuth.stackhpc.com"],
-                    "resourceVersion": "12345",
                 },
             }
         )
@@ -166,7 +165,6 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
                     "name": "test1",
                     "namespace": "ns1",
                     "finalizers": ["another-finalizer", "caas.azimuth.stackhpc.com"],
-                    "resourceVersion": "12345",
                 },
             }
         )

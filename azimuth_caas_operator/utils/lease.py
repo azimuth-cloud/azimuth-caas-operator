@@ -81,34 +81,36 @@ async def release_lease(client, cluster: cluster_crd.Cluster):
         )
     except easykube.ApiError as exc:
         if exc.status_code == 404:
+            LOG.info("Lease already deleted.")
             return
         else:
             raise
-    # Remove our finalizer from the lease to indicate that we are done with it
+
     existing_finalizers = lease.metadata.get("finalizers", [])
-    if FINALIZER in existing_finalizers:
-        try:
-            data = await ekleases.replace(
-                lease.metadata.name,
-                {
-                    # Include the resource version for optimistic concurrency
-                    "metadata": {
-                        "finalizers": [
-                            f for f in existing_finalizers if f != FINALIZER
-                        ],
-                        "resourceVersion": lease["metadata"]["resourceVersion"],
-                    },
-                },
-                namespace=lease.metadata.namespace,
-            )
-        except easykube.ApiError as exc:
-            # Retry as soon as possible after a 409
-            if exc.status_code == 409:
-                raise kopf.TemporaryError("conflict updating status", delay=1)
-            else:
-                raise
-        # Store the new resource version
-        lease.metadata.resource_version = data["metadata"]["resourceVersion"]
+    if FINALIZER not in existing_finalizers:
+        LOG.info("Lease not owned by us, skipping.")
+        return
+
+    if len(existing_finalizers) > 1:
+        LOG.info("Waiting for other finalizers to be dropped.")
+        raise kopf.TemporaryError(
+            "Waiting for other finalizers to be dropped.", delay=5
+        )
+
+    # Once we are the only finalizer left,
+    # i.e. once the scheduled operator has finished,
+    # we can remove our finalizer.
+    # If we don't wait, both operators may try to
+    # remove their finalizers at once, causing lost writes.
+    await ekleases.patch(
+        lease.metadata.name,
+        {
+            "metadata": {
+                "finalizers": [],
+            },
+        },
+        namespace=lease.metadata.namespace,
+    )
 
 
 async def ensure_lease_active(client, cluster: cluster_crd.Cluster):

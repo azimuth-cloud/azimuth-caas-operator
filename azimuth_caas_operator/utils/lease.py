@@ -88,7 +88,7 @@ async def release_lease(client, cluster: cluster_crd.Cluster):
 
     existing_finalizers = lease.metadata.get("finalizers", [])
     if FINALIZER not in existing_finalizers:
-        LOG.info("Lease not owned by us, skipping.")
+        LOG.info("Our finalizer not here, skipping.")
         return
 
     if len(existing_finalizers) > 1:

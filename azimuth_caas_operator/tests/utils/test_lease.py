@@ -173,6 +173,7 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(kopf.TemporaryError) as ctx:
             await lease.release_lease(mock_client, cluster)
 
+        mock_resource.patch.assert_not_awaited()
         self.assertEqual(
             "Waiting for other finalizers to be dropped.",
             str(ctx.exception),

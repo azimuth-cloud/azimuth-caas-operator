@@ -30,7 +30,10 @@ rules:
       - scheduling.azimuth.stackhpc.com
     resources:
       - leases
-    verbs: ["*"]
+    verbs:
+      - list
+      - get
+      - patch
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["*"]

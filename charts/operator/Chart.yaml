@@ -3,14 +3,10 @@ name: azimuth-caas-operator
 description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
 type: application
 # The version and appVersion are set by the CI script
-version: 0.2.0
+version: 0.1.0
 appVersion: "main"
 
 dependencies:
   - name: ara
     version: ">=0-0"
     repository: file://../ara
-
-maintainers:
-  - name: StackHPC
-    email: "azimuth@stackhpc.com"

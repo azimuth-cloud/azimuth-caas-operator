@@ -61,6 +61,9 @@ class TestModels(unittest.TestCase):
                   "jobTimeout": {
                     "type": "integer"
                   },
+                  "jobCreateRetries": {
+                    "type": "integer"
+                  },
                   "extraVars": {
                     "additionalProperties": {
                       "x-kubernetes-preserve-unknown-fields": true
@@ -299,6 +302,9 @@ class TestModels(unittest.TestCase):
                         "type": "string"
                       },
                       "jobTimeout": {
+                        "type": "integer"
+                      },
+                      "jobCreateRetries": {
                         "type": "integer"
                       },
                       "extraVars": {

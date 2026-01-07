@@ -150,10 +150,12 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
         await lease.release_lease(mock_client, cluster)
 
         mock_resource.patch.assert_awaited_once_with(
-            "test1", {"metadata": {"finalizers": []}}, namespace="ns1"
+            "test1",
+            {"metadata": {"finalizers": []}},
+            namespace="ns1",
         )
 
-    async def test_release_lease_preserves_other_finalizers(self):
+    async def test_release_lease_waits_for_other_finalizers(self):
         mock_client = mock.Mock()
         mock_client.api.return_value = mock_api = mock.AsyncMock()
         mock_api.resource.return_value = mock_resource = mock.AsyncMock()
@@ -168,10 +170,12 @@ class TestLease(unittest.IsolatedAsyncioTestCase):
         )
         cluster = cluster_crd.get_fake()
 
-        await lease.release_lease(mock_client, cluster)
+        with self.assertRaises(kopf.TemporaryError) as ctx:
+            await lease.release_lease(mock_client, cluster)
 
-        mock_resource.patch.assert_awaited_once_with(
-            "test1",
-            {"metadata": {"finalizers": ["another-finalizer"]}},
-            namespace="ns1",
+        mock_resource.patch.assert_not_awaited()
+        self.assertEqual(
+            "Waiting for other finalizers to be dropped.",
+            str(ctx.exception),
         )
+        self.assertEqual(5, ctx.exception.delay)

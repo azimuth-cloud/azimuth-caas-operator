@@ -1,5 +1,6 @@
 ara
 bcrypt==4.3.0
+easykube==0.6.0
 jsonschema
 netaddr
 openstacksdk

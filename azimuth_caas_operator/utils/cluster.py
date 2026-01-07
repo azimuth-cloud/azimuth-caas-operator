@@ -170,7 +170,7 @@ data:
     client = config.sync_client(
         default_field_manager="autodelete", default_namespace="{namespace}")
     cluster_resource = client.api("{registry.API_VERSION}").resource("cluster")
-    cluster_resource.delete("{name}")
+    cluster_resource.delete("{name}", propagation_policy="Foreground")
 """
     job_yaml = f"""apiVersion: batch/v1
 kind: CronJob

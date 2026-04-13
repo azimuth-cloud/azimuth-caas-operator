@@ -117,6 +117,11 @@ jobs:
   mirror_ara_image:
     name: Mirror and tag the latest ARA image
     runs-on: ubuntu-latest
+    permissions:
+      contents: none
+      id-token: none
+      packages: none
+      security-events: none
     steps:
       - name: Check out the repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

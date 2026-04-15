@@ -20,6 +20,11 @@ jobs:
     with:
       ref: ${{ github.ref }}
     secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      security-events: write
 
   publish_charts:
     needs: [publish_images]
@@ -27,6 +32,9 @@ jobs:
     with:
       ref: ${{ github.ref }}
     secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
 
   functional_tests:
     needs: [publish_images]

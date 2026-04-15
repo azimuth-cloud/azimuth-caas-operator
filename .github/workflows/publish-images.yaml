@@ -120,7 +120,7 @@ jobs:
     permissions:
       contents: none
       id-token: none
-      packages: none
+      packages: write
       security-events: none
     steps:
       - name: Check out the repository

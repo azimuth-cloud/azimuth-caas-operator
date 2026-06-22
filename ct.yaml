@@ -1,8 +1,9 @@
 # Complains about invalid maintainer URLs
 validate-maintainers: false
-# Skip version bump detection and lint all charts
-# since we're using the azimuth-cloud Helm chart publish
-# workflow which doesn't use Chart.yaml's version key
+# Skip version bump detection since we're using the azimuth-cloud Helm
+# chart publish workflow which overrides Chart.yaml's version key via CI
+check-version-increment: false
+# Lint all charts on every run, not only changed ones
 all: true
 # Split output to make it look nice in GitHub Actions tab
 github-groups: true

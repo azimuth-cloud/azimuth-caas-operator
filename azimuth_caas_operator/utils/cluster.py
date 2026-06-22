@@ -253,7 +253,9 @@ spec:
 
     sa_data = yaml.safe_load(sa_yaml)
     sa_resource = await client.api("v1").resource("ServiceAccount")
-    await sa_resource.create_or_patch(f"autodelete-{name}", sa_data, namespace=namespace)
+    await sa_resource.create_or_patch(
+        f"autodelete-{name}", sa_data, namespace=namespace
+    )
 
     role_binding_data = yaml.safe_load(role_binding_yaml)
     role_binding_resource = await client.api("rbac.authorization.k8s.io/v1").resource(

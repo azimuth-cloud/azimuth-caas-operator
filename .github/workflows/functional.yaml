@@ -27,7 +27,7 @@ jobs:
 
       - name: Get SemVer version for current commit
         id: semver
-        uses: azimuth-cloud/github-actions/semver@master
+        uses: azimuth-cloud/github-actions/semver@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
 
       - name: Run test
         timeout-minutes: 10

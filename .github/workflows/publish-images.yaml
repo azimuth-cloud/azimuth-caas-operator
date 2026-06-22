@@ -33,7 +33,7 @@ jobs:
 
       - name: Get SemVer version for current commit
         id: semver
-        uses: azimuth-cloud/github-actions/semver@master
+        uses: azimuth-cloud/github-actions/semver@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
 
       - name: Calculate metadata for image
         id: image-meta
@@ -47,7 +47,7 @@ jobs:
             type=raw,value=${{ steps.semver.outputs.short-sha }}
 
       - name: Build and push image
-        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
+        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
         with:
           cache-key: azimuth-caas-operator
           context: .
@@ -90,7 +90,7 @@ jobs:
 
       - name: Get SemVer version for current commit
         id: semver
-        uses: azimuth-cloud/github-actions/semver@master
+        uses: azimuth-cloud/github-actions/semver@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
 
       - name: Calculate metadata for image
         id: image-meta
@@ -104,7 +104,7 @@ jobs:
             type=raw,value=${{ steps.semver.outputs.short-sha }}
 
       - name: Build and push image
-        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@master
+        uses: azimuth-cloud/github-actions/docker-multiarch-build-push@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
         with:
           cache-key: azimuth-caas-operator-ee
           context: ./ee-context/
@@ -133,7 +133,7 @@ jobs:
 
       - name: Get SemVer version for current commit
         id: semver
-        uses: azimuth-cloud/github-actions/semver@master
+        uses: azimuth-cloud/github-actions/semver@718c40d2def4fd8acd4bc5fb348bc8a5e6361b31 # master 2026-06-15
 
       - name: Mirror ARA image
         run: |-

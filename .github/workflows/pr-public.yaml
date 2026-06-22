@@ -1,0 +1,26 @@
+name: PR checks (public)
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+      - reopened
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit_tests:
+    uses: ./.github/workflows/tox.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  lint:
+    uses: ./.github/workflows/helm-lint.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}

@@ -1,4 +1,4 @@
-name: on pull request
+name: PR publish (internal only)
 
 on:
   pull_request_target:
@@ -15,26 +15,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Run the unit tests on every PR, even from external repos
-  unit_tests:
-    uses: ./.github/workflows/tox.yaml
-    with:
-      ref: ${{ github.event.pull_request.head.sha }}
-
-  # Run the chart linting on every PR, even from external repos
-  lint:
-    uses: ./.github/workflows/helm-lint.yaml
-    with:
-      ref: ${{ github.event.pull_request.head.sha }}
-  
-  # When the PR is from a branch of the main repo, publish images and charts
+  # Only run for PRs from branches of this repository (not external forks)
+  # to prevent untrusted code from accessing repository secrets via pull_request_target.
   publish_images:
-    needs: [unit_tests, lint]
+    if: github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/publish-images.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
-    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
     permissions:
       contents: read
       id-token: write         # needed for signing the images with GitHub OIDC Token
@@ -47,27 +35,20 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
-    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
     permissions:
       contents: write
       pull-requests: write
 
-  # The functional tests require the runner image, so we can only run them
-  # once the image has been built, and on PRs from the main repo
   functional_tests:
     needs: [publish_images]
     uses: ./.github/workflows/functional.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
-    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'
 
-  # The integration tests require the charts, and are only worth running once
-  # the functional tests are passing
   integration_tests:
     needs: [publish_charts, functional_tests]
     uses: ./.github/workflows/integration.yaml
     with:
       chart-version: ${{ needs.publish_charts.outputs.chart-version }}
     secrets: inherit
-    if: github.repository == 'azimuth-cloud/azimuth-caas-operator'

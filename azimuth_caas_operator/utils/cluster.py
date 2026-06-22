@@ -172,6 +172,36 @@ data:
     cluster_resource = client.api("{registry.API_VERSION}").resource("cluster")
     cluster_resource.delete("{name}", propagation_policy="Foreground")
 """
+    sa_yaml = f"""apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autodelete-{name}
+  namespace: {namespace}
+  ownerReferences:
+  - apiVersion: {registry.API_VERSION}
+    kind: Cluster
+    name: "{name}"
+    uid: "{uid}"
+"""
+    role_binding_yaml = f"""apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: autodelete-{name}
+  namespace: {namespace}
+  ownerReferences:
+  - apiVersion: {registry.API_VERSION}
+    kind: Cluster
+    name: "{name}"
+    uid: "{uid}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: azimuth-caas-operator:edit
+subjects:
+- kind: ServiceAccount
+  name: autodelete-{name}
+  namespace: {namespace}
+"""
     job_yaml = f"""apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -187,6 +217,13 @@ spec:
     spec:
       template:
         spec:
+          serviceAccountName: autodelete-{name}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
           containers:
           - name: delete
             image: "{image}"
@@ -194,6 +231,11 @@ spec:
             args:
             - "-c"
             - "python3 /delete.py"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
             volumeMounts:
             - name: python-delete
               mountPath: /delete.py
@@ -209,32 +251,22 @@ spec:
     configmap_resource = await client.api("v1").resource("ConfigMap")
     await configmap_resource.create(configmap_data, namespace=namespace)
 
+    sa_data = yaml.safe_load(sa_yaml)
+    sa_resource = await client.api("v1").resource("ServiceAccount")
+    await sa_resource.create_or_patch(f"autodelete-{name}", sa_data, namespace=namespace)
+
+    role_binding_data = yaml.safe_load(role_binding_yaml)
+    role_binding_resource = await client.api("rbac.authorization.k8s.io/v1").resource(
+        "RoleBinding"
+    )
+    await role_binding_resource.create_or_patch(
+        f"autodelete-{name}",
+        role_binding_data,
+        namespace=namespace,
+    )
+
     job_data = yaml.safe_load(job_yaml)
     job_resource = await client.api("batch/v1").resource("CronJob")
     await job_resource.create(job_data, namespace=namespace)
 
-    # ensure above cron job can delete the cluster
-    role_binding_yaml = f"""apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: azimuth-caas-operator-edit-{namespace}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: azimuth-caas-operator:edit
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: {namespace}
-"""
-    role_binding_data = yaml.safe_load(role_binding_yaml)
-    role_binding_resource = await client.api("rbac.authorization.k8s.io/v1").resource(
-        "ClusterRoleBinding"
-    )
-    # TODO(johngarbutt): really just need to ensure its present
-    await role_binding_resource.create_or_patch(
-        f"azimuth-caas-operator-edit-{namespace}",
-        role_binding_data,
-        namespace=namespace,
-    )
     LOG.info(f"Scheduled cluster auto delete for cluster: {name} in: {namespace}")

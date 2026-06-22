@@ -1,0 +1,53 @@
+# Mirrors the checks run by CI workflows:
+#   tox.yaml      -> ruff, codespell hooks
+#   helm-lint.yaml -> ct-lint, helm-unittest, helm-kubeconform hooks
+#
+# Prerequisites for Helm hooks (install once):
+#   brew install helm chart-testing kubeconform
+#   helm plugin install https://github.com/helm-unittest/helm-unittest
+
+repos:
+  # --- Python: mirrors tox envs 'ruff' and 'codespell' ---
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.12  # keep in sync with test-requirements.txt
+    hooks:
+      # ruff check + auto-fix (CI runs check-only; fix locally is more useful)
+      - id: ruff
+        args: [--fix]
+      # ruff format (auto-formats; CI runs --check only)
+      - id: ruff-format
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+
+  # --- Helm: mirrors helm-lint.yaml workflow steps ---
+  # All three hooks are system-level and require the tools listed above.
+
+  - repo: local
+    hooks:
+      # Mirrors: ct lint --target-branch main
+      - id: ct-lint
+        name: ct lint
+        entry: ct lint --target-branch main
+        language: system
+        pass_filenames: false
+        files: ^charts/
+
+      # Mirrors: helm unittest charts/operator (snapshot tests)
+      - id: helm-unittest
+        name: helm unittest
+        entry: helm unittest charts/operator
+        language: system
+        pass_filenames: false
+        files: ^charts/operator/
+
+      # Mirrors: helm template foo charts/operator | kubeconform --strict --summary
+      - id: helm-kubeconform
+        name: helm template | kubeconform
+        entry: bash -c 'helm dependency build charts/operator --quiet && helm template foo charts/operator | kubeconform --strict --summary'
+        language: system
+        pass_filenames: false
+        files: ^charts/operator/

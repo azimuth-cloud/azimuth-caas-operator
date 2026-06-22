@@ -46,6 +46,8 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
 
+  # The integration tests require the charts, and are only worth running once
+  # the functional tests are passing
   integration_tests:
     needs: [publish_charts, functional_tests]
     uses: ./.github/workflows/integration.yaml

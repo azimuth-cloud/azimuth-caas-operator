@@ -3,8 +3,12 @@ name: azimuth-caas-operator
 description: Helm chart for deploying the Azimuth Cluster-as-a-Service operator.
 type: application
 # The version and appVersion are set by the CI script
-version: 0.1.0
+version: 0.1.1
 appVersion: "main"
+
+maintainers:
+  - name: azimuth-cloud
+    url: https://github.com/azimuth-cloud
 
 dependencies:
   - name: ara

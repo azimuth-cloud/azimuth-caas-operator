@@ -19,7 +19,7 @@ idna==3.19
 iso8601==2.1.0
 kopf==1.44.6
 kube-custom-resource==0.6.1
-multidict==6.7.1
+multidict==6.8.0
 pbr==7.0.3
 propcache==0.5.2
 pycparser==3.0

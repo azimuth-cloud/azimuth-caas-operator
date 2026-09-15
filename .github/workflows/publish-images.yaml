@@ -129,7 +129,7 @@ jobs:
           ref: ${{ inputs.ref || github.ref }}
       
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Calculate metadata for image
         id: image-meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
         with:
           images: ghcr.io/azimuth-cloud/ara-api
           # Produce the branch name or tag and the SHA as tags

@@ -16,7 +16,8 @@ RUN dnf update -y \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
-RUN python3 -m pip install "ara[server,postgresql,mysql]" gunicorn "django-health-check<4.0.0"
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install "ara[server,postgresql,mysql]" gunicorn "django-health-check<4.0.0"
 
 ENV ARA_BASE_DIR=/opt/ara
 

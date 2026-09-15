@@ -51,9 +51,8 @@ rules:
     verbs: ["*"]
   - apiGroups: ["rbac.authorization.k8s.io"]
     resources:
-      - clusterrolebindings
       - rolebindings
-    verbs: ["*"]
+    verbs: ["get", "create", "patch", "delete"]
   # Required so that the CaaS operator can grant permissions on leases for the TF plugin
   - apiGroups: [coordination.k8s.io]
     resources: [leases]

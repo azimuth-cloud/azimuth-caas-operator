@@ -1,21 +1,19 @@
 FROM quay.io/fedora/fedora:44
 
-RUN dnf update -y \
-    && dnf install -y \
-        which \
+RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
+      dnf update -y \
+      && dnf install -y \
+        gcc \
+        libpq \
+        libpq-devel \
+        mariadb-connector-c \
+        mariadb-devel \
+        postgresql \
+        postgresql-devel \
         python3-pip \
         python3-wheel \
-        postgresql \
-        libpq \
-        mariadb-connector-c \
-        gcc \
         python3-devel \
-        postgresql-devel \
-        libpq-devel \
-        mariadb-devel \
-    && dnf clean all \
-    && rm -rf /var/cache/dnf
-
+        which
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install "ara[server,postgresql,mysql]" gunicorn "django-health-check<4.0.0"
 

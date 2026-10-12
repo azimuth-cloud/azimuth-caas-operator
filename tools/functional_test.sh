@@ -30,7 +30,11 @@ until [ `kubectl get crds | grep cluster | wc -l` -gt 1 ]; do echo "wait for crd
 kubectl get crds
 
 kubectl apply -f $SCRIPT_DIR/test_cluster_type.yaml
-until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do echo "wait for status to appear"; sleep 5; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Available clustertype quick-test; do
+  echo "wait for status to appear"
+  sleep 5
+done
+
 kubectl get clustertype quick-test -o yaml
 
 # find the correct version a sub it into the tests
@@ -42,14 +46,22 @@ kubectl create secret generic openstack2 --from-file=clouds.yaml || true
 sed "s/REPLACE_ME_VERSION/${cluster_version}/" tools/test_quick_delete_failure.yaml |
   kubectl create -f -
 
-until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do echo "wait for status to appear"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Creating cluster quick-test; do 
+  echo "wait for status to appear"
+  sleep 2
+done
 
 kubectl get cluster
 kubectl get clustertype
 kubectl get jobs
 kubectl get pods
 
-until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do echo "wait for created"; sleep 2; kubectl describe pods; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test; do 
+  echo "wait for created"
+  sleep 2
+  kubectl describe pods
+
+done
 
 kubectl get cluster
 kubectl get clustertype
@@ -57,18 +69,33 @@ kubectl get jobs
 kubectl get pods
 
 # kick off failed delete
-until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test-fail-delete; do echo "wait for created"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Ready cluster quick-test-fail-delete; do
+  echo "wait for created"
+  sleep 2
+done
+
 kubectl delete -f $SCRIPT_DIR/test_quick_delete_failure.yaml --wait=false
 
 # wait for delete we expect to work
 kubectl delete -f $SCRIPT_DIR/test_quick.yaml
 
 # make sure the failed delete is still deleting
-until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do 
+  echo "wait for deleting"
+  sleep 2
+done
+
 # make sure the failed delete has an error set
-until kubectl wait --for=jsonpath='{.status.error}' cluster quick-test-fail-delete; do echo "wait for delete failure"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.error}' cluster quick-test-fail-delete; do
+  echo "wait for delete failure"
+  sleep 2
+done
+
 # make sure the failed delete is still deleting
-until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do echo "wait for deleting"; sleep 2; done
+until kubectl wait --for=jsonpath='{.status.phase}'=Deleting cluster quick-test-fail-delete; do
+  echo "wait for deleting"
+  sleep 2
+done
 
 kubectl get cluster
 kubectl get cluster -o yaml

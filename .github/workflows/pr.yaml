@@ -1,24 +1,24 @@
 name: PR publish (internal only)
 
 on:
-  pull_request_target:
-    types:
-      - opened
-      - synchronize
-      - ready_for_review
-      - reopened
-    branches:
-      - main
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
-  # Only run for PRs from branches of this repository (not external forks)
-  # to prevent untrusted code from accessing repository secrets via pull_request_target.
+  unit_tests:
+    uses: ./.github/workflows/tox.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
+  lint:
+    uses: ./.github/workflows/helm-lint.yaml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+
   publish_images:
-    if: github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/publish-images.yaml
     with:
       ref: ${{ github.event.pull_request.head.sha }}

@@ -2,6 +2,7 @@ name: on tag
 
 on:
   push:
+    branches: ['**']
     tags: ['**']
 
 jobs:

@@ -121,7 +121,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
         rbac.authorization.k8s.io/aggregate-to-admin: "true"
         rbac.authorization.k8s.io/aggregate-to-edit: "true"
         rbac.authorization.k8s.io/aggregate-to-view: "true"
@@ -142,7 +142,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator:controller
     rules:
       - apiGroups:
@@ -247,7 +247,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator:tfstate
     rules:
       - apiGroups:
@@ -276,7 +276,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
         rbac.authorization.k8s.io/aggregate-to-view: "true"
       name: release-name-azimuth-caas-operator:view
     rules:
@@ -297,7 +297,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator
     roleRef:
       apiGroup: rbac.authorization.k8s.io
@@ -316,7 +316,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator
     spec:
       replicas: 1
@@ -350,6 +350,8 @@ templated manifests should match snapshot:
                       fieldPath: metadata.namespace
                 - name: LEASE_CHECK_INTERVAL_SECONDS
                   value: "10"
+                - name: LOG_LEVEL
+                  value: info
               image: ghcr.io/azimuth-cloud/azimuth-caas-operator:main
               imagePullPolicy: IfNotPresent
               name: operator
@@ -382,7 +384,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator-extravars
     stringData:
       extravars: |
@@ -396,7 +398,7 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator
     spec:
       ports:
@@ -417,5 +419,5 @@ templated manifests should match snapshot:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: azimuth-caas-operator
         app.kubernetes.io/version: main
-        helm.sh/chart: azimuth-caas-operator-0.1.1
+        helm.sh/chart: azimuth-caas-operator-0.1.2
       name: release-name-azimuth-caas-operator

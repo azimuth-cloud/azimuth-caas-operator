@@ -11,6 +11,7 @@ config:
   leaseCheckIntervalSeconds: 10
   # Any global extravars to use
   globalExtraVars: {}
+  loggingLevel: info
 
 # A bundle of trusted CAs to use instead of the defaults
 trustBundle:

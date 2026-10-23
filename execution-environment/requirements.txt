@@ -3,6 +3,7 @@ bcrypt==4.3.0
 easykube==0.6.0
 jsonschema
 netaddr
-openstacksdk
+# Openstacksdk 4.15 is not supported by ansible-slurm-appliance
+openstacksdk<4.15
 passlib
 python-openstackclient

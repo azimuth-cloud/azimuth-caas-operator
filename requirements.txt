@@ -22,9 +22,9 @@ kube-custom-resource==0.7.2
 multidict==7.1.0
 pbr==7.1.3
 propcache==0.5.4
-pycparser==3.11
+pycparser==3.12
 pydantic==2.14.1
-python-dateutil==2.9.0.post0
+python-dateutil==3.0.0
 python-json-logger==4.2.0
 PyYAML==6.0.3
 six==1.17.0

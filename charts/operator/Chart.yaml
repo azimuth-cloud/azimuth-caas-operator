@@ -9,6 +9,10 @@ maintainers:
   - name: azimuth-cloud
     url: https://github.com/azimuth-cloud
 
+maintainers:
+  - name: azimuth-cloud
+    url: https://github.com/azimuth-cloud
+
 dependencies:
   - name: ara
     version: ">=0-0"

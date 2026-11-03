@@ -226,10 +226,12 @@ templated manifests should match snapshot:
       - apiGroups:
           - rbac.authorization.k8s.io
         resources:
-          - clusterrolebindings
           - rolebindings
         verbs:
-          - '*'
+          - get
+          - create
+          - patch
+          - delete
       - apiGroups:
           - coordination.k8s.io
         resources:

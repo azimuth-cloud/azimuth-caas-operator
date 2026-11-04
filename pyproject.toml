@@ -23,9 +23,9 @@ dependencies = [
 [dependency-groups]
 dev = [
     "autopep8>=2.3.2",
-    "black>=26.10.1",
     "codespell>=2.4.3",
     "coverage>=7.17.0",
+    "diff-cover>=10.0.0",
     "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
@@ -53,6 +53,7 @@ fallback-version = "0.0.1+unknown"
 [tool.hatch.build.targets.sdist]
 only-include = ["azimuth_caas_operator"]
 sources = ["azimuth_caas_operator"]
+
 [tool.hatch.build.targets.wheel]
 only-include = ["azimuth_caas_operator"]
 sources = ["azimuth_caas_operator"]
@@ -87,10 +88,7 @@ select = [
     # TODO: fix pep8 naming
     # "N",
 ]
-ignore = [
-    "UP038", # deprecated
-    "UP017", # remove and fix once CI not running 3.10 tests
-]
+ignore = []
 
 [tool.mypy]
 follow_imports = "silent"

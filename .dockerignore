@@ -9,12 +9,9 @@ Dockerfile
 .dockerignore
 .github
 .gitignore
-.stestr.conf
 .venv/*
 CONTRIBUTING.md
 charts
 execution-environment
-test-requirements.txt
 tilt-component.yaml
 tools
-tox.ini

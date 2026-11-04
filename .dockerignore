@@ -10,6 +10,8 @@ Dockerfile
 .github
 .gitignore
 .stestr.conf
+.venv/*
+CONTRIBUTING.md
 charts
 execution-environment
 test-requirements.txt

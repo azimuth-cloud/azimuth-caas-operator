@@ -54,8 +54,7 @@ fallback-version = "0.0.1+unknown"
 packages = ["azimuth_caas_operator"]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["azimuth_caas_operator"]
-sources = ["azimuth_caas_operator"]
+packages = ["azimuth_caas_operator"]
 
 [tool.ruff]
 line-length = 88

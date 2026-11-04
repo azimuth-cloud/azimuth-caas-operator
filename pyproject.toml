@@ -1,3 +1,61 @@
+[project]
+name = "azimuth-caas-operator"
+dynamic = ["version"]
+requires-python = ">=3.12"
+authors = [
+    {name = "John Garbutt"}
+]
+maintainers = [
+    {name = "Will Tripp", email = "willt@stackhpc.com"}
+]
+readme = "README.md"
+license = "Apache-2.0"
+dependencies = [
+    "aiohttp>=3.14.5",
+    "certifi>=2026.10.23",
+    "cryptography>=50.0.2",
+    "easykube>=0.6.0",
+    "kopf>=1.45.2",
+    "kube-custom-resource>=0.7.2",
+    "pydantic>=2.14.1,<3",
+]
+
+[dependency-groups]
+dev = [
+    "autopep8>=2.3.2",
+    "codespell>=2.4.3",
+    "coverage>=7.17.0",
+    "diff-cover>=10.0.0",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "python-subunit>=1.4.6",
+    "ruff>=0.17.2",
+    "stestr>=2.9.1",
+    "testtools>=2.9.1",
+    "tox>=4.67.2",
+    "tox-uv>=1.37.1",
+    "types-pyyaml>=6.0.12.20260906",
+    "types-setuptools>=84.0.0.20261006",
+]
+
+[tool.uv]
+exclude-newer = "7 days"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+fallback-version = "0.0.1+unknown"
+
+[tool.hatch.build.targets.sdist]
+packages = ["azimuth_caas_operator"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["azimuth_caas_operator"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py312"
@@ -28,10 +86,7 @@ select = [
     # TODO: fix pep8 naming
     # "N",
 ]
-ignore = [
-    "UP038", # deprecated
-    "UP017", # remove and fix once CI not running 3.10 tests
-]
+ignore = []
 
 [tool.mypy]
 follow_imports = "silent"

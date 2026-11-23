@@ -24,7 +24,7 @@ dependencies = [
 dev = [
     "autopep8>=2.3.2",
     "codespell>=2.4.3",
-    "coverage>=7.17.0",
+    "coverage>=7.17.3",
     "diff-cover>=11.0.1",
     "mypy>=2.4.1",
     "pytest>=9.2.0",
@@ -35,7 +35,7 @@ dev = [
     "testtools>=2.9.1",
     "tox>=4.67.13",
     "tox-uv>=1.37.7",
-    "types-pyyaml>=6.0.12.20260906",
+    "types-pyyaml>=6.0.12.20261113",
     "types-setuptools>=84.2.0.20261104",
 ]
 

@@ -25,7 +25,7 @@ jobs:
           # We also don't need all the tests
           # The workstation is sufficient to test that the CaaS machinery is working
           extra-vars: |
-            azimuth_caas_operator_chart_repo: https://azimuth-cloud.github.io/azimuth-caas-operator
+            azimuth_caas_operator_chart_ref: oci://quay.io/azimuth/azimuth-caas-operator-charts/azimuth-caas-operator
             azimuth_caas_operator_chart_version: ${{ inputs.chart-version }}
             generate_tests_caas_test_case_slurm_enabled: false
             generate_tests_caas_test_case_repo2docker_enabled: false

@@ -36,8 +36,9 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
+      id-token: write
 
   functional_tests:
     needs: [publish_images]
